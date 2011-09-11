@@ -1,4 +1,4 @@
-package cs2103.t14j1.taskmeter.smartBarParse;
+package cs2103.t14j1.Logic.smartBarParse;
 
 import java.util.Calendar;
 import java.util.Scanner;

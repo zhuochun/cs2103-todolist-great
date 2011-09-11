@@ -4,9 +4,11 @@ class Control {
 	
 	/**
 	 * @param input - The input string passed by the GUI
-	 * 
+	 * returns a boolean value which denotes whether the desired input operation was 
+	 * successful or not 
 	 */
 	public Boolean processInput (String input) {
-		return false;
+		SmartBar.extractCommand();
+		executeCommand()
 	}
 }

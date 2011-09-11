@@ -58,76 +58,76 @@ public class TaskMeter extends Shell {
 		setMenuBar(menu);
 		
 		MenuItem mntmUser = new MenuItem(menu, SWT.CASCADE);
-		mntmUser.setText("File");
+		mntmUser.setText(getResourceString("menu.user"));
 		
 		Menu menuUser = new Menu(mntmUser);
 		mntmUser.setMenu(menuUser);
 		
 		MenuItem mntmSave = new MenuItem(menuUser, SWT.NONE);
-		mntmSave.setText("Save");
+		mntmSave.setText(getResourceString("save"));
 		
 		new MenuItem(menuUser, SWT.SEPARATOR);
 		
 		MenuItem mntmExit = new MenuItem(menuUser, SWT.NONE);
-		mntmExit.setText("Exit");
+		mntmExit.setText(getResourceString("exit"));
 		
 		MenuItem mntmEdit = new MenuItem(menu, SWT.CASCADE);
-		mntmEdit.setText("Edit");
+		mntmEdit.setText(getResourceString("menu.edit"));
 		
 		Menu menuEdit = new Menu(mntmEdit);
 		mntmEdit.setMenu(menuEdit);
 		
 		MenuItem mntmUndo = new MenuItem(menuEdit, SWT.NONE);
-		mntmUndo.setText("Undo");
+		mntmUndo.setText(getResourceString("undo"));
 		
 		MenuItem mntmRedo = new MenuItem(menuEdit, SWT.NONE);
-		mntmRedo.setText("Redo");
+		mntmRedo.setText(getResourceString("redo"));
 		
 		new MenuItem(menuEdit, SWT.SEPARATOR);
 		
 		MenuItem mntmSearch = new MenuItem(menuEdit, SWT.NONE);
-		mntmSearch.setText("Search");
+		mntmSearch.setText(getResourceString("find"));
 		
 		MenuItem mntmWindow = new MenuItem(menu, SWT.CASCADE);
-		mntmWindow.setText("Window");
+		mntmWindow.setText(getResourceString("menu.window"));
 		
 		Menu menuWindow = new Menu(mntmWindow);
 		mntmWindow.setMenu(menuWindow);
 		
 		MenuItem mntmListView = new MenuItem(menuWindow, SWT.CHECK);
 		mntmListView.setSelection(true);
-		mntmListView.setText("List View");
+		mntmListView.setText(getResourceString("list"));
 		
 		MenuItem mntmCalendarView = new MenuItem(menuWindow, SWT.CHECK);
-		mntmCalendarView.setText("Calendar View");
+		mntmCalendarView.setText(getResourceString("calendar"));
 		
-		MenuItem mntmSetting = new MenuItem(menu, SWT.CASCADE);
-		mntmSetting.setText("Setting");
+		MenuItem mntmSettings = new MenuItem(menu, SWT.CASCADE);
+		mntmSettings.setText(getResourceString("menu.setting"));
 		
-		Menu menuSetting = new Menu(mntmSetting);
-		mntmSetting.setMenu(menuSetting);
+		Menu menuSetting = new Menu(mntmSettings);
+		mntmSettings.setMenu(menuSetting);
 		
 		MenuItem mntmUserSettings = new MenuItem(menuSetting, SWT.NONE);
-		mntmUserSettings.setText("User Settings");
+		mntmUserSettings.setText(getResourceString("setting"));
 		
-		MenuItem mntmHelp = new MenuItem(menu, SWT.CASCADE);
-		mntmHelp.setText("Help");
+		MenuItem mntmHelps = new MenuItem(menu, SWT.CASCADE);
+		mntmHelps.setText(getResourceString("menu.help"));
 		
-		Menu menu_4 = new Menu(mntmHelp);
-		mntmHelp.setMenu(menu_4);
+		Menu menuHelp = new Menu(mntmHelps);
+		mntmHelps.setMenu(menuHelp);
 		
-		MenuItem mntmStatistics = new MenuItem(menu_4, SWT.NONE);
-		mntmStatistics.setText("Statistics");
+		MenuItem mntmStatistics = new MenuItem(menuHelp, SWT.NONE);
+		mntmStatistics.setText(getResourceString("statistics"));
 		
-		new MenuItem(menu_4, SWT.SEPARATOR);
+		new MenuItem(menuHelp, SWT.SEPARATOR);
 		
-		MenuItem mntmHelp_1 = new MenuItem(menu_4, SWT.NONE);
-		mntmHelp_1.setText("Help");
+		MenuItem mntmHelp = new MenuItem(menuHelp, SWT.NONE);
+		mntmHelp.setText(getResourceString("help"));
 		
-		new MenuItem(menu_4, SWT.SEPARATOR);
+		new MenuItem(menuHelp, SWT.SEPARATOR);
 		
-		MenuItem mntmAbout = new MenuItem(menu_4, SWT.NONE);
-		mntmAbout.setText("About");
+		MenuItem mntmAbout = new MenuItem(menuHelp, SWT.NONE);
+		mntmAbout.setText(getResourceString("about"));
 		
 		smartBar = new Text(this, SWT.BORDER);
 		smartBar.setFont(SWTResourceManager.getFont("Segoe UI", 12, SWT.NORMAL));
@@ -139,14 +139,14 @@ public class TaskMeter extends Shell {
 		statusBar = new Label(this, SWT.NONE);
 		statusBar.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
 		statusBar.setBounds(10, 430, 730, 20);
-		statusBar.setText("StatusBar");
+		statusBar.setText(getResourceString("msg.welcome"));
 		
 		taskLists = new List(this, SWT.BORDER);
 		taskLists.setBounds(5, 40, 150, 350);
 		
 		Button btnAddANew = new Button(this, SWT.NONE);
 		btnAddANew.setBounds(5, 395, 150, 25);
-		btnAddANew.setText("Add A New List");
+		btnAddANew.setText(getResourceString("add.list"));
 		
 		taskTable = new Table(this, SWT.BORDER | SWT.FULL_SELECTION);
 		taskTable.setBounds(160, 40, 579, 350);
@@ -156,64 +156,64 @@ public class TaskMeter extends Shell {
 		TableColumn tblclmnId = new TableColumn(taskTable, SWT.CENTER);
 		tblclmnId.setResizable(false);
 		tblclmnId.setWidth(26);
-		tblclmnId.setText("Id");
+		tblclmnId.setText(getResourceString("table.id"));
 		
 		TableColumn tblclmnName = new TableColumn(taskTable, SWT.CENTER);
 		tblclmnName.setWidth(218);
-		tblclmnName.setText("Name");
+		tblclmnName.setText(getResourceString("table.name"));
 		
 		TableColumn tblclmnPriority = new TableColumn(taskTable, SWT.CENTER);
 		tblclmnPriority.setResizable(false);
 		tblclmnPriority.setMoveable(true);
 		tblclmnPriority.setWidth(50);
-		tblclmnPriority.setText("Priority");
+		tblclmnPriority.setText(getResourceString("table.priority"));
 		
 		TableColumn tblclmnDate = new TableColumn(taskTable, SWT.CENTER);
 		tblclmnDate.setMoveable(true);
 		tblclmnDate.setWidth(105);
-		tblclmnDate.setText("Date");
+		tblclmnDate.setText(getResourceString("table.date"));
 		
 		TableColumn tblclmnDuration = new TableColumn(taskTable, SWT.CENTER);
 		tblclmnDuration.setMoveable(true);
 		tblclmnDuration.setWidth(100);
-		tblclmnDuration.setText("Duration");
+		tblclmnDuration.setText(getResourceString("table.duration"));
 		
 		TableColumn tblclmnCompleted = new TableColumn(taskTable, SWT.CENTER);
 		tblclmnCompleted.setMoveable(true);
 		tblclmnCompleted.setWidth(75);
-		tblclmnCompleted.setText("Completed");
+		tblclmnCompleted.setText(getResourceString("table.completed"));
 		
 		Button btnAll = new Button(this, SWT.NONE);
 		btnAll.setBounds(160, 395, 35, 25);
-		btnAll.setText("All");
+		btnAll.setText(getResourceString("filter.all"));
 		
 		Button btnImportant = new Button(this, SWT.NONE);
 		btnImportant.setBounds(200, 395, 65, 25);
-		btnImportant.setText("Important");
+		btnImportant.setText(getResourceString("filter.important"));
 		
 		Button btnCompleted = new Button(this, SWT.NONE);
 		btnCompleted.setBounds(270, 395, 75, 25);
-		btnCompleted.setText("Completed");
+		btnCompleted.setText(getResourceString("filter.completed"));
 		
 		Button btnOverdue = new Button(this, SWT.NONE);
 		btnOverdue.setBounds(350, 395, 65, 25);
-		btnOverdue.setText("Overdue");
+		btnOverdue.setText(getResourceString("filter.overdue"));
 		
 		Button btnToday = new Button(this, SWT.NONE);
 		btnToday.setBounds(440, 395, 45, 25);
-		btnToday.setText("Today");
+		btnToday.setText(getResourceString("filter.today"));
 		
 		Button btnTomorrow = new Button(this, SWT.NONE);
 		btnTomorrow.setBounds(490, 395, 75, 25);
-		btnTomorrow.setText("Tomorrow");
+		btnTomorrow.setText(getResourceString("filter.tomorrow"));
 		
 		Button btnNextDays = new Button(this, SWT.NONE);
 		btnNextDays.setBounds(570, 395, 75, 25);
-		btnNextDays.setText("Next 7 Days");
+		btnNextDays.setText(getResourceString("filter.custom"));
 		
 		Button btnWithoutDate = new Button(this, SWT.NONE);
 		btnWithoutDate.setBounds(650, 395, 90, 25);
-		btnWithoutDate.setText("Without Date");
+		btnWithoutDate.setText(getResourceString("filter.nodate"));
 		
 		createContents();
 	}

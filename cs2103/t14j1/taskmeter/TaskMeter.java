@@ -57,29 +57,77 @@ public class TaskMeter extends Shell {
 		Menu menu = new Menu(this, SWT.BAR);
 		setMenuBar(menu);
 		
-		MenuItem mntmfile = new MenuItem(menu, SWT.CASCADE);
-		mntmfile.setText("File");
+		MenuItem mntmUser = new MenuItem(menu, SWT.CASCADE);
+		mntmUser.setText("File");
 		
-		Menu menu_1 = new Menu(mntmfile);
-		mntmfile.setMenu(menu_1);
+		Menu menuUser = new Menu(mntmUser);
+		mntmUser.setMenu(menuUser);
+		
+		MenuItem mntmSave = new MenuItem(menuUser, SWT.NONE);
+		mntmSave.setText("Save");
+		
+		new MenuItem(menuUser, SWT.SEPARATOR);
+		
+		MenuItem mntmExit = new MenuItem(menuUser, SWT.NONE);
+		mntmExit.setText("Exit");
 		
 		MenuItem mntmEdit = new MenuItem(menu, SWT.CASCADE);
 		mntmEdit.setText("Edit");
 		
-		Menu menu_2 = new Menu(mntmEdit);
-		mntmEdit.setMenu(menu_2);
+		Menu menuEdit = new Menu(mntmEdit);
+		mntmEdit.setMenu(menuEdit);
+		
+		MenuItem mntmUndo = new MenuItem(menuEdit, SWT.NONE);
+		mntmUndo.setText("Undo");
+		
+		MenuItem mntmRedo = new MenuItem(menuEdit, SWT.NONE);
+		mntmRedo.setText("Redo");
+		
+		new MenuItem(menuEdit, SWT.SEPARATOR);
+		
+		MenuItem mntmSearch = new MenuItem(menuEdit, SWT.NONE);
+		mntmSearch.setText("Search");
 		
 		MenuItem mntmWindow = new MenuItem(menu, SWT.CASCADE);
 		mntmWindow.setText("Window");
 		
-		Menu menu_3 = new Menu(mntmWindow);
-		mntmWindow.setMenu(menu_3);
+		Menu menuWindow = new Menu(mntmWindow);
+		mntmWindow.setMenu(menuWindow);
+		
+		MenuItem mntmListView = new MenuItem(menuWindow, SWT.CHECK);
+		mntmListView.setSelection(true);
+		mntmListView.setText("List View");
+		
+		MenuItem mntmCalendarView = new MenuItem(menuWindow, SWT.CHECK);
+		mntmCalendarView.setText("Calendar View");
+		
+		MenuItem mntmSetting = new MenuItem(menu, SWT.CASCADE);
+		mntmSetting.setText("Setting");
+		
+		Menu menuSetting = new Menu(mntmSetting);
+		mntmSetting.setMenu(menuSetting);
+		
+		MenuItem mntmUserSettings = new MenuItem(menuSetting, SWT.NONE);
+		mntmUserSettings.setText("User Settings");
 		
 		MenuItem mntmHelp = new MenuItem(menu, SWT.CASCADE);
 		mntmHelp.setText("Help");
 		
 		Menu menu_4 = new Menu(mntmHelp);
 		mntmHelp.setMenu(menu_4);
+		
+		MenuItem mntmStatistics = new MenuItem(menu_4, SWT.NONE);
+		mntmStatistics.setText("Statistics");
+		
+		new MenuItem(menu_4, SWT.SEPARATOR);
+		
+		MenuItem mntmHelp_1 = new MenuItem(menu_4, SWT.NONE);
+		mntmHelp_1.setText("Help");
+		
+		new MenuItem(menu_4, SWT.SEPARATOR);
+		
+		MenuItem mntmAbout = new MenuItem(menu_4, SWT.NONE);
+		mntmAbout.setText("About");
 		
 		smartBar = new Text(this, SWT.BORDER);
 		smartBar.setFont(SWTResourceManager.getFont("Segoe UI", 12, SWT.NORMAL));
@@ -174,7 +222,7 @@ public class TaskMeter extends Shell {
 	 * Create contents of the shell.
 	 */
 	protected void createContents() {
-		setText(getResourceString("window.title"));
+		setText(getResourceString("app.title.ful"));
 		setSize(750, 500);
 	}
 

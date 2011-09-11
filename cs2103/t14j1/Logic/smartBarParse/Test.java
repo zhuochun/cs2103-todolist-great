@@ -17,9 +17,9 @@ public class Test {
 		
 		PrintStream out = System.out;
 		
-		for(int i=0;i<res.length;i++){
-			out.println(res[i]);
-		}
+//		for(int i=0;i<res.length;i++){
+//			out.println(res[i]);
+//		}
 		
 		
 		Scanner in = new Scanner(System.in);
@@ -30,18 +30,26 @@ public class Test {
 		
 		// then need a matcher
 		Matcher matcher = 
-        pattern.matcher("--");
+        pattern.matcher("");
 		
-		boolean found = false;
-    while (matcher.find()) {
-        System.out.format("I found the text \"%s\" starting at " +
-           "index %d and ending at index %d.%n",
-            matcher.group(), matcher.start(), matcher.end());
-        found = true;
-    }
-    if(!found){
-        System.out.format("No match found.%n");
-    }
+		String a = " +=.";
+		String res1[] = a.split("\\ ");
+		
+		
+		for(int i=0;i<res1.length;i++){
+			System.out.println(res1[i]);
+		}
+		
+//		boolean found = false;
+//    while (matcher.find()) {
+//        System.out.format("I found the text \"%s\" starting at " +
+//           "index %d and ending at index %d.%n",
+//            matcher.group(), matcher.start(), matcher.end());
+//        found = true;
+//    }
+//    if(!found){
+//        System.out.format("No match found.%n");
+//    }
 	}
 
 }

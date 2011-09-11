@@ -4,6 +4,7 @@ import java.text.SimpleDateFormat;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Scanner;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -35,7 +36,7 @@ public class SmartBarParseCommand implements ExtractParsedCommand {
 	// @group regex: regular expressions for match
 	
 		// to differ between words -- a spacer is not a digit character or alphabet
-	private static final String regWordSpacer = "([^\\d\\w]|^)";
+	private static final String regWordSpacer = "([^\\d\\w]|[$^])";
 	private static final String regDateSpacer = "[,-/. ]";
 
 		// regular expression for matching the time
@@ -65,8 +66,12 @@ public class SmartBarParseCommand implements ExtractParsedCommand {
 			"([12][0-9]|3[01]|(0)?[1-9])" + regDateSpacer + regMonthText + "(" + regDateSpacer + "(19|20)\\d\\d)?";
 	private static final String regDateFormat_dd_$mm$M$_$yy$yy$$ = 
 			"(" + regDateFormat_dd_$M$_$yy$yy$$+ ")|(" + regDateFormat_dd_$mm$_$yy$yy$$ + ")";
-	private static final String regDayFormat_order_D = 
-			"(" + regDayOrder + regWeekText + ")";
+	
+	private static final String regDateFormat_order_weekD = 
+			"((" + regDayOrder + regWordSpacer + ")?" + regWeekText + ")";
+	
+	private static final String regDateFormat_today_tomorrow = 
+			"(today|tomorrow)";
 	
 		// the date format for mm/dd/yy; leave it here for the possible use in the future
 	private static final String regDateFormat_mm_dd_yy =
@@ -94,8 +99,12 @@ public class SmartBarParseCommand implements ExtractParsedCommand {
 	
 	/** The constructor
 	 * @param command - the command passed from the smart bar GUI
+	 * @throws Exception 
 	 */
-	public SmartBarParseCommand(String command) {
+	public SmartBarParseCommand(String command) throws Exception {
+		// set the time zone to 
+		TimeZone.setDefault(TimeZone.getTimeZone("GMT-0"));
+		
 		this.command = command;
 		
 		// check the date
@@ -108,13 +117,32 @@ public class SmartBarParseCommand implements ExtractParsedCommand {
 		 *  4) next Mon ~ Sun, or Monday ~ Sunday --> indicates the day of next week 
 		 */
 			// check for 1)
-		Pattern regDateFormat_dd_mm_$yy$yy$$_Pattern = Pattern.compile(regDateFormat_dd_$mm$M$_$yy$yy$$ + regWordSpacer,Pattern.CASE_INSENSITIVE);
+		Pattern regDateFormat_dd_mm_$yy$yy$$_Pattern = Pattern.compile(
+				regWordSpacer + regDateFormat_dd_$mm$M$_$yy$yy$$ + regWordSpacer,Pattern.CASE_INSENSITIVE);
 		Matcher regDateFormat_dd_mm_$yy$yy$$_Matcher = regDateFormat_dd_mm_$yy$yy$$_Pattern.matcher(command);
+		Pattern regDateFormat_today_tomorrow_Pattern = Pattern.compile(regWordSpacer + regDateFormat_today_tomorrow + regWordSpacer);	// this is case sensitive
+		Matcher regDateFormat_today_tomorrow_Matcher = regDateFormat_today_tomorrow_Pattern.matcher(command);
+		Pattern regDateFormat_order_weekD_Pattern = Pattern.compile(regDateFormat_order_weekD,Pattern.CASE_INSENSITIVE);	// this is case sensitive
+		Matcher regDateFormat_order_weekD_Matcher = regDateFormat_order_weekD_Pattern.matcher(command);
+		
 		if(regDateFormat_dd_mm_$yy$yy$$_Matcher.find()){	// date is in dd/mm/yy format
-			dateFormat_dd_mm_$yy$yy$$_Process(startDate, regDateFormat_dd_mm_$yy$yy$$_Matcher.group()); 
-			System.out.println(regDateFormat_dd_mm_$yy$yy$$_Matcher.group());
-			System.out.println(regDateFormat_dd_mm_$yy$yy$$_Pattern.pattern());
-		}else{
+			if(!dateFormat_dd_mm_$yy$yy$$_Process(startDate,
+					removeTheLeadingAndTailingWordSpacer(regDateFormat_dd_mm_$yy$yy$$_Matcher.group()))){
+				// got problem here.
+				throw new Exception("Date Parsing Problem: error in parsing the date with format dd/mm|M/yy(yy)");
+			}
+		}else if(regDateFormat_today_tomorrow_Matcher.find()){
+			if(!regDateFormat_today_tomorrow_Process(startDate,
+					removeTheLeadingAndTailingWordSpacer(regDateFormat_today_tomorrow_Matcher.group()))){
+				throw new Exception("Date Parsing Problem: error in parse the date with format today|tomorrow");
+			}
+		} else if(regDateFormat_order_weekD_Matcher.find()){
+			if(!regDateFormat_order_weekD_Process(startDate,
+					removeTheLeadingAndTailingWordSpacer(regDateFormat_order_weekD_Matcher.group()))){
+				throw new Exception("Date Parsing Problem: error in parsing the (this|next) day_of_week ");
+			}
+		}
+		else{
 			System.out.println("Not found");
 		}
 		
@@ -130,6 +158,43 @@ public class SmartBarParseCommand implements ExtractParsedCommand {
 		// then the deadline
 	}
 	
+	private static boolean regDateFormat_order_weekD_Process(Calendar date, String weekDStr) {
+		date = Calendar.getInstance();
+		
+		// spacer is here
+		String[] dayInfo = weekDStr.split(regWordSpacer);
+		
+		
+		
+		int dayOfTheWeek = dateParseGetDayOfWeekFromText(weekDStr);
+		int currentDay = date.get(Calendar.DAY_OF_WEEK);
+		
+		if(currentDay == -1){	// failure in day parsing
+			return false;
+		}
+		
+		if(currentDay > dayOfTheWeek){	// indicating the day of next week
+			date.set(Calendar.DAY_OF_WEEK_IN_MONTH, date.get(Calendar.DAY_OF_WEEK_IN_MONTH)+1);
+			date.set(Calendar.DAY_OF_WEEK, dayOfTheWeek);
+		} else{	// indicating this week. if on the same date, it's still this week
+			date.set(Calendar.DAY_OF_WEEK, dayOfTheWeek);
+		}
+		return true;
+	}
+
+	private boolean regDateFormat_today_tomorrow_Process(Calendar date, String today_tomorrow) {
+		date = Calendar.getInstance();
+		if(today_tomorrow.compareTo("today") == 0){
+			// do nothing here
+		} else if(today_tomorrow.compareTo("tomorrow") == 0){
+			date.set(Calendar.DAY_OF_MONTH, date.get(Calendar.DAY_OF_MONTH) + 1);
+		} else{
+			return false;
+		}
+		
+		return true;
+	}
+
 	private static int dateParseGetMonthFromText(String month){
 		if(month.compareToIgnoreCase("Jan") == 0 || 
 			 month.compareToIgnoreCase("January") == 0){
@@ -192,6 +257,20 @@ public class SmartBarParseCommand implements ExtractParsedCommand {
 		
 	}
 	
+	private static String removeTheLeadingAndTailingWordSpacer(String inStr){
+		// the leading word spacer
+		if(inStr.substring(0, 1).matches(regWordSpacer)){
+			inStr = inStr.substring(1);
+		}
+		
+		// the tailing word spacer
+		if(inStr.substring(inStr.length()-1).matches(regWordSpacer)){
+			inStr = inStr.substring(0, inStr.length()-1);
+		}
+		
+		return inStr;
+	}
+	
 	private static int dateParseGetMonth(String month){
 		int monthNum = 0;
 		try{
@@ -206,7 +285,7 @@ public class SmartBarParseCommand implements ExtractParsedCommand {
 	}
 	
 	private static boolean dateFormat_dd_mm_$yy$yy$$_Process(Calendar date, String dateStr) {
-		date = Calendar.getInstance();
+		date = Calendar.getInstance();date.clear();
 		
 		String[] dateInfoArr = dateStr.split(regDateSpacer);
 		
@@ -242,10 +321,11 @@ public class SmartBarParseCommand implements ExtractParsedCommand {
 
 	/**
 	 * @param args
+	 * @throws Exception 
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		// test match here
-		String taskStr = "this wednesday";	// test time
+		String taskStr = "this Wednesday";	// test time
 		
 		
 		SmartBarParseCommand test = new SmartBarParseCommand(taskStr);

@@ -1,4 +1,4 @@
-package cs2103.t14j1.taskmeter.smartBarParse;
+package cs2103.t14j1.Logic.smartBarParse;
 
 import java.io.PrintStream;
 import java.util.Scanner;

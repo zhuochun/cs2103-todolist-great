@@ -1,3 +1,6 @@
+//Shubham: Please also include a function that returns the actual title of the task.
+//Looks like you have implemented all other functions but forgotten that.
+
 package cs2103.t14j1.Logic;
 
 /**
@@ -83,6 +86,7 @@ public interface ExtractParsedCommand {
 	 * @return
 	 *  the "before" timestamp used in search
 	 *  null on doesn't exist
+	 *  Shubham: I don't understand what this function is for. Please exlain to me on gTalk
 	 */
 	public Long extractAfterTimestamp();
 	
@@ -90,6 +94,7 @@ public interface ExtractParsedCommand {
 	 * @return
 	 * 	integer indicating priority
 	 *  null on doesn't exist
+	 *  Shubham: I don't understand what this function is for. Please exlain to me on gTalk
 	 */
 	public Integer extractPriority();
 }

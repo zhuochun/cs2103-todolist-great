@@ -8,7 +8,14 @@ class Control {
 	 * successful or not 
 	 */
 	public Boolean processInput (String input) {
-		SmartBar.extractCommand();
-		executeCommand()
+		Commands command = smartBarParse.SmartBarParseCommand.extractCommand();
+		executeCommand(command);
+	}
+
+	private void executeCommand(Commands command) {
+		switch (command) {
+		case ADD:
+			
+		}
 	}
 }

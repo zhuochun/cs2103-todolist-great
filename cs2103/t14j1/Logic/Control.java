@@ -7,8 +7,8 @@ class Control {
 	 * returns a boolean value which denotes whether the desired input operation was 
 	 * successful or not 
 	 */
-	public Boolean processInput (String input) {
-		SmartBar.extractCommand();
-		executeCommand()
-	}
+	///public Boolean processInput (String input) {
+		//SmartBar.extractCommand();
+		//executeCommand()
+	//}
 }

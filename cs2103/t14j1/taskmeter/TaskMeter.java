@@ -12,7 +12,6 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
-import org.eclipse.swt.widgets.List;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
@@ -33,10 +32,10 @@ public class TaskMeter extends Shell {
 	
 	private static ResourceBundle resourceBundle = ResourceBundle.getBundle("taskmeter_res");
 	private Label statusBar;
-	private List taskLists;
 	private Table taskTable;
 	private Text smartBar;
 	private boolean isModified;
+	private Table taskList;
 	
 	/**
 	 * Launch the application.
@@ -125,8 +124,22 @@ public class TaskMeter extends Shell {
 	 * 
 	 */
 	private void createTaskList() {
-		taskLists = new List(this, SWT.BORDER);
-		taskLists.setBounds(5, 40, 150, 350);
+		taskList = new Table(this, SWT.BORDER | SWT.FULL_SELECTION);
+		taskList.setBounds(5, 40, 150, 350);
+		taskList.setHeaderVisible(true);
+		taskList.setLinesVisible(true);
+		
+		TableColumn tblclmnLists = new TableColumn(taskList, SWT.CENTER);
+		tblclmnLists.setResizable(false);
+		tblclmnLists.setWidth(146);
+		tblclmnLists.setText(getResourceString("list"));
+		
+		TableItem tableInbox = new TableItem(taskList, SWT.NONE);
+		tableInbox.setChecked(true);
+		tableInbox.setText(getResourceString("list.inbox"));
+		
+		TableItem tableTrash = new TableItem(taskList, SWT.NONE);
+		tableTrash.setText(getResourceString("list.trash"));
 		
 		Button btnAddANew = new Button(this, SWT.NONE);
 		btnAddANew.addSelectionListener(new SelectionAdapter() {
@@ -135,7 +148,7 @@ public class TaskMeter extends Shell {
 
 			}
 		});
-		btnAddANew.setBounds(5, 395, 150, 25);
+		btnAddANew.setBounds(4, 395, 151, 25);
 		btnAddANew.setText(getResourceString("add.list"));
 	}
 

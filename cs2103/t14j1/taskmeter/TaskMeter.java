@@ -34,10 +34,9 @@ public class TaskMeter extends Shell {
 	private static ResourceBundle resourceBundle = ResourceBundle.getBundle("taskmeter_res");
 	private Label statusBar;
 	private Table taskTable;
+	private Table taskList;
 	private Text smartBar;
 	private boolean isModified;
-	private Table taskList;
-	
 	/**
 	 * Launch the application.
 	 * @param args
@@ -148,20 +147,27 @@ public class TaskMeter extends Shell {
 		btnAddANew.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-				addNewTask();
+				addNewList();
 			}
 		});
 		btnAddANew.setBounds(4, 395, 151, 25);
 		btnAddANew.setText(getResourceString("list.add"));
 	}
 	
-	private void addNewTask() {
+	private void addNewList() {
 		AddListDialog dialog = new AddListDialog(this);
 		String newList = dialog.open();
-		if (newList != null)
+		if (newList != null && newList.length() > 1) {
+			addNewList(newList);
 			setStatusBar(newList);
+		}
 	}
 
+	private void addNewList(String name) {
+		TableItem table = new TableItem(taskList, SWT.NONE);
+		table.setText(name);
+	}
+	
 	/**
 	 * 
 	 */

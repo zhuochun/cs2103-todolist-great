@@ -8,6 +8,7 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
@@ -63,6 +64,8 @@ public class TaskMeter extends Shell {
 	 */
 	public TaskMeter(Display display) {
 		super(display, SWT.CLOSE | SWT.MIN | SWT.TITLE);
+		
+		setImage(new Image(display, "taskMeter.png"));
 		setMinimumSize(new Point(750, 500));
 		setLayout(null);
 		
@@ -145,11 +148,18 @@ public class TaskMeter extends Shell {
 		btnAddANew.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-
+				addNewTask();
 			}
 		});
 		btnAddANew.setBounds(4, 395, 151, 25);
-		btnAddANew.setText(getResourceString("add.list"));
+		btnAddANew.setText(getResourceString("list.add"));
+	}
+	
+	private void addNewTask() {
+		AddListDialog dialog = new AddListDialog(this);
+		String newList = dialog.open();
+		if (newList != null)
+			setStatusBar(newList);
 	}
 
 	/**
@@ -395,6 +405,11 @@ public class TaskMeter extends Shell {
 	 */
 	private void editTask(TableItem tableItem) {
 		TaskDetailDialog dialog = new TaskDetailDialog(this);
+		String[] values = dialog.open();
+		
+		if (values != null) {
+			isModified = true;
+		}
 		/*
 		dialog.setLabels(columnNames);
 		String[] values = new String[table.getColumnCount()];
@@ -416,6 +431,7 @@ public class TaskMeter extends Shell {
 
 	private void displayError(String msg) {
 		MessageBox box = new MessageBox(this, SWT.ICON_ERROR);
+		box.setText("Error");
 		box.setMessage(msg);
 		box.open();
 	}

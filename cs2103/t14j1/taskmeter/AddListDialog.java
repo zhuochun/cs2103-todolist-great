@@ -58,7 +58,7 @@ public class AddListDialog extends Dialog {
 	 * Create contents of the dialog.
 	 */
 	private void createContents() {
-		shell = new Shell(getParent(), SWT.DIALOG_TRIM);
+		shell = new Shell(getParent(), SWT.DIALOG_TRIM | SWT.PRIMARY_MODAL);
 		shell.addShellListener(new ShellAdapter() {
 			@Override
 			public void shellClosed(ShellEvent e) {
@@ -71,7 +71,7 @@ public class AddListDialog extends Dialog {
 		text = new Text(shell, SWT.BORDER);
 		text.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
-				result = text.getText();
+				result = text.getText().trim();
 			}
 		});
 		text.setFont(SWTResourceManager.getFont("Segoe UI", 13, SWT.NORMAL));
@@ -109,7 +109,7 @@ public class AddListDialog extends Dialog {
 	}
 	
 	private boolean closeAddTask() {
-		if(text.getText() != null && !button) {
+		if (button == false && text.getText().trim().length() > 1) {
 			//ask user if they want to save current address book
 			MessageBox box = new MessageBox(shell, SWT.ICON_WARNING | SWT.YES | SWT.NO | SWT.CANCEL);
 			box.setText(this.getText());
@@ -119,7 +119,7 @@ public class AddListDialog extends Dialog {
 			if(choice == SWT.CANCEL) {
 				return false;
 			} else if(choice == SWT.YES) {
-				result = text.getText();
+				result = text.getText().trim();
 			} else {
 				result = null;
 			}

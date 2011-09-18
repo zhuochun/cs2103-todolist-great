@@ -10,12 +10,14 @@ import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -35,8 +37,9 @@ public class TaskMeter extends Shell {
 	private Label statusBar;
 	private Table taskTable;
 	private Table taskList;
-	private Text smartBar;
+	private Text  smartBar;
 	private boolean isModified;
+	
 	/**
 	 * Launch the application.
 	 * @param args
@@ -158,6 +161,7 @@ public class TaskMeter extends Shell {
 		AddListDialog dialog = new AddListDialog(this);
 		String newList = dialog.open();
 		if (newList != null && newList.length() > 1) {
+			isModified = true;
 			addNewList(newList);
 			setStatusBar(newList);
 		}
@@ -351,6 +355,20 @@ public class TaskMeter extends Shell {
 		
 		new MenuItem(menuEdit, SWT.SEPARATOR);
 		
+		MenuItem mntmEditTask = new MenuItem(menuEdit, SWT.NONE);
+		mntmEditTask.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				editTask(new TableItem(taskList, 0));
+			}
+		});
+		mntmEditTask.setText("Edit");
+		
+		MenuItem mntmDeleteTask = new MenuItem(menuEdit, SWT.NONE);
+		mntmDeleteTask.setText("Delete");
+		
+		new MenuItem(menuEdit, SWT.SEPARATOR);
+		
 		MenuItem mntmSearch = new MenuItem(menuEdit, SWT.NONE);
 		mntmSearch.setText(getResourceString("find"));
 	}
@@ -365,12 +383,32 @@ public class TaskMeter extends Shell {
 		Menu menuUser = new Menu(mntmUser);
 		mntmUser.setMenu(menuUser);
 		
+		MenuItem mntmAddList = new MenuItem(menuUser, SWT.NONE);
+		mntmAddList.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				addNewList();
+			}
+		});
+		mntmAddList.setText("Add List");
+		
+		MenuItem mntmAddTask = new MenuItem(menuUser, SWT.NONE);
+		mntmAddTask.setText("Add New Task");
+		
+		new MenuItem(menuUser, SWT.SEPARATOR);
+		
 		MenuItem mntmSave = new MenuItem(menuUser, SWT.NONE);
 		mntmSave.setText(getResourceString("save"));
 		
 		new MenuItem(menuUser, SWT.SEPARATOR);
 		
 		MenuItem mntmExit = new MenuItem(menuUser, SWT.NONE);
+		mntmExit.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				System.exit(0);
+			}
+		});
 		mntmExit.setText(getResourceString("exit"));
 	}
 	

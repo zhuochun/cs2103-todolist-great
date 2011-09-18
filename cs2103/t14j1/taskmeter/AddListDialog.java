@@ -3,21 +3,28 @@ package cs2103.t14j1.taskmeter;
 import java.util.ResourceBundle;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.ShellAdapter;
+import org.eclipse.swt.events.ShellEvent;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.Label;
 import org.eclipse.wb.swt.SWTResourceManager;
-import org.eclipse.swt.widgets.Button;
-import org.eclipse.swt.events.SelectionAdapter;
-import org.eclipse.swt.events.SelectionEvent;
-import org.eclipse.swt.events.ModifyListener;
-import org.eclipse.swt.events.ModifyEvent;
-import org.eclipse.swt.events.ShellAdapter;
-import org.eclipse.swt.events.ShellEvent;
 
+/**
+ * A dialog window to take in the new list name
+ * 
+ * @author Zhuochun
+ *
+ */
 public class AddListDialog extends Dialog {
 
 	private static ResourceBundle resourceBundle = ResourceBundle.getBundle("taskmeter_res");
@@ -43,6 +50,7 @@ public class AddListDialog extends Dialog {
 	 */
 	public String open() {
 		createContents();
+		center();
 		shell.open();
 		shell.layout();
 		Display display = getParent().getDisplay();
@@ -68,6 +76,19 @@ public class AddListDialog extends Dialog {
 		shell.setSize(245, 120);
 		shell.setText(getText());
 		
+		createText();
+		createButtons();
+	}
+
+	/**
+	 * 
+	 */
+	private void createText() {
+		Label lblEnterNewList = new Label(shell, SWT.NONE);
+		lblEnterNewList.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
+		lblEnterNewList.setBounds(5, 5, 230, 20);
+		lblEnterNewList.setText("Enter New List Name:");
+		
 		text = new Text(shell, SWT.BORDER);
 		text.addModifyListener(new ModifyListener() {
 			public void modifyText(ModifyEvent e) {
@@ -76,12 +97,12 @@ public class AddListDialog extends Dialog {
 		});
 		text.setFont(SWTResourceManager.getFont("Segoe UI", 13, SWT.NORMAL));
 		text.setBounds(5, 30, 230, 25);
-		
-		Label lblEnterNewList = new Label(shell, SWT.NONE);
-		lblEnterNewList.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
-		lblEnterNewList.setBounds(5, 5, 230, 20);
-		lblEnterNewList.setText("Enter New List Name:");
-		
+	}
+
+	/**
+	 * 
+	 */
+	private void createButtons() {
 		Button btnAdd = new Button(shell, SWT.NONE);
 		btnAdd.addSelectionListener(new SelectionAdapter() {
 			@Override
@@ -108,12 +129,15 @@ public class AddListDialog extends Dialog {
 		shell.setDefaultButton(btnAdd);
 	}
 	
+	/**
+	 * 
+	 * @return
+	 */
 	private boolean closeAddTask() {
 		if (button == false && text.getText().trim().length() > 1) {
-			//ask user if they want to save current address book
 			MessageBox box = new MessageBox(shell, SWT.ICON_WARNING | SWT.YES | SWT.NO | SWT.CANCEL);
 			box.setText(this.getText());
-			box.setMessage("msg.close");
+			box.setMessage(resourceBundle.getString("msg.close.addtask"));
 		
 			int choice = box.open();
 			if(choice == SWT.CANCEL) {
@@ -127,5 +151,13 @@ public class AddListDialog extends Dialog {
 
 		return true;
 	}
+	
+    private void center() {
+		Rectangle parent = getParent().getBounds();
+		Rectangle rect = shell.getBounds ();
+		int x = parent.x + (parent.width - rect.width) / 2;
+		int y = parent.y + (parent.height - rect.height) / 2;
+		shell.setLocation (x, y);
+    }
 	
 }

@@ -3,24 +3,35 @@ package cs2103.t14j1.taskmeter;
 import java.util.ResourceBundle;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Combo;
+import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
-import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
-import org.eclipse.swt.widgets.DateTime;
-import org.eclipse.swt.widgets.Combo;
-import org.eclipse.swt.widgets.Button;
+import org.eclipse.wb.swt.SWTResourceManager;
 
+/**
+ * a task detail dialog for editing task details
+ * 
+ * @author Zhuochun
+ *
+ */
 public class TaskDetailDialog extends Dialog {
 
-	//private static ResourceBundle resourceBundle = ResourceBundle.getBundle("taskmeter_res");
-	protected String[] values;
+	private static ResourceBundle resourceBundle = ResourceBundle.getBundle("taskmeter_res");
 	protected Shell shell;
+	protected String[] values;
 	private Text txtName;
-	private Label lblDeadline;
 	private Text txtList;
-	private Text txtDuration;
+	private DateTime DateStart;
+	private DateTime TimeStart;
+	private DateTime TimeEnd;
+	private Combo cboPriority;
+	private Combo cboStatus;
 
 	/**
 	 * Create the dialog.
@@ -29,7 +40,7 @@ public class TaskDetailDialog extends Dialog {
 	 */
 	public TaskDetailDialog(Shell parent) {
 		super(parent, SWT.NONE);
-		//setText(resourceBundle.getString("app.task.detail.title"));
+		setText(resourceBundle.getString("app.task.detail.title"));
 	}
 
 	public void setTitle(String title) {
@@ -37,14 +48,16 @@ public class TaskDetailDialog extends Dialog {
 	}
 	
 	public void setTask(String[] columns) {
-		
+		values = columns;
 	}
+	
 	/**
 	 * Open the dialog.
 	 * @return the result
 	 */
 	public String[] open() {
 		createContents();
+		center();
 		shell.open();
 		shell.layout();
 		Display display = getParent().getDisplay();
@@ -60,62 +73,86 @@ public class TaskDetailDialog extends Dialog {
 	 * Create contents of the dialog.
 	 */
 	private void createContents() {
-		shell = new Shell(getParent(), SWT.BORDER | SWT.CLOSE);
-		shell.setSize(450, 300);
+		shell = new Shell(getParent(), SWT.DIALOG_TRIM);
+		shell.setSize(405, 188);
 		shell.setText(getText());
 		
-		Label lblTask = new Label(shell, SWT.NONE);
-		lblTask.setBounds(10, 10, 32, 15);
-		lblTask.setText("Task");
-		
 		txtName = new Text(shell, SWT.BORDER);
+		txtName.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
 		txtName.setText("");
-		txtName.setBounds(48, 10, 386, 21);
+		txtName.setBounds(10, 10, 380, 25);
 		
-		lblDeadline = new Label(shell, SWT.NONE);
-		lblDeadline.setBounds(10, 46, 55, 15);
-		lblDeadline.setText("Deadline");
+		DateStart = new DateTime(shell, SWT.BORDER | SWT.DROP_DOWN);
+		DateStart.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
+		DateStart.setBounds(10, 40, 90, 25);
 		
-		DateTime dateTime = new DateTime(shell, SWT.BORDER);
-		dateTime.setBounds(81, 47, 80, 24);
+		TimeStart = new DateTime(shell, SWT.BORDER | SWT.TIME | SWT.SHORT);
+		TimeStart.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
+		TimeStart.setBounds(105, 40, 80, 25);
 		
-		Label lblList = new Label(shell, SWT.NONE);
-		lblList.setBounds(10, 93, 32, 15);
-		lblList.setText("List");
+		Label lblDash = new Label(shell, SWT.NONE);
+		lblDash.setAlignment(SWT.CENTER);
+		lblDash.setBounds(190, 45, 20, 15);
+		lblDash.setText(resourceBundle.getString("TaskDetailDialog.lblDash.text"));
 		
-		txtList = new Text(shell, SWT.BORDER);
-		txtList.setText("List");
-		txtList.setBounds(48, 93, 73, 21);
+		DateTime DateEnd = new DateTime(shell, SWT.BORDER);
+		DateEnd.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
+		DateEnd.setBounds(215, 40, 90, 25);
+		
+		TimeEnd = new DateTime(shell, SWT.BORDER | SWT.TIME | SWT.SHORT);
+		TimeEnd.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
+		TimeEnd.setBounds(310, 40, 80, 25);
 		
 		Label lblPriority = new Label(shell, SWT.NONE);
-		lblPriority.setBounds(10, 137, 55, 15);
+		lblPriority.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
+		lblPriority.setBounds(10, 73, 45, 25);
 		lblPriority.setText("Priority");
 		
-		Combo cboPriority = new Combo(shell, SWT.NONE);
-		cboPriority.setBounds(73, 137, 88, 23);
+		cboPriority = new Combo(shell, SWT.READ_ONLY);
+		cboPriority.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
+		cboPriority.setItems(new String[] {"Important", "Normal", "Low"});
+		cboPriority.setBounds(60, 70, 120, 25);
+		cboPriority.select(1);
 		
-		Label lblDuration = new Label(shell, SWT.NONE);
-		lblDuration.setBounds(209, 46, 55, 15);
-		lblDuration.setText("Duration");
+		Label lblList = new Label(shell, SWT.NONE);
+		lblList.setAlignment(SWT.RIGHT);
+		lblList.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
+		lblList.setBounds(165, 73, 40, 25);
+		lblList.setText(resourceBundle.getString("TaskDetailDialog.lblList.text")); //$NON-NLS-1$
 		
-		txtDuration = new Text(shell, SWT.BORDER);
-		txtDuration.setText("Duration");
-		txtDuration.setBounds(270, 46, 73, 21);
+		txtList = new Text(shell, SWT.BORDER | SWT.READ_ONLY);
+		txtList.setEnabled(false);
+		txtList.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
+		txtList.setBounds(215, 70, 175, 25);
 		
 		Label lblStatus = new Label(shell, SWT.NONE);
-		lblStatus.setBounds(195, 93, 55, 15);
-		lblStatus.setText("Status");
+		lblStatus.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
+		lblStatus.setBounds(10, 104, 70, 22);
+		lblStatus.setText("Completed");
 		
-		Combo cboStatus = new Combo(shell, SWT.NONE);
-		cboStatus.setBounds(270, 107, 88, 23);
+		cboStatus = new Combo(shell, SWT.READ_ONLY);
+		cboStatus.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
+		cboStatus.setItems(new String[] {"No", "Yes"});
+		cboStatus.setBounds(81, 100, 99, 25);
+		cboStatus.select(0);
 		
 		Button btnSave = new Button(shell, SWT.NONE);
-		btnSave.setBounds(204, 192, 75, 25);
+		btnSave.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
+		btnSave.setBounds(235, 120, 75, 30);
 		btnSave.setText("Save");
 		
 		Button btnClose = new Button(shell, SWT.NONE);
-		btnClose.setBounds(285, 192, 75, 25);
-		btnClose.setText("Close");
+		btnClose.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
+		btnClose.setBounds(315, 120, 75, 30);
+		btnClose.setText("Cancel");
 
 	}
+	
+    private void center() {
+		Rectangle parent = getParent().getBounds();
+		Rectangle rect = shell.getBounds ();
+		int x = parent.x + (parent.width - rect.width) / 2;
+		int y = parent.y + (parent.height - rect.height) / 2;
+		shell.setLocation (x, y);
+    }
 }

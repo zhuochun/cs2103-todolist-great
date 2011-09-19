@@ -8,39 +8,31 @@ import java.util.ArrayList;
  */
 public class TaskList {
 	private ArrayList<Task> listOfTasks;
-	private int numberOfTasks;
+	private int count;
 	
 	public TaskList() {
 		listOfTasks =  new ArrayList<Task>();
-		numberOfTasks = 0;
+		count = 0;
 	}
 	
-	public boolean addTaskIntoTaskList(Task task) {
+	public boolean add(Task task) {
 		
 		boolean success = listOfTasks.add(task);
-		incrementNumberOfTaksIfTaskSuccessfullyAddd(success);
-		return success;
-	}
-	
-	private void incrementNumberOfTaksIfTaskSuccessfullyAddd(boolean success) {
 		if(success == true)
-			numberOfTasks ++;
+			count ++;
+		return success;
 	}
 
 	public boolean removeTaskFromTaskList (Task task) {
 		boolean success = listOfTasks.remove(task);
-		decrementNumberOfTaksIfTaskSuccessfullyRemoved(success);
-		return success;
-	}
-	
-	private void decrementNumberOfTaksIfTaskSuccessfullyRemoved(boolean success) {
 		if(success == true)
-			numberOfTasks --;
+			count --;
+		return success;
 	}
 
 	public ArrayList<Task> searchTask(String criteria, String searchTerm) {
 		ArrayList<Task> searchAnswers = new ArrayList<Task>();
-		for(int i = 0; i < numberOfTasks; i ++) {
+		for(int i = 0; i < count; i ++) {
 			Task task = listOfTasks.get(i);
 			boolean isMatch = matchThisTask(criteria, searchTerm, task);
 			if (isMatch)
@@ -56,4 +48,14 @@ public class TaskList {
 		else
 			return false;
 	}
+	
+	public Task get(int index) {
+		if((index > count) || (index < 1))
+			return null;
+		else
+			return listOfTasks.get(index - 1);
+	}
+	
+	
+	
 }

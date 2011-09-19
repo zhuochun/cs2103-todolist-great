@@ -8,8 +8,8 @@ public class Test {
 		System.out.println(t.getValue("priority"));
 		Task u = new Task(null, 2, null, null, null, null, null, null);
 		TaskList q = new TaskList();
-		q.addTaskIntoTaskList(t);
-		q.addTaskIntoTaskList(u);
+		q.add(t);
+		q.add(u);
 		System.out.println(q.searchTask("priority", "2"));
 	}
 }

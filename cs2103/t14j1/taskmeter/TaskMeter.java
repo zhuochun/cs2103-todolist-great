@@ -191,18 +191,16 @@ public class TaskMeter extends Shell {
 		taskTable.setLinesVisible(true);
 		
 		TableColumn tblclmnId = new TableColumn(taskTable, SWT.CENTER);
-		tblclmnId.setResizable(false);
-		tblclmnId.setWidth(26);
+		tblclmnId.setWidth(30);
 		tblclmnId.setText(getResourceString("table.id"));
 		
 		TableColumn tblclmnName = new TableColumn(taskTable, SWT.CENTER);
-		tblclmnName.setWidth(218);
+		tblclmnName.setWidth(200);
 		tblclmnName.setText(getResourceString("table.name"));
 		
 		TableColumn tblclmnPriority = new TableColumn(taskTable, SWT.CENTER);
-		tblclmnPriority.setResizable(false);
 		tblclmnPriority.setMoveable(true);
-		tblclmnPriority.setWidth(50);
+		tblclmnPriority.setWidth(68);
 		tblclmnPriority.setText(getResourceString("table.priority"));
 		
 		TableColumn tblclmnDate = new TableColumn(taskTable, SWT.CENTER);
@@ -219,6 +217,9 @@ public class TaskMeter extends Shell {
 		tblclmnCompleted.setMoveable(true);
 		tblclmnCompleted.setWidth(75);
 		tblclmnCompleted.setText(getResourceString("table.completed"));
+		
+		TableItem tableItem = new TableItem(taskTable, SWT.NONE);
+		tableItem.setText(new String[] {"1", "Test", "Important", "unkown", "unkown", "No"});
 	}
 
 	/**

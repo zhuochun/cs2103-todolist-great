@@ -1,11 +1,11 @@
 //Shubham: Please also include a function that returns the actual title of the task.
 //Looks like you have implemented all other functions but forgotten that.
 
-package cs2103.t14j1.Logic;
+package cs2103.t14j1.logic;
 
 /**
  * Use this interface to define all the "extract" function of the parsed 
- * 	information for Smart Bar.
+ * information for Smart Bar.
  * 
  * @author Song Yangyu
  */

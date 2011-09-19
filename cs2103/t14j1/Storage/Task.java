@@ -1,46 +1,44 @@
-package cs2103.t14j1.Storage;
+package cs2103.t14j1.storage;
 
-/**
- * @author Shubham Goyal
- * This class defines a task after it has been loaded from storage
- * @Worapol - I decided that since I am implementing Control, I need to depend on Task
- * and TaskList a lot. So, please implement FileHandler which should be quite tough really
- * and leave these 2 esy psys to me.
- */
 public class Task {
-	
-	private String whatToDo;
-	private Priority priority; //Can be any of 1, 2 or 3
-	private long deadline;
+
+	private String name; // define the task action
+	private String list; // belong to which list
+	private Priority priority;
 	private long startDate;
 	private long startTime;
 	private long endDate;
 	private long endTime;
-	private String place;
+	private boolean status; // completed or not
 	
-	public Task (String whatToDo, Priority priority, Long deadline, Long startDate,
-			Long startTime, Long endDate, Long endTime, String place) {
-		
-		this.whatToDo = whatToDo;
-		this.priority = priority;
-		this.deadline = deadline;
+	public static final boolean COMPLETED = true;
+	public static final boolean NOT_COMPLETED = false;
+	
+	/**
+	 * A Constructor with all parameters provided
+	 */
+	public Task (String name, String list, Priority priority, Long startDate, Long startTime,
+			Long endDate, Long endTime, boolean status) {
+		this.name      = name;
+		this.list      = list;
+		this.priority  = priority;
 		this.startDate = startDate;
 		this.startTime = startTime;
-		this.endDate = endDate;
-		this.endTime = endTime;
-		this.place = place;
+		this.endDate   = endDate;
+		this.endTime   = endTime;
+		this.status    = status;
 	}
 	
-	public String getWhatToDo() {
-		return whatToDo;
+	public String getName() {
+		return name;
+	}
+	
+	public String getList() {
+		return list;
 	}
 	
 	public Priority getPriority() {
 		return priority;
-	}
-	
-	public long getDeadline() {
-		return deadline;
 	}
 	
 	public long getStartDate() {
@@ -59,11 +57,28 @@ public class Task {
 		return endTime;
 	}
 	
-	public String getPlace() {
-		return place;
+	public boolean getStatus() {
+		return status;
 	}
 	
-	private boolean areStringsEqual(String a, String b) {
-		return a.equals(b);
+	public void setStatus(boolean newStatus) {
+		status = newStatus;
 	}
+	
+	// TODO merge startDate and startTime
+	public long getStartDateTime() {
+		return startDate;
+	}
+	
+
+	// TODO change this
+	public String toString() {
+		return name;
+	}
+	
+	// TODO change this
+	public String[] toArray() {
+		return new String[2];
+	}
+
 }

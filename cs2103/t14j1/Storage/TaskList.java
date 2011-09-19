@@ -1,4 +1,4 @@
-package cs2103.t14j1.Storage;
+package cs2103.t14j1.storage;
 
 import java.util.ArrayList;
 
@@ -7,6 +7,7 @@ import java.util.ArrayList;
  *	This class is an abstraction for the category tasks are placed under.
  */
 public class TaskList {
+	/*
 	private ArrayList<Task> listOfTasks;
 	private int count;
 	
@@ -56,6 +57,6 @@ public class TaskList {
 			return listOfTasks.get(index - 1);
 	}
 	
-	
+	*/
 	
 }

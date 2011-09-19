@@ -1,4 +1,4 @@
-package cs2103.t14j1.Logic.smartBarParse;
+package cs2103.t14j1.logic.smartbar;
 
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -10,8 +10,8 @@ import java.util.regex.Pattern;
 
 import org.eclipse.swt.internal.C;
 
-import cs2103.t14j1.Logic.Commands;
-import cs2103.t14j1.Logic.ExtractParsedCommand;
+import cs2103.t14j1.logic.Commands;
+import cs2103.t14j1.logic.ExtractParsedCommand;
 
 /**
  * this class would parse the command from SmartBar.
@@ -31,8 +31,8 @@ import cs2103.t14j1.Logic.ExtractParsedCommand;
  * 	
  * @author Song Yangyu
  */
-public class SmartBarParseCommand implements ExtractParsedCommand {
-
+public class ParseCommand {
+/*
 	// @group regex: regular expressions for match
 	
 		// to differ between words -- a spacer is not a digit character or alphabet
@@ -105,6 +105,7 @@ public class SmartBarParseCommand implements ExtractParsedCommand {
 	 * @param command - the command passed from the smart bar GUI
 	 * @throws Exception 
 	 */
+	/*
 	public SmartBarParseCommand(String command) throws Exception {
 		// set the time zone to 
 		TimeZone.setDefault(TimeZone.getTimeZone("GMT-0"));
@@ -121,6 +122,8 @@ public class SmartBarParseCommand implements ExtractParsedCommand {
 		 *  4) next Mon ~ Sun, or Monday ~ Sunday --> indicates the day of next week 
 		 */
 			// check for 1)
+	
+	/*
 		Pattern regDateFormat_dd_mm_$yy$yy$$_Pattern = Pattern.compile(
 				regWordSpacer + regDateFormat_dd_$mm$M$_$yy$yy$$ + regWordSpacer,Pattern.CASE_INSENSITIVE);
 		Matcher regDateFormat_dd_mm_$yy$yy$$_Matcher = regDateFormat_dd_mm_$yy$yy$$_Pattern.matcher(command);
@@ -374,6 +377,7 @@ public class SmartBarParseCommand implements ExtractParsedCommand {
 	 * @param args
 	 * @throws Exception 
 	 */
+	/*
 	public static void main(String[] args) throws Exception {
 		// test match here
 		String taskStr = "this Wednesday 4:00 pm";	// test time
@@ -393,6 +397,7 @@ public class SmartBarParseCommand implements ExtractParsedCommand {
 //		}
 	}
 
+	/*
 	@Override
 	public Commands extractCommand() {
 		if(command.charAt(0) == '/'){
@@ -488,5 +493,5 @@ public class SmartBarParseCommand implements ExtractParsedCommand {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
+*/
 }

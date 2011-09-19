@@ -1,4 +1,4 @@
-package cs2103.t14j1.Logic.smartBarParse;
+package cs2103.t14j1.logic.smartbar;
 
 import java.io.PrintStream;
 import java.util.Scanner;
@@ -11,6 +11,7 @@ public class Test {
 	 * Use this to test the regular expression
 	 * @param args
 	 */
+	/*
 	public static void main(String[] args) {
 		String str = "toMatch";
 		String res[] = str.toLowerCase().split("m"); 
@@ -51,5 +52,5 @@ public class Test {
 //        System.out.format("No match found.%n");
 //    }
 	}
-
+*/
 }

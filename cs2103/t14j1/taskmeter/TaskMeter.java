@@ -8,13 +8,16 @@ import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
+import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
+import org.eclipse.swt.widgets.Monitor;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
@@ -33,9 +36,9 @@ public class TaskMeter extends Shell {
 	private static ResourceBundle resourceBundle = ResourceBundle.getBundle("taskmeter_res");
 	private Label statusBar;
 	private Table taskTable;
-	private Text smartBar;
-	private boolean isModified;
 	private Table taskList;
+	private Text  smartBar;
+	private boolean isModified;
 	
 	/**
 	 * Launch the application.
@@ -63,6 +66,8 @@ public class TaskMeter extends Shell {
 	 */
 	public TaskMeter(Display display) {
 		super(display, SWT.CLOSE | SWT.MIN | SWT.TITLE);
+		
+		setImage(new Image(display, "taskMeter.png"));
 		setMinimumSize(new Point(750, 500));
 		setLayout(null);
 		
@@ -145,13 +150,28 @@ public class TaskMeter extends Shell {
 		btnAddANew.addSelectionListener(new SelectionAdapter() {
 			@Override
 			public void widgetSelected(SelectionEvent e) {
-
+				addNewList();
 			}
 		});
 		btnAddANew.setBounds(4, 395, 151, 25);
-		btnAddANew.setText(getResourceString("add.list"));
+		btnAddANew.setText(getResourceString("list.add"));
+	}
+	
+	private void addNewList() {
+		AddListDialog dialog = new AddListDialog(this);
+		String newList = dialog.open();
+		if (newList != null && newList.length() > 1) {
+			isModified = true;
+			addNewList(newList);
+			setStatusBar(newList);
+		}
 	}
 
+	private void addNewList(String name) {
+		TableItem table = new TableItem(taskList, SWT.NONE);
+		table.setText(name);
+	}
+	
 	/**
 	 * 
 	 */
@@ -171,18 +191,16 @@ public class TaskMeter extends Shell {
 		taskTable.setLinesVisible(true);
 		
 		TableColumn tblclmnId = new TableColumn(taskTable, SWT.CENTER);
-		tblclmnId.setResizable(false);
-		tblclmnId.setWidth(26);
+		tblclmnId.setWidth(30);
 		tblclmnId.setText(getResourceString("table.id"));
 		
 		TableColumn tblclmnName = new TableColumn(taskTable, SWT.CENTER);
-		tblclmnName.setWidth(218);
+		tblclmnName.setWidth(200);
 		tblclmnName.setText(getResourceString("table.name"));
 		
 		TableColumn tblclmnPriority = new TableColumn(taskTable, SWT.CENTER);
-		tblclmnPriority.setResizable(false);
 		tblclmnPriority.setMoveable(true);
-		tblclmnPriority.setWidth(50);
+		tblclmnPriority.setWidth(68);
 		tblclmnPriority.setText(getResourceString("table.priority"));
 		
 		TableColumn tblclmnDate = new TableColumn(taskTable, SWT.CENTER);
@@ -199,6 +217,9 @@ public class TaskMeter extends Shell {
 		tblclmnCompleted.setMoveable(true);
 		tblclmnCompleted.setWidth(75);
 		tblclmnCompleted.setText(getResourceString("table.completed"));
+		
+		TableItem tableItem = new TableItem(taskTable, SWT.NONE);
+		tableItem.setText(new String[] {"1", "Test", "Important", "unkown", "unkown", "No"});
 	}
 
 	/**
@@ -335,6 +356,20 @@ public class TaskMeter extends Shell {
 		
 		new MenuItem(menuEdit, SWT.SEPARATOR);
 		
+		MenuItem mntmEditTask = new MenuItem(menuEdit, SWT.NONE);
+		mntmEditTask.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				editTask(new TableItem(taskList, 0));
+			}
+		});
+		mntmEditTask.setText("Edit");
+		
+		MenuItem mntmDeleteTask = new MenuItem(menuEdit, SWT.NONE);
+		mntmDeleteTask.setText("Delete");
+		
+		new MenuItem(menuEdit, SWT.SEPARATOR);
+		
 		MenuItem mntmSearch = new MenuItem(menuEdit, SWT.NONE);
 		mntmSearch.setText(getResourceString("find"));
 	}
@@ -349,12 +384,32 @@ public class TaskMeter extends Shell {
 		Menu menuUser = new Menu(mntmUser);
 		mntmUser.setMenu(menuUser);
 		
+		MenuItem mntmAddList = new MenuItem(menuUser, SWT.NONE);
+		mntmAddList.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				addNewList();
+			}
+		});
+		mntmAddList.setText("Add List");
+		
+		MenuItem mntmAddTask = new MenuItem(menuUser, SWT.NONE);
+		mntmAddTask.setText("Add New Task");
+		
+		new MenuItem(menuUser, SWT.SEPARATOR);
+		
 		MenuItem mntmSave = new MenuItem(menuUser, SWT.NONE);
 		mntmSave.setText(getResourceString("save"));
 		
 		new MenuItem(menuUser, SWT.SEPARATOR);
 		
 		MenuItem mntmExit = new MenuItem(menuUser, SWT.NONE);
+		mntmExit.addSelectionListener(new SelectionAdapter() {
+			@Override
+			public void widgetSelected(SelectionEvent e) {
+				System.exit(0);
+			}
+		});
 		mntmExit.setText(getResourceString("exit"));
 	}
 	
@@ -395,6 +450,11 @@ public class TaskMeter extends Shell {
 	 */
 	private void editTask(TableItem tableItem) {
 		TaskDetailDialog dialog = new TaskDetailDialog(this);
+		String[] values = dialog.open();
+		
+		if (values != null) {
+			isModified = true;
+		}
 		/*
 		dialog.setLabels(columnNames);
 		String[] values = new String[table.getColumnCount()];
@@ -416,6 +476,7 @@ public class TaskMeter extends Shell {
 
 	private void displayError(String msg) {
 		MessageBox box = new MessageBox(this, SWT.ICON_ERROR);
+		box.setText("Error");
 		box.setMessage(msg);
 		box.open();
 	}

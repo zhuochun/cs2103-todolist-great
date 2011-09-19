@@ -10,7 +10,7 @@ package cs2103.t14j1.Storage;
 public class Task {
 	
 	private String whatToDo;
-	private int priority; //Can be any of 1, 2 or 3
+	private Priority priority; //Can be any of 1, 2 or 3
 	private long deadline;
 	private long startDate;
 	private long startTime;
@@ -18,50 +18,49 @@ public class Task {
 	private long endTime;
 	private String place;
 	
-	public Task (String whatToDo, Integer priority, Long deadline, Long startDate,
+	public Task (String whatToDo, Priority priority, Long deadline, Long startDate,
 			Long startTime, Long endDate, Long endTime, String place) {
-	
-		/*null checks are introduced because primitive data types like long and int
-		can't be assigned the value null*/
 		
 		this.whatToDo = whatToDo;
-		if(priority != null)
-			this.priority = priority;
-		if(deadline != null)
-			this.deadline = deadline;
-		if(startDate != null)
-			this.startDate = startDate;
-		if(startTime != null)
-			this.startTime = startTime;
-		if(endDate != null)
-			this.endDate = endDate;
-		if(endTime != null)
-			this.endTime = endTime;
+		this.priority = priority;
+		this.deadline = deadline;
+		this.startDate = startDate;
+		this.startTime = startTime;
+		this.endDate = endDate;
+		this.endTime = endTime;
 		this.place = place;
 	}
 	
-	public Object getValue(String nameOfParameter) {
-		if (areStringsEqual(nameOfParameter, "priority"))
-			return priority;
-		else if (areStringsEqual(nameOfParameter, "whatToDo"))
-			return whatToDo;
-		else if (areStringsEqual(nameOfParameter, "deadline"))
-			return deadline;
-		else if (areStringsEqual(nameOfParameter, "startDate"))
-			return startDate;
-		else if (areStringsEqual(nameOfParameter, "startTime"))
-			return startTime;
-		else if (areStringsEqual(nameOfParameter, "endDate"))
-			return endDate;
-		else if (areStringsEqual(nameOfParameter, "endTime"))
-			return endTime;
-		else if (areStringsEqual(nameOfParameter, "place"))
-			return place;
-		else {
-			System.err.println("Error: Trying to get value of a parameter which" +
-					"doesn't exist");
-			return null;
-		}
+	public String getWhatToDo() {
+		return whatToDo;
+	}
+	
+	public Priority getPriority() {
+		return priority;
+	}
+	
+	public long getDeadline() {
+		return deadline;
+	}
+	
+	public long getStartDate() {
+		return startDate;
+	}
+	
+	public long getStartTime() {
+		return startTime;
+	}
+	
+	public long getEndDate() {
+		return endDate;
+	}
+	
+	public long getTime() {
+		return endTime;
+	}
+	
+	public String getPlace() {
+		return place;
 	}
 	
 	private boolean areStringsEqual(String a, String b) {

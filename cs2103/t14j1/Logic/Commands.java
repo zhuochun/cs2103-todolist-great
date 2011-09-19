@@ -1,7 +1,13 @@
-package cs2103.t14j1.Logic;
+package cs2103.t14j1.logic;
 
 public enum Commands {
-	ADD,
+	ADD_TASK,
+	ADD_LIST,
+	DELETE_TASK,
+	DELETE_LIST,
 	SEARCH,
-	SWITCHLIST
+	EDIT_TASK,
+	EDIT_LIST,
+	SORT,
+	SWITCH
 }

@@ -11,11 +11,22 @@ package cs2103.t14j1.Logic;
  */
 public interface ExtractParsedCommand {
 	/**
+	 * 
+	 * @return
 	 * Extract information from the command
 	 * would return null if the information doesn't exist
-	 * @return
 	 */
 	public Commands extractCommand();
+	
+	/** 
+	 * @return
+	 * Get the task title
+	 * This would exclude other extractable information. For example, if the 
+	 *   task is "lunch with Zhuochun 12:00 today at Arts Canteen", then this 
+	 *   command would return "lunch with Zhuochun" cuz "12:00", "today", 
+	 *   "at Arts Canteen" has been extracted.  
+	 */
+	public String extractTaskTitle();
 	
 	/**
 	 * @return

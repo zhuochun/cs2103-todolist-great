@@ -40,13 +40,13 @@ public class SmartBarParseCommand implements ExtractParsedCommand {
 	private static final String regDateSpacer = "[,-/. ]";
 
 		// regular expression for matching the time
-	private static final String regTimePointAmPm =
+	private static final String regTimePointAmPm = // match the 5am/pm, 5 am/pm, or 5:00 am/pm. 
 			"(1[012]|\\d)(:[0-5]\\d){0,2}((\\ )?[ap]m)";
 	private static final String regTimePoint24H = 
 			"([01]?\\d|2[0-3])(:[0-5]\\d){0,2}";
 	private static final String regTimePointInteger =
 			"(1[012]|[1-9])([AP]M)";
-	private static final String regTimeFormat = 
+	private static final String regTimeFormat = // can be either 24 hour, or am/pm
 			"(" + regTimePointAmPm + "|" + regTimePoint24H + ")";
 	
 	
@@ -76,7 +76,11 @@ public class SmartBarParseCommand implements ExtractParsedCommand {
 		// the date format for mm/dd/yy; leave it here for the possible use in the future
 	private static final String regDateFormat_mm_dd_yy =
 			"(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])([- /.](19|20)\\d\\d)?";
-	private static final String regMatchCalendar = "at";
+	
+		
+		// regex for checking time 
+	
+	
 	// @endgroup regex
 	
 	
@@ -120,10 +124,19 @@ public class SmartBarParseCommand implements ExtractParsedCommand {
 		Pattern regDateFormat_dd_mm_$yy$yy$$_Pattern = Pattern.compile(
 				regWordSpacer + regDateFormat_dd_$mm$M$_$yy$yy$$ + regWordSpacer,Pattern.CASE_INSENSITIVE);
 		Matcher regDateFormat_dd_mm_$yy$yy$$_Matcher = regDateFormat_dd_mm_$yy$yy$$_Pattern.matcher(command);
-		Pattern regDateFormat_today_tomorrow_Pattern = Pattern.compile(regWordSpacer + regDateFormat_today_tomorrow + regWordSpacer);	// this is case sensitive
+		
+		Pattern regDateFormat_today_tomorrow_Pattern = Pattern.compile(
+				regWordSpacer + regDateFormat_today_tomorrow + regWordSpacer);	// this is case sensitive
 		Matcher regDateFormat_today_tomorrow_Matcher = regDateFormat_today_tomorrow_Pattern.matcher(command);
-		Pattern regDateFormat_order_weekD_Pattern = Pattern.compile(regDateFormat_order_weekD,Pattern.CASE_INSENSITIVE);	// this is case sensitive
+		
+		Pattern regDateFormat_order_weekD_Pattern = Pattern.compile(
+				regDateFormat_order_weekD,Pattern.CASE_INSENSITIVE);	// this is case sensitive
 		Matcher regDateFormat_order_weekD_Matcher = regDateFormat_order_weekD_Pattern.matcher(command);
+		
+		Pattern regTimeFormatAllPattern = Pattern.compile(
+				regWordSpacer + regTimeFormat + regWordSpacer, Pattern.CASE_INSENSITIVE);
+		Matcher regTimeFormatAllMatcher = regTimeFormatAllPattern.matcher(command);
+		
 		
 		if(regDateFormat_dd_mm_$yy$yy$$_Matcher.find()){	// date is in dd/mm/yy format
 			if(!dateFormat_dd_mm_$yy$yy$$_Process(startDate,
@@ -143,10 +156,17 @@ public class SmartBarParseCommand implements ExtractParsedCommand {
 			}
 		}
 		else{
-			System.out.println("Not found");
+			// TODO: for debug purpose only; would remove it later
+			System.out.println("DEBUG: Date Not found");
 		}
 		
 		// then check the time
+		if(regTimeFormatAllMatcher.find()){
+			if(!regTimeFormatProcess(startTime,
+					removeTheLeadingAndTailingWordSpacer(regTimeFormatAllMatcher.group()))){
+				throw new Exception("Time Parsing Problem: wrong number format.");
+			}
+		}
 		
 		
 		// then the duration
@@ -158,6 +178,37 @@ public class SmartBarParseCommand implements ExtractParsedCommand {
 		// then the deadline
 	}
 	
+	private boolean regTimeFormatProcess(Long time,
+			String timeStr) {
+		// first level: separate by :
+		time = (long) 0; 	// initialization
+		System.out.println(timeStr);
+		System.out.println(timeStr.contains("pm"));
+		// capture the [a|p]m. 
+		// This tag is no longer useful after this operation
+		if(timeStr.contains("pm")){
+			time += 3600 * 12;	// the afternoon
+			System.out.println(timeStr);
+		}
+		String[] purifiedTime = timeStr.split("[a|p]m");
+		timeStr = purifiedTime[0];
+		
+		String[] timeOptions = timeStr.split(":");
+		
+		long amplifier = 3600;
+		try{
+			for(int i=0;i<timeOptions.length;i++,amplifier/=60){
+				time += Long.parseLong(timeOptions[i]) * amplifier;
+			}
+		} catch(NumberFormatException e){
+			return false;
+		}
+		
+		System.out.println(time);
+		
+		return true;
+	}
+
 	private static boolean regDateFormat_order_weekD_Process(Calendar date, String weekDStr) {
 		date = Calendar.getInstance();
 		
@@ -325,8 +376,9 @@ public class SmartBarParseCommand implements ExtractParsedCommand {
 	 */
 	public static void main(String[] args) throws Exception {
 		// test match here
-		String taskStr = "this Wednesday";	// test time
+		String taskStr = "this Wednesday 4:00 pm";	// test time
 		
+//		System.out.println(taskStr.matches(regTimeFormat));
 		
 		SmartBarParseCommand test = new SmartBarParseCommand(taskStr);
 		test.extractStartTime();
@@ -361,7 +413,8 @@ public class SmartBarParseCommand implements ExtractParsedCommand {
 	public Long extractStartTime() {
 		Long startTime = null;
 		
-		Pattern regTimePointAmPmPattern = Pattern.compile(regTimePointAmPm,Pattern.CASE_INSENSITIVE);
+		Pattern regTimePointAmPmPattern = Pattern.compile(
+				regTimePointAmPm + "(^|$)",Pattern.CASE_INSENSITIVE);
 		Matcher regTimePointAmPmMatcher = regTimePointAmPmPattern.matcher(command);
 		
 		if(regTimePointAmPmMatcher.find()){
@@ -426,6 +479,12 @@ public class SmartBarParseCommand implements ExtractParsedCommand {
 
 	@Override
 	public Integer extractPriority() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public String extractTaskTitle() {
 		// TODO Auto-generated method stub
 		return null;
 	}

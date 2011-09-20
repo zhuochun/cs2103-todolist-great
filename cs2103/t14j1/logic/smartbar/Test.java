@@ -1,9 +1,5 @@
 package cs2103.t14j1.logic.smartbar;
 
-import java.io.PrintStream;
-import java.util.Scanner;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class Test {
 

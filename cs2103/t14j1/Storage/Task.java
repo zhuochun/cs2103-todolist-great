@@ -1,14 +1,22 @@
 package cs2103.t14j1.storage;
 
+import java.util.Date;
+
+import cs2103.t14j1.logic.DateFormat;
+
+/**
+ * a basic Task and its properties
+ * 
+ * @author Zhuochun
+ *
+ */
 public class Task {
 
 	private String name; // define the task action
 	private String list; // belong to which list
 	private Priority priority;
-	private long startDate;
-	private long startTime;
-	private long endDate;
-	private long endTime;
+	private Date startDateTime; // use Date is much easier, check out the DateFormat class
+	private Date endDateTime;   // besides, long cannot use to store minutes and hours
 	private boolean status; // completed or not
 	
 	public static final boolean COMPLETED = true;
@@ -17,15 +25,13 @@ public class Task {
 	/**
 	 * A Constructor with all parameters provided
 	 */
-	public Task (String name, String list, Priority priority, Long startDate, Long startTime,
-			Long endDate, Long endTime, boolean status) {
+	public Task (String name, String list, Priority priority, Date startDateTime,
+			Date endDateTime, boolean status) {
 		this.name      = name;
 		this.list      = list;
 		this.priority  = priority;
-		this.startDate = startDate;
-		this.startTime = startTime;
-		this.endDate   = endDate;
-		this.endTime   = endTime;
+		this.startDateTime = startDateTime;
+		this.endDateTime   = endDateTime;
 		this.status    = status;
 	}
 	
@@ -41,20 +47,76 @@ public class Task {
 		return priority;
 	}
 	
-	public long getStartDate() {
-		return startDate;
+	/**
+	 * 
+	 * @return yyyy-MM-dd HH:mm:ss
+	 */
+	public String getStartLong() {
+		if (startDateTime == null) {
+			return null;
+		}
+		
+		return DateFormat.dateToStrLong(startDateTime);
 	}
 	
-	public long getStartTime() {
-		return startTime;
+	/**
+	 * 
+	 * @return yyyy-MM-dd
+	 */
+	public String getStartDate() {
+		if (startDateTime == null) {
+			return null;
+		}
+		
+		return DateFormat.dateToStr(startDateTime);
 	}
 	
-	public long getEndDate() {
-		return endDate;
+	/**
+	 * 
+	 * @return HH:mm
+	 */
+	public String getStartTime() {
+		if (startDateTime == null) {
+			return null;
+		}
+		
+		return DateFormat.getTime(startDateTime);
 	}
 	
-	public long getTime() {
-		return endTime;
+	/**
+	 * 
+	 * @return yyyy-MM-dd HH:mm:ss
+	 */
+	public String getEndLong() {
+		if (endDateTime == null) {
+			return null;
+		}
+		
+		return DateFormat.dateToStrLong(endDateTime);
+	}
+
+	/**
+	 * 
+	 * @return yyyy-MM-dd
+	 */
+	public String getEndDate() {
+		if (endDateTime == null) {
+			return null;
+		}
+		
+		return DateFormat.dateToStr(endDateTime);
+	}
+	
+	/**
+	 * 
+	 * @return HH:mm
+	 */
+	public String getEndTime() {
+		if (endDateTime == null) {
+			return null;
+		}
+		
+		return DateFormat.getTime(endDateTime);
 	}
 	
 	public boolean getStatus() {
@@ -65,12 +127,6 @@ public class Task {
 		status = newStatus;
 	}
 	
-	// TODO merge startDate and startTime
-	public long getStartDateTime() {
-		return startDate;
-	}
-	
-
 	// TODO change this
 	public String toString() {
 		return name;

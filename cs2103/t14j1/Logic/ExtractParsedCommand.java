@@ -3,6 +3,28 @@
 
 package cs2103.t14j1.logic;
 
+
+/*
+ * for all reasons, I don't think we need a Interface for smartbar, because we
+ * only need to implement all these functions for once in logic.smartbar package
+ * 
+ * create an interface only when you know that you will implement the functions
+ * at other places with different behaviours.
+ * 
+ * refer to http://download.oracle.com/javase/tutorial/java/IandI/createinterface.html
+ * which says the car example, it uses a interface because different car models can
+ * have different behaviours for turn, changeLanes etc.
+ * 
+ * another example I can say is, think animals, all animals can walk, jump. however,
+ * different animals walk, jump differently, therefore you create a interface.
+ * 
+ * if you any questions, post it in the google group, but google Interface first
+ * if you accept my opinion, delete this class
+ * 
+ * Zhuochun
+ * 
+ */
+
 /**
  * Use this interface to define all the "extract" function of the parsed 
  * information for Smart Bar.

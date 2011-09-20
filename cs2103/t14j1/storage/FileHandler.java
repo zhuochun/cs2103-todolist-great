@@ -2,6 +2,8 @@ package cs2103.t14j1.storage;
 
 import java.util.Date;
 
+import cs2103.t14j1.logic.DateFormat;
+
 
 /**
  * the file handler to load from and save to files
@@ -37,17 +39,29 @@ public class FileHandler {
 	
 	private static void loadTasks(TaskLists lists) {
 		
-		// this is a demo of how to add a task into list
+		// these are demos of how to add a task into list
+		// delete these demos only after you finished the loading
+		// because they are used for other layer for testing
+		
+		// add one task
 		String name = "new task";
 		String list = "inbox";
 		Priority priority = Priority.IMPORTANT;
 		Date startDateTime = null;
 		Date endDateTime = null;
 		boolean status = Task.NOT_COMPLETED;
-		
 		Task newTask = new Task(name, list, priority, startDateTime, endDateTime, status);
+		lists.addTask(list, newTask);
 		
-		lists.addTask("inbox", newTask);
+		// add another task
+		name = "new task 2";
+		list = "inbox";
+		priority = Priority.NORMAL;
+		startDateTime = DateFormat.strToDateLong("2011-9-20 14:20:20");
+		endDateTime = DateFormat.strToDateLong("2011-9-20 15:20:30");
+		status = Task.NOT_COMPLETED;
+		newTask = new Task(name, list, priority, startDateTime, endDateTime, status);
+		lists.addTask(list, newTask);
 		
 		// TODO: open the taskFile and load all the tasks into lists
 		
@@ -70,7 +84,7 @@ public class FileHandler {
 	private static void saveLists(String[] names) {
 		
 		for (String name : names) {
-			// TODO: save name to XML listFile
+			// TODO: save list name to XML listFile
 		}
 		
 	}
@@ -93,7 +107,9 @@ public class FileHandler {
 			for (int i = 0; i < numTasks; i++) {
 				Task task = list.getTask(i);
 				
-				// TODO: write task detail to XML
+				// TODO: write task detail to XML taskFile
+				// You can use task.getName() etc to get what you need to write,
+				// Note, use task.getStartLong() and task.getEndLong() to write time
 				
 			}
 		}

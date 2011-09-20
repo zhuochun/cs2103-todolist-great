@@ -14,7 +14,7 @@ import cs2103.t14j1.storage.TaskLists;
  * It also serves as the command line interface for version 0.1
  * Afterwards, it serve as the bridge between user interface and logic
  *
- * @author Zhuochun
+ * @author Zhuochun, Shubham
  * 
  */
 class Control {
@@ -45,7 +45,7 @@ class Control {
 	 */
 	public Control() {
 		lists = new TaskLists();
-		FileHandler.loadAll(lists); // call storage to load all lists from file
+		FileHandler.loadAll(lists); // call storage to load all lists and tasks from file
 	}
 	
 	/**
@@ -63,11 +63,9 @@ class Control {
 	/**
 	 * execute command
 	 * 
-	 * (public, because in GUI, processInput() will be done in GUI)
-	 * 
 	 * @param command
 	 * @param input
-	 * @return
+	 * @return feedback
 	 */
 	public String executeCommand(Commands command, String input) {
 		switch (command) {

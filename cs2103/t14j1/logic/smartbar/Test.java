@@ -1,8 +1,10 @@
 package cs2103.t14j1.logic.smartbar;
 
-/**
+/*
  * Yangyu, if you want to test your regex, create another project to test them
  * or use jUnit, so it won't interfere with the project.
+ * 
+ * do not create another test class
  * 
  * Zhuochun
  */

@@ -10,6 +10,10 @@ import java.util.GregorianCalendar;
  * Format date/time to string or otherwise
  * Use these functions to do all the things relate to time and date
  * 
+ * eg:
+ * DateFormat.getNow() to get the current date and time in type Date
+ * DateFormat.dateToStr(date) convert date to string
+ * 
  * @author Zhuochun
  * 
  */

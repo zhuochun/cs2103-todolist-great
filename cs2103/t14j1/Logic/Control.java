@@ -1,8 +1,12 @@
 package cs2103.t14j1.logic;
 
+import java.util.Date;
 import java.util.Scanner;
 
+import cs2103.t14j1.logic.smartbar.ParseCommand;
 import cs2103.t14j1.storage.FileHandler;
+import cs2103.t14j1.storage.Priority;
+import cs2103.t14j1.storage.Task;
 import cs2103.t14j1.storage.TaskLists;
 
 /**
@@ -51,10 +55,9 @@ class Control {
 	 * @return
 	 */
 	public String processInput(String input) {
-		//Commands command = extractCommand(input);
-		//String feedback  = executeCommand(command, input);
-		//return feedback;
-		return null;
+		Commands command = ParseCommand.extractCommand(input);
+		String feedback  = executeCommand(command, input);
+		return feedback;
 	}
 
 	/**
@@ -90,10 +93,24 @@ class Control {
 		}
 	}
 
+	/**
+	 * add task into TaskLists
+	 * 
+	 * @param input
+	 * @return
+	 */
 	private String addTask(String input) {
-		// TODO Auto-generated method stub
+		String name        = ParseCommand.extractTaskName(input);
+		String list        = ParseCommand.extractListName(input);
+		Priority priority  = ParseCommand.extractPriority(input);
+		Date startDateTime = ParseCommand.extractStartDate(input);
+		Date endDateTime   = ParseCommand.extractEndDate(input);
+		boolean status    = Task.NOT_COMPLETED;
 		
-		return null;
+		Task newTask = new Task(name, list, priority, startDateTime, endDateTime, status);
+		String result = lists.addTask(list, newTask);
+		
+		return result;
 	}
 
 	private String addList(String input) {

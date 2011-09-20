@@ -1,17 +1,5 @@
 package cs2103.t14j1.logic.smartbar;
 
-import java.text.SimpleDateFormat;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.Scanner;
-import java.util.TimeZone;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-
-import org.eclipse.swt.internal.C;
-
-import cs2103.t14j1.logic.Commands;
-import cs2103.t14j1.logic.ExtractParsedCommand;
 
 /**
  * this class would parse the command from SmartBar.

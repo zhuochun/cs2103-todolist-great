@@ -1,25 +1,21 @@
 package cs2103.t14j1.logic;
 
-import java.util.ArrayList;
 import java.util.Scanner;
 
-import cs2103.t14j1.storage.*;
-import cs2103.t14j1.logic.smartbar.*;
+import cs2103.t14j1.storage.FileHandler;
+import cs2103.t14j1.storage.TaskLists;
 
 /**
- * It is the centre of logic.
+ * It is the centre of logic layer.
  * It also serves as the command line interface for version 0.1
- * Later on, it serve as the bridge between user interface and logic
+ * Afterwards, it serve as the bridge between user interface and logic
  *
  * @author Zhuochun
  * 
  */
 class Control {
 	
-	ArrayList<TaskList> lists;
-	
-	private static final int TRASH = 0; // in lists, TRASH is lists[1]
-	private static final int INBOX = 1; // in lists, INBOX is lists[0]
+	TaskLists lists;
 
 	/**
 	 * command line interface, just for version 0.1
@@ -44,8 +40,8 @@ class Control {
 	 * constructor
 	 */
 	public Control() {
-		lists = new ArrayList<TaskList>();
-		storageLoad(lists); // call storage to load all lists from file
+		lists = new TaskLists();
+		FileHandler.loadAll(lists); // call storage to load all lists from file
 	}
 	
 	/**
@@ -55,9 +51,10 @@ class Control {
 	 * @return
 	 */
 	public String processInput(String input) {
-		Commands command = extractCommand(input);
-		String feedback  = executeCommand(command, input);
-		return feedback;
+		//Commands command = extractCommand(input);
+		//String feedback  = executeCommand(command, input);
+		//return feedback;
+		return null;
 	}
 
 	/**
@@ -96,40 +93,49 @@ class Control {
 	private String addTask(String input) {
 		// TODO Auto-generated method stub
 		
+		return null;
 	}
 
 	private String addList(String input) {
 		// TODO Auto-generated method stub
 		
+		return null;
 	}
 
 	private String search(String input) {
 		// TODO Auto-generated method stub
 		
+		return null;
 	}
 
 	private String deleteTask(String input) {
 		// TODO Auto-generated method stub
 		
+		return null;
 	}
 
 	private String deleteList(String input) {
 		// TODO Auto-generated method stub
 		
+		return null;
 	}
 
 	private String editTask(String input) {
 		// TODO Auto-generated method stub
 		
+		return null;
 	}
 
 	private String editList(String input) {
 		// TODO Auto-generated method stub
 		
+		return null;
 	}
 
 	private String sortBy(String input) {
 		// TODO Auto-generated method stub
 		
+		return null;
 	}
+	
 }

@@ -2,31 +2,13 @@ package cs2103.t14j1.logic.smartbar;
 
 import java.util.Calendar;
 import java.util.Date;
+import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import cs2103.t14j1.logic.Commands;
 import cs2103.t14j1.logic.DateFormat;
 import cs2103.t14j1.storage.Priority;
-
-/*
- * TODO:
- * 
- * Use static functions, so we can use it without creating a instance of it.
- * 
- * eg. we can call ParseCommand.extractTime(line) directly, check how i write
- * DateFormat class
- * 
- * by the way, ParseCommand do not need to care about create task, it just
- * process the input line
- * 
- * for Priority, use PRIORIY.IMPORTANT, PRIOIRTY.NORMAL, PRIORITY.LOW
- * 
- * I standardised the extract related function names, don't change the function names!
- * go to Control AddTask() to see how I want the ParseCommand extract functions to work
- * 
- * Zhuochun
- */
 
 /**
  * this class would parse the command from SmartBar.
@@ -51,7 +33,7 @@ public class ParseCommand {
 	// @group regex: regular expressions for match
 	
 		// to differ between words -- a spacer is not a digit character or alphabet
-	private static final String regWordSpacer = "([^\\d\\w]|[$^])";
+	private static final String regWordSpacer = "([^\\d\\w]|(^)|($))";
 	private static final String regDateSpacer = "[,-/. ]";
 
 		// regular expression for matching the time
@@ -102,34 +84,24 @@ public class ParseCommand {
 	// @end group regex-match
 	
 	// basic information 
-	/*
-	 * TODO: No need for all these ===== Zhuochun
-	 * 
+
 	private Calendar startDate = null;
-	Long startTime = null;
-	Long endTime = null;
-	Long duration = null;
-	Integer priority = null;
+	private Long startTime = null;
+	private Long endTime = null;
+	private Long duration = null;
+	private Integer priority = null;
 	
-	String place = null;
-	*/
-	
-	
+	private String place = null;
+
 	// filed of this class
-	//String command;
+	private String command;
 	
 	
-	/*
-	 * 
-	 * create the Pattern and Matcher in each functions, do not create a constructor
-	 * 
-	 * zhuochun
-	 */
 	
 	/* The constructor
 	 * @param command - the command passed from the smart bar GUI
-	 * @throws Exception 
-	public SmartBarParseCommand(String command) throws Exception {
+	 * @throws Exception */ 
+	public ParseCommand(String command) throws Exception {
 		// set the time zone to 
 		TimeZone.setDefault(TimeZone.getTimeZone("GMT-0"));
 		
@@ -144,7 +116,7 @@ public class ParseCommand {
 		 *  3) Mon ~ Sun, or Monday ~ Sunday --> indicates the next day.
 		 *  4) next Mon ~ Sun, or Monday ~ Sunday --> indicates the day of next week 
 		 */
-	/*
+	
 			// check for 1)
 	
 		Pattern regDateFormat_dd_mm_$yy$yy$$_Pattern = Pattern.compile(
@@ -190,7 +162,7 @@ public class ParseCommand {
 		if(regTimeFormatAllMatcher.find()){
 			if(!regTimeFormatProcess(startTime,
 					removeTheLeadingAndTailingWordSpacer(regTimeFormatAllMatcher.group()))){
-				throw new Exception("Time Parsing Problem: wrong number format.");
+				throw new Exception("DEBUG: Time Parsing Problem - wrong number format.");
 			}
 		}
 		
@@ -203,18 +175,14 @@ public class ParseCommand {
 		
 		// then the deadline
 	}
-	 */
 	
 	private boolean regTimeFormatProcess(Long time, String timeStr) {
 		// first level: separate by :
 		time = (long) 0; 	// initialization
-		System.out.println(timeStr);
-		System.out.println(timeStr.contains("pm"));
 		// capture the [a|p]m. 
 		// This tag is no longer useful after this operation
 		if(timeStr.contains("pm")){
 			time += 3600 * 12;	// the afternoon
-			System.out.println(timeStr);
 		}
 		String[] purifiedTime = timeStr.split("[a|p]m");
 		timeStr = purifiedTime[0];
@@ -222,15 +190,14 @@ public class ParseCommand {
 		String[] timeOptions = timeStr.split(":");
 		
 		long amplifier = 3600;
-		try{
+//		try{  /* TODO: Not putting the exception handling here for debugging */
 			for(int i=0;i<timeOptions.length;i++,amplifier/=60){
-				time += Long.parseLong(timeOptions[i]) * amplifier;
+				time += Long.parseLong(timeOptions[i].trim()) * amplifier;
 			}
-		} catch(NumberFormatException e){
-			return false;
-		}
+//		} catch(NumberFormatException e){
+//			return false;
+//		}
 		
-		System.out.println(time);
 		
 		return true;
 	}
@@ -240,8 +207,6 @@ public class ParseCommand {
 		
 		// spacer is here
 		String[] dayInfo = weekDStr.split(regWordSpacer);
-		
-		
 		
 		int dayOfTheWeek = dateParseGetDayOfWeekFromText(weekDStr);
 		int currentDay = date.get(Calendar.DAY_OF_WEEK);
@@ -334,7 +299,7 @@ public class ParseCommand {
 		
 	}
 	
-	private static String removeTheLeadingAndTailingWordSpacer(String inStr){
+	private String removeTheLeadingAndTailingWordSpacer(String inStr){
 		// the leading word spacer
 		if(inStr.substring(0, 1).matches(regWordSpacer)){
 			inStr = inStr.substring(1);
@@ -361,7 +326,7 @@ public class ParseCommand {
 		return (monthNum<=12)?monthNum:0;	// return 0 on false
 	}
 	
-	private static boolean dateFormat_dd_mm_$yy$yy$$_Process(Calendar date, String dateStr) {
+	private boolean dateFormat_dd_mm_$yy$yy$$_Process(Calendar date, String dateStr) {
 		date = Calendar.getInstance();date.clear();
 		
 		String[] dateInfoArr = dateStr.split(regDateSpacer);
@@ -395,7 +360,7 @@ public class ParseCommand {
 	}
 	
 
-	/* no need extractStartTime()
+	
 	public Long extractStartTime() {
 		Long startTime = null;
 		
@@ -413,23 +378,19 @@ public class ParseCommand {
 		
 		return startTime;
 	}
-	*/
+
 	
 //	private static boolean 
 
-	/*
-	 * don't put main in class, use jUnit to test
-	 * 
-	 * @param args
-	 * @throws Exception 
+	
 	public static void main(String[] args) throws Exception {
 		// test match here
-		String taskStr = "this Wednesday 4:00 pm";	// test time
+		String taskStr = "this Wednesday 4:00 am";	// test time
 		
 //		System.out.println(taskStr.matches(regTimeFormat));
 		
-		//ParseCommand test = new SmartBarParseCommand(taskStr);
-		//test.extractStartTime();
+		ParseCommand test = new ParseCommand(taskStr);
+		test.extractStartTime();
 		
 //		taskStr = in.nextLine();
 //		Scanner in = new Scanner(System.in);
@@ -440,16 +401,25 @@ public class ParseCommand {
 //			taskStr = in.nextLine();
 //		}
 	}
-	 */
+	 
 	
 	/*
+	 * 
+	 */
+	/**
+	 **** Zhuochun's Last Words: 
+	 * 
 	 * Yangyu, the following function names cannot be changed, only modify inside
 	 * and return the correct type
 	 * 
 	 * Zhuochun
+	 * 
+	 ****
+	 * This function would return the command: 
+	 * @param command
+	 * @return
 	 */
-	
-	public static Commands extractCommand(String input) {
+	public Commands extractCommand(String input) {
 		/*
 		 * check the Commands class for new command
 		 * 
@@ -466,25 +436,25 @@ public class ParseCommand {
 		return Commands.INVALID; // if Command is not found, return INVALID
 	}
 	
-	public static String extractTaskName(String input) {
+	public String extractTaskName(String input) {
 		// TODO Auto-generated method stub
 		
 		return null; // if TaskTitle is not found, return null
 	}
 
-	public static String extractListName(String input) {
+	public String extractListName(String input) {
 		// TODO Auto-generated method stub
 		
 		return "inbox"; // if list name is not specified, use inbox list
 	}
 
-	public static Priority extractPriority(String input) {
+	public Priority extractPriority(String input) {
 		// TODO Auto-generated method stub
 		
 		return Priority.NORMAL; // if priority is not specified, use normal
 	}
 
-	public static Date extractStartDate(String input) {
+	public Date extractStartDate(String input) {
 		//return (startDate != null)?startDate.getTimeInMillis()/1000:null;
 		
 		/* use DateFormat.strToDate(str) or DateFormat.strToDateLong(str) */
@@ -492,7 +462,7 @@ public class ParseCommand {
 		return null; // if date is not specified, return null
 	}
 
-	public static Date extractEndDate(String input) {
+	public Date extractEndDate(String input) {
 		// TODO Auto-generated method stub
 		
 		return null; // if date is not specified, return null

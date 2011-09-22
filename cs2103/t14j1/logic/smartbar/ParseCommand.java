@@ -34,6 +34,7 @@ public class ParseCommand {
 	
 		// to differ between words -- a spacer is not a digit character or alphabet
 	private static final String regWordSpacer = "([^\\d\\w]|(^)|($))";
+	private static final String regNonSpaceWordSpacer = "([^\\d\\w\\ ]|(^)|($))";
 	private static final String regDateSpacer = "[,-/. ]";
 
 		// regular expression for matching the time
@@ -41,10 +42,8 @@ public class ParseCommand {
 			"(1[012]|\\d)(:[0-5]\\d){0,2}((\\ )?[ap]m)";
 	private static final String regTimePoint24H = 
 			"([01]?\\d|2[0-3])(:[0-5]\\d){0,2}";
-	private static final String regTimePointInteger =
-			"(1[012]|[1-9])([AP]M)";
 	private static final String regTimeFormat = // can be either 24 hour, or am/pm
-			"(" + regTimePointAmPm + "|" + regTimePoint24H + ")";
+			"((at" + regWordSpacer + ")?" + regTimePointAmPm + "|" + regTimePoint24H + ")";
 	
 		// regular expression for matching the date
 	private static final String regMonthText =
@@ -64,7 +63,7 @@ public class ParseCommand {
 			"(" + regDateFormat_dd_$M$_$yy$yy$$+ ")|(" + regDateFormat_dd_$mm$_$yy$yy$$ + ")";
 	
 	private static final String regDateFormat_order_weekD = 
-			"((" + regDayOrder + regWordSpacer + ")?" + regWeekText + ")";
+			"((on" + regWordSpacer + ")?(" + regDayOrder + regWordSpacer + ")?" + regWeekText + ")";
 	
 	private static final String regDateFormat_today_tomorrow = 
 			"(today|tomorrow)";
@@ -72,9 +71,15 @@ public class ParseCommand {
 		// the date format for mm/dd/yy; leave it here for the possible use in the future
 	private static final String regDateFormat_mm_dd_yy =
 			"(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])([- /.](19|20)\\d\\d)?";
-		
-		// regex for checking time 
+	private static final String regTimeUnit = 
+			"((hour(s)?|h)|(minute(s)?|min)|(second(s)?|sec)|(day(s)?))";
 	
+	private static final String regDurationFormat = 
+			"(for(\\ )+[\\d]+(\\ )?" + regTimeUnit + ")";
+	private static final String regPlaceFormat = 
+		"((on|at|in)(\\ )+[\\w\\ ]" + regNonSpaceWordSpacer + ")";
+	private static final String regPriorityFormat = "(![123])";
+	private static final String regListFormat = "(#[\\w]+)";
 	
 	// @endgroup regex
 	
@@ -89,12 +94,13 @@ public class ParseCommand {
 	private Long startTime = null;
 	private Long endTime = null;
 	private Long duration = null;
-	private Integer priority = null;
+	private Priority priority = null;
 	
 	private String place = null;
 
 	// filed of this class
 	private String command;
+	private String list;
 	
 	
 	
@@ -135,21 +141,39 @@ public class ParseCommand {
 				regWordSpacer + regTimeFormat + regWordSpacer, Pattern.CASE_INSENSITIVE);
 		Matcher regTimeFormatAllMatcher = regTimeFormatAllPattern.matcher(command);
 		
+		Pattern regDurationFormatPattern = Pattern.compile(
+				regWordSpacer + regDurationFormat + regWordSpacer, Pattern.CASE_INSENSITIVE);
+		Matcher regDurationFormatMatcher = regDurationFormatPattern.matcher(command);
 		
+		// TODO: need to further consider this part
+		Pattern regPlaceFormatPattern = Pattern.compile(
+				regWordSpacer + regPlaceFormat + regWordSpacer, Pattern.CASE_INSENSITIVE);
+		Matcher regPlaceFormatMatcher = regPlaceFormatPattern.matcher(command);
+		
+		Pattern regPriorityFormatPattern = Pattern.compile(
+				regWordSpacer + regPriorityFormat + regWordSpacer, Pattern.CASE_INSENSITIVE);
+		Matcher regPriorityFormatMatcher = regPriorityFormatPattern.matcher(command);
+		
+		Pattern regListFormatPattern = Pattern.compile(
+				regWordSpacer + regListFormat + regWordSpacer, Pattern.CASE_INSENSITIVE);
+		Matcher regListFormatMatcher = regListFormatPattern.matcher(command);
+		
+		
+		String matchedStr = null;
 		if(regDateFormat_dd_mm_$yy$yy$$_Matcher.find()){	// date is in dd/mm/yy format
 			if(!dateFormat_dd_mm_$yy$yy$$_Process(startDate,
-					removeTheLeadingAndTailingWordSpacer(regDateFormat_dd_mm_$yy$yy$$_Matcher.group()))){
+					matchedStr = removeTheLeadingAndTailingWordSpacer(regDateFormat_dd_mm_$yy$yy$$_Matcher.group()))){
 				// got problem here.
 				throw new Exception("Date Parsing Problem: error in parsing the date with format dd/mm|M/yy(yy)");
 			}
 		}else if(regDateFormat_today_tomorrow_Matcher.find()){
 			if(!regDateFormat_today_tomorrow_Process(startDate,
-					removeTheLeadingAndTailingWordSpacer(regDateFormat_today_tomorrow_Matcher.group()))){
+					matchedStr = removeTheLeadingAndTailingWordSpacer(regDateFormat_today_tomorrow_Matcher.group()))){
 				throw new Exception("Date Parsing Problem: error in parse the date with format today|tomorrow");
 			}
 		} else if(regDateFormat_order_weekD_Matcher.find()){
 			if(!regDateFormat_order_weekD_Process(startDate,
-					removeTheLeadingAndTailingWordSpacer(regDateFormat_order_weekD_Matcher.group()))){
+					matchedStr = removeTheLeadingAndTailingWordSpacer(regDateFormat_order_weekD_Matcher.group()))){
 				throw new Exception("Date Parsing Problem: error in parsing the (this|next) day_of_week ");
 			}
 		}
@@ -158,24 +182,129 @@ public class ParseCommand {
 			System.out.println("DEBUG: Date Not found");
 		}
 		
+		if(matchedStr != null){
+			command = command.replace(matchedStr, "");	// remove the matched String
+			matchedStr = null;
+		}
+
+		
 		// then check the time
 		if(regTimeFormatAllMatcher.find()){
 			if(!regTimeFormatProcess(startTime,
-					removeTheLeadingAndTailingWordSpacer(regTimeFormatAllMatcher.group()))){
-				throw new Exception("DEBUG: Time Parsing Problem - wrong number format.");
+					matchedStr = removeTheLeadingAndTailingWordSpacer(regTimeFormatAllMatcher.group()))){
+				throw new Exception("DEBUG: Time Parsing Problem.");
 			}
+			if(startDate == null){
+				regDateFormat_today_tomorrow_Process(startDate,"today");
+			}
+		}
+		if(matchedStr != null){
+			command = command.replace(matchedStr,"");	// remove the matched time
+			matchedStr = null;
 		}
 		
 		
 		// then the duration
+		if(regDurationFormatMatcher.find()){
+			if(!regDurationFormatProcess(duration,
+					matchedStr = removeTheLeadingAndTailingWordSpacer(regDurationFormatMatcher.group()))){
+				throw new Exception("DEBUG: Duration Parsing Problem.");
+			}
+		}
+		if(matchedStr != null){
+			command = command.replace(matchedStr, "");
+			matchedStr = null;
+		}
 		
-		// then the place
+		// then the place 
+		// TODO: controversial about how to extract the Place.. should finish this later
+		
 		
 		// the priority
+		if(regPriorityFormatMatcher.find()){
+			if(!regPriorityFormatProcess(priority,
+					matchedStr = removeTheLeadingAndTailingWordSpacer(regPriorityFormatMatcher.group()))){
+				throw new Exception("DEBUG: Priority Parsing Problem. Matched String: " + matchedStr);
+			}
+		}
+		if(matchedStr != null){
+			command = command.replace(matchedStr, "");
+			matchedStr = null;
+		}
+		
+		// the list TODO: might need to consider the case of mutiple lists
+		if(regListFormatMatcher.find()){
+			if(!regListFormatProcess(list,
+					matchedStr = removeTheLeadingAndTailingWordSpacer(regPriorityFormatMatcher.group()))){
+				throw new Exception("DEBUG: List Parsing Problem. Matched String: " + matchedStr);
+			}
+		}
+		if(matchedStr != null){
+			command = command.replace(matchedStr, "");
+			matchedStr = null;
+		}
 		
 		// then the deadline
+		
+		
+		// TODO final test, remove later
+		System.out.println(command);
 	}
 	
+	private static boolean regListFormatProcess(String list, String listStr) {
+		list = listStr.substring(1);	// simply leave out the first character (#)
+		return false;
+	}
+
+	/**
+	 * @param priority
+	 *  the Priority Enum
+	 * @param priorityStr
+	 *  currently, 1 for Important, 2 for Normal, 3 for Low (defined by Zhuochun)
+	 * @return
+	 */
+	private static boolean regPriorityFormatProcess(Priority priority, String priorityStr) {
+		int numPriority = Integer.parseInt(priorityStr.substring(1));
+		
+		switch(numPriority){
+		case 1: priority = Priority.IMPORTANT; break;
+		case 2: priority = Priority.NORMAL; break;
+		case 3: priority = Priority.LOW; break;
+		default: return false;
+		}
+		
+		return true;
+	}
+
+	/**
+	 * @param duration
+	 *  Long -- would store the result into this; unit is second.
+	 *  E.g., if the 
+	 * @param durationStr
+	 *   
+	 * @return
+	 */
+	private static boolean regDurationFormatProcess(Long duration, String durationStr) {
+		String[] durationParts = durationStr.split("\\ ");
+		long base = Long.parseLong(durationParts[1]);
+		
+		// then try to tell the duration information
+		String unit = durationParts[2];
+		if(unit.substring(0, 3).compareToIgnoreCase("sec") == 0){
+			duration = base;
+		} else if(unit.substring(0, 3).compareToIgnoreCase("min") == 0){
+			duration = base * 60;
+		} else if(unit.substring(0, 1).compareToIgnoreCase("h") == 0){
+			duration = base * 3600;
+		} else if(unit.substring(0, 3).compareToIgnoreCase("day") == 0){
+			duration = base * 3600 * 24;
+		} else {
+			return false;
+		}
+		
+		return true;
+	}
+
 	private boolean regTimeFormatProcess(Long time, String timeStr) {
 		// first level: separate by :
 		time = (long) 0; 	// initialization
@@ -299,7 +428,7 @@ public class ParseCommand {
 		
 	}
 	
-	private String removeTheLeadingAndTailingWordSpacer(String inStr){
+	private static String removeTheLeadingAndTailingWordSpacer(String inStr){
 		// the leading word spacer
 		if(inStr.substring(0, 1).matches(regWordSpacer)){
 			inStr = inStr.substring(1);
@@ -323,7 +452,7 @@ public class ParseCommand {
 			return dateParseGetMonthFromText(month);
 		}
 		
-		return (monthNum<=12)?monthNum:0;	// return 0 on false
+		return (monthNum<=12)?monthNum:-1;	// return -1 on false
 	}
 	
 	private boolean dateFormat_dd_mm_$yy$yy$$_Process(Calendar date, String dateStr) {
@@ -335,7 +464,7 @@ public class ParseCommand {
 		date.set(Calendar.DATE, Integer.parseInt(dateInfoArr[0]));
 			// set the month of a year
 		int monthNum = dateParseGetMonth(dateInfoArr[1]);
-		System.out.println("Month Num: " + monthNum);
+
 		if(monthNum == -1){
 			return false;	// parsing of the month failed
 		} else{
@@ -359,33 +488,12 @@ public class ParseCommand {
 		return true;
 	}
 	
-
-	
-	public Long extractStartTime() {
-		Long startTime = null;
-		
-		Pattern regTimePointAmPmPattern = Pattern.compile(
-				regTimePointAmPm + "(^|$)",Pattern.CASE_INSENSITIVE);
-		Matcher regTimePointAmPmMatcher = regTimePointAmPmPattern.matcher(command);
-		
-		if(regTimePointAmPmMatcher.find()){
-			System.out.println(regTimePointAmPmMatcher.group());
-		} else{
-			System.out.println("Output.");
-		}
-		
-		// code for getting user input to test
-		
-		return startTime;
-	}
-
-	
 //	private static boolean 
 
 	
 	public static void main(String[] args) throws Exception {
 		// test match here
-		String taskStr = "this Wednesday 4:00 am";	// test time
+		String taskStr = "Jogging on this Wednesday 4:00 am for 2 hours at Climenti";	// test time
 		
 //		System.out.println(taskStr.matches(regTimeFormat));
 		
@@ -415,6 +523,11 @@ public class ParseCommand {
 	 * Zhuochun
 	 * 
 	 ****
+	 * Yangyu's Reply:
+	 *   We've only defined the "search task", "switch list", and "add task"
+	 *   Therefore I only support these 3 in this phase.
+	 * 
+	 ****
 	 * This function would return the command: 
 	 * @param command
 	 * @return
@@ -424,45 +537,62 @@ public class ParseCommand {
 		 * check the Commands class for new command
 		 * 
 		 * zhuochun
-		 * 
+		 */ 
 		if(command.charAt(0) == '/'){
 			return Commands.SEARCH;
 		} else if(command.charAt(0) == '#'){
-			return Commands.SWITCHLIST;
+			return Commands.SWITCH;
 		} else{
-			return Commands.ADD;
+			return Commands.ADD_TASK;
 		}
-		*/
-		return Commands.INVALID; // if Command is not found, return INVALID
+//		return Commands.INVALID; // if Command is not found, return INVALID
 	}
 	
-	public String extractTaskName(String input) {
-		// TODO Auto-generated method stub
+	public String extractTaskName() {
 		
-		return null; // if TaskTitle is not found, return null
+		return command; // if TaskTitle is not found, return null
 	}
 
-	public String extractListName(String input) {
-		// TODO Auto-generated method stub
-		
-		return "inbox"; // if list name is not specified, use inbox list
+	public String extractListName() {
+		return (list==null)?list:"inbox"; // if list name is not specified, use inbox list
 	}
 
-	public Priority extractPriority(String input) {
-		// TODO Auto-generated method stub
-		
-		return Priority.NORMAL; // if priority is not specified, use normal
+	public Priority extractPriority() {
+		return (priority == null)?priority:Priority.NORMAL; // if priority is not specified, use normal
 	}
 
-	public Date extractStartDate(String input) {
-		//return (startDate != null)?startDate.getTimeInMillis()/1000:null;
-		
-		/* use DateFormat.strToDate(str) or DateFormat.strToDateLong(str) */
-		
-		return null; // if date is not specified, return null
+	public Long extractStartTime() {
+		return startTime;
 	}
-
-	public Date extractEndDate(String input) {
+	
+	public Date extractStartDate() {
+		/* Zhuochun: use DateFormat.strToDate(str) or DateFormat.strToDateLong(str) 
+		 * Yangyu's reply: this would not work because: 
+		 *   1. the date string may following different format; simply using that would cause Exception
+		 *     (for example, we also consider 'tomorrow' as a date, but this cannot be parsed using strToDate)
+		 *   2. the date can be extracted in the constructor; no point of using this again 
+		 */
+		
+		/* Because zhuochun don't want the return type to be cahnged to (Long 
+		 *   we've discusseed --), nor does Calendar... do I have to use the 
+		 *   seemingly depreciated "Date" class here.
+		 */
+		if(startDate == null){
+			return null;
+		} else{
+			return new Date(startDate.getTimeInMillis());
+		}
+	}
+	
+	public Long extractDuration(){
+		return duration;
+	}
+	
+	/**
+	 * Currently not supported in this phase
+	 * @return
+	 */
+	public Date extractEndDate() {
 		// TODO Auto-generated method stub
 		
 		return null; // if date is not specified, return null

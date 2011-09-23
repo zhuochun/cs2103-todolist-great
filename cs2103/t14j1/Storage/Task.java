@@ -17,7 +17,27 @@ import cs2103.t14j1.logic.DateFormat;
  * 
  */
 public class Task {
-
+	
+	/** Songyy changed: 
+	 *   add in magic string to standardize the task attribute; this would be 
+	 * useful when using XML to save the task
+	 */
+	public static final String NAME = "name";
+	public static final String START_DATE = "start_date";
+	public static final String END_DATE = "end_date";
+	public static final String START_TIME = "start_time";
+	public static final String END_TIME = "end_time";
+	public static final String PLACE = "place";
+	public static final String LIST = "list_name";
+	public static final String STATUS = "status";
+	public static final String PRIORITY = "priority";
+	/*
+	 * this is not included in Zhuochun's first design, but it's very important 
+	 * also
+	 */
+	public final String DESCRIPTION = ""; 
+	public final String DURATION = "";
+	
 	private String name; // define the task action
 	private String list; // belong to which list
 	private Priority priority;
@@ -100,6 +120,9 @@ public class Task {
 	}
 	
 	/**
+	 *** Songyy's note:
+	 *  This is not a proper name because the "Long" would be easily mistaken as
+	 * a return type (though in DateFormat class, you can also see strToDateLong)
 	 * 
 	 * @return yyyy-MM-dd HH:mm:ss
 	 */

@@ -10,6 +10,21 @@ import cs2103.t14j1.logic.Commands;
 import cs2103.t14j1.logic.DateFormat;
 import cs2103.t14j1.storage.Priority;
 
+/*
+Functions completed:
+	extractTaskName() // simply return the string passed in
+	extractListName() // only support one list now
+	extractPriority()  // as Zhuochun requested, 1 measn High, 3 means low
+	extractStartDate() // returning a Date class as Zhuochun requested; personally I prefer Calendar class. or simply a Long integer with the meaning we've defined;
+	extractStartTime() // return an Long, is the number of seconds passed since 0:00.
+	extractDuration() // return an Long.
+	Function Partially Completed:
+	extractCommand:
+	I've only done for search task, switch task, and add task; cuz we didn't define syntax for the rest of the commands
+	Function not implemented:
+	extractEndDate: don't know how we're doing with this now...
+*/
+
 /**
  * this class would parse the command from SmartBar.
  *  

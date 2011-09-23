@@ -7,6 +7,10 @@ import java.util.ArrayList;
  * 
  * @author Shubham, Zhuochun
  *
+ ************************************
+ * update at 2011-9-23 8:30:24, by Song Yangyu:
+ *   Defined the magic string for "inbox" and "trash" -- cuz it's commonly used,
+ * its name should be standardized. 
  */
 public class TaskList {
 
@@ -16,6 +20,10 @@ public class TaskList {
 	private static final String ADD_SUCCESS = "Task \"%1$s\" is Successfully Added";
 	private static final String DELETE_SUCCESS = "Task \"%1$s\" is Successfully Deleted";
 	private static final String INVALID_INDEX = "Invalid Index";
+	
+	// create some very basic List Name
+	public static final String INOBX = "Inbox";
+	public static final String TRASH = "Trash";
 	
 	public TaskList(String name) {
 		this.name = name;

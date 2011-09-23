@@ -8,7 +8,13 @@ import cs2103.t14j1.logic.DateFormat;
  * a basic Task and its properties
  * 
  * @author Zhuochun
- *
+ * 
+ ***********************************
+ * Song Yangyu's notes:
+ *   When passing the time/date, It would be a better idea to pass an Integer
+ * instead of a String -- String may cause some formating problem, and it's 
+ * unnecessary to parse this information back to Integer again 
+ * 
  */
 public class Task {
 
@@ -18,6 +24,13 @@ public class Task {
 	private Date startDateTime; // use Date is much easier, check out the DateFormat class
 	private Date endDateTime;   // besides, long cannot use to store minutes and hours
 	private boolean status; // completed or not
+	
+	/** Song Yangyu's Nodes:
+	 * Added startTime/endTime here, to differentiate from the date, because 
+	 *   some task doesn't have start/end time -- i.e., only has start/end date
+	 */
+	private Long startTime;
+	private Long endTime;
 	
 	public static final boolean COMPLETED = true;
 	public static final boolean NOT_COMPLETED = false;
@@ -39,6 +52,9 @@ public class Task {
 		return name;
 	}
 	
+	/** Songyy's note:
+	 * The list here can be a ArrayList so that we can support multiple lists
+	 */
 	public String getList() {
 		return list;
 	}

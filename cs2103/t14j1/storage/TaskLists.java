@@ -11,7 +11,13 @@ import java.util.TreeMap;
  */
 public class TaskLists {
 	
-	/* Use tree because we need to use list name frequently */
+	/** Zhuochun's note:
+	 *  Use tree because we need to use list name frequently
+	 ********************
+	 ** Songyy's note:
+	 *  Another good thing of using a tree, instead of hash table, is that it's 
+	 *   possible to traverse the tree, but impossible for the hash table
+	 */
 	private TreeMap<String, TaskList> lists;
 	
 	/* Messages */
@@ -21,8 +27,8 @@ public class TaskLists {
 	/* constructor */
 	public TaskLists() {
 		lists = new TreeMap<String, TaskList>();
-		add("inbox");
-		add("trash");
+		add(TaskList.INOBX);
+		add(TaskList.TRASH);
 	}
 	
 	/**

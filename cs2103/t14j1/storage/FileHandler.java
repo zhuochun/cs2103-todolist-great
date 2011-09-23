@@ -126,33 +126,11 @@ public class FileHandler {
 			}
 			
 			// TODO: the time also need that kind of handling
-			Long start_time = Long.parseLong((taskAttr.getNamedItem(Task.START_TIME)).getNodeValue());
-			Long end_time = Long.parseLong((taskAttr.getNamedItem(Task.END_TIME)).getNodeValue());
+//			Long start_time = Long.parseLong((taskAttr.getNamedItem(Task.START_TIME)).getNodeValue());
+//			Long end_time = Long.parseLong((taskAttr.getNamedItem(Task.END_TIME)).getNodeValue());
 			
 			lists.addTask(list, new Task(name,list,priority,startDate,endDate,status));
 		}
-		// add one task
-		String name = "new task";
-		String list = "inbox";
-		Priority priority = Priority.IMPORTANT;
-		Date startDateTime = null;
-		Date endDateTime = null;
-		boolean status = Task.NOT_COMPLETED;
-		Task newTask = new Task(name, list, priority, startDateTime, endDateTime, status);
-		lists.addTask(list, newTask);
-		
-		// add another task
-		name = "new task 2";
-		list = "inbox";
-		priority = Priority.NORMAL;
-		startDateTime = DateFormat.strToDateLong("2011-9-20 14:20:20");
-		endDateTime = DateFormat.strToDateLong("2011-9-20 15:20:30");
-		status = Task.NOT_COMPLETED;
-		newTask = new Task(name, list, priority, startDateTime, endDateTime, status);
-		lists.addTask(list, newTask);
-		
-		// TODO: open the taskFile and load all the tasks into lists
-		
 	}
 	
 	private static Priority translateStringToPriority(String priorityStr) throws IOException {
@@ -268,10 +246,10 @@ public class FileHandler {
 				listElement.setAttribute(Task.NAME, task.getName());
 				listElement.setAttribute(Task.LIST, task.getList());
 				listElement.setAttribute(Task.PRIORITY,translatePriorityToString(task.getPriority()));
-				listElement.setAttribute(Task.START_DATE, task.getStartLong());
-				listElement.setAttribute(Task.END_DATE, task.getEndLong());
-				listElement.setAttribute(Task.START_TIME, task.getStartTime());
-				listElement.setAttribute(Task.END_TIME, task.getEndTime());
+				listElement.setAttribute(Task.START_DATE, translateStrToXML(task.getStartLong()));
+				listElement.setAttribute(Task.END_DATE, translateStrToXML(task.getEndLong()));
+				listElement.setAttribute(Task.START_TIME, translateStrToXML(task.getStartTime()));
+				listElement.setAttribute(Task.END_TIME, translateStrToXML(task.getEndTime()));
 				listElement.setAttribute(Task.STATUS, Boolean.toString(task.getStatus()));
 				// would implement this later cuz currently not defined in the task
 				// listElement.setAttribute(Task.PLACE, task.getList());
@@ -286,6 +264,9 @@ public class FileHandler {
 		}
 	}
 	
+	private static String translateStrToXML(String input){
+		return (input == null)?xmlUndefined:input;
+	}
 	
 	private static String translatePriorityToString(Priority priority) {
 		String priorityStr = null;

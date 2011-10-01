@@ -55,10 +55,10 @@ class Control {
 	 * @return
 	 */
 	public String processInput(String input) {
-		//Commands command = ParseCommand.extractCommand(input);
-		//String feedback  = executeCommand(command, input);
-		//return feedback;
-	    return null;
+		ParseCommand parseCommand = new ParseCommand(input);
+		Commands command = parseCommand.extractCommand();
+		String feedback  = executeCommand(command, input);
+		return feedback;
 	}
 
 	/**
@@ -99,20 +99,18 @@ class Control {
 	 * @return
 	 */
 	private String addTask(String input) {
-	    /*
-		String name        = ParseCommand.extractTaskName(input);
-		String list        = ParseCommand.extractListName(input);
-		Priority priority  = ParseCommand.extractPriority(input);
-		Date startDateTime = ParseCommand.extractStartDate(input);
-		Date endDateTime   = ParseCommand.extractEndDate(input);
+		ParseCommand parseCommand = new ParseCommand(input);
+		String name        = parseCommand.extractTaskName();
+		String list        = parseCommand.extractListName();
+		Priority priority  = parseCommand.extractPriority();
+		Date startDateTime = parseCommand.extractStartDate();
+		Date endDateTime   = parseCommand.extractEndDate();
 		boolean status    = Task.NOT_COMPLETED;
 		
 		Task newTask = new Task(name, list, priority, startDateTime, endDateTime, status);
 		String result = lists.addTask(list, newTask);
 		
 		return result;
-		*/
-	    return null;
 	}
 
 	private String addList(String input) {

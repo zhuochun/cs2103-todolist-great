@@ -20,6 +20,7 @@ import cs2103.t14j1.storage.TaskLists;
 class Control {
 	
 	TaskLists lists;
+	ParseCommand parseCommand;
 
 	/**
 	 * command line interface, just for version 0.1
@@ -45,7 +46,7 @@ class Control {
 	 */
 	public Control() {
 		lists = new TaskLists();
-		//FileHandler.loadAll(lists); // call storage to load all lists and tasks from file
+		FileHandler.loadAll(lists); // call storage to load all lists and tasks from file
 	}
 	
 	/**
@@ -55,7 +56,12 @@ class Control {
 	 * @return
 	 */
 	public String processInput(String input) {
-		ParseCommand parseCommand = new ParseCommand(input);
+		try {
+            parseCommand = new ParseCommand(input);
+        } catch (Exception e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
 		Commands command = parseCommand.extractCommand();
 		String feedback  = executeCommand(command, input);
 		return feedback;
@@ -99,7 +105,6 @@ class Control {
 	 * @return
 	 */
 	private String addTask(String input) {
-		ParseCommand parseCommand = new ParseCommand(input);
 		String name        = parseCommand.extractTaskName();
 		String list        = parseCommand.extractListName();
 		Priority priority  = parseCommand.extractPriority();

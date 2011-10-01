@@ -45,7 +45,7 @@ class Control {
 	 */
 	public Control() {
 		lists = new TaskLists();
-		FileHandler.loadAll(lists); // call storage to load all lists and tasks from file
+		//FileHandler.loadAll(lists); // call storage to load all lists and tasks from file
 	}
 	
 	/**
@@ -55,9 +55,10 @@ class Control {
 	 * @return
 	 */
 	public String processInput(String input) {
-		Commands command = ParseCommand.extractCommand(input);
-		String feedback  = executeCommand(command, input);
-		return feedback;
+		//Commands command = ParseCommand.extractCommand(input);
+		//String feedback  = executeCommand(command, input);
+		//return feedback;
+	    return null;
 	}
 
 	/**
@@ -98,6 +99,7 @@ class Control {
 	 * @return
 	 */
 	private String addTask(String input) {
+	    /*
 		String name        = ParseCommand.extractTaskName(input);
 		String list        = ParseCommand.extractListName(input);
 		Priority priority  = ParseCommand.extractPriority(input);
@@ -109,6 +111,8 @@ class Control {
 		String result = lists.addTask(list, newTask);
 		
 		return result;
+		*/
+	    return null;
 	}
 
 	private String addList(String input) {

@@ -1,5 +1,7 @@
 package cs2103.t14j1.storage;
 
+import java.util.Iterator;
+import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
@@ -9,26 +11,32 @@ import java.util.TreeMap;
  * @author Zhuochun
  *
  */
-public class TaskLists {
+public class TaskLists implements Iterable<Entry<String, TaskList>> {
 	
-	/** Zhuochun's note:
+	/*
+     * Zhuochun's note:
 	 *  Use tree because we need to use list name frequently
-	 ********************
-	 ** Songyy's note:
+	 *
+	 * Songyy's note:
 	 *  Another good thing of using a tree, instead of hash table, is that it's 
-	 *   possible to traverse the tree, but impossible for the hash table
+	 *  possible to traverse the tree, but impossible for the hash table
 	 */
 	private TreeMap<String, TaskList> lists;
 	
 	/* Messages */
 	private static final String ADD_SUCCESS = "List \"%1$s\" is Successfully Added";
 	private static final String REMOVE_SUCCESS = "List \"%1$s\" is Successfully Removed";
+
+    /* Default Lists */
+	public static final String INBOX = "Inbox";
+	public static final String TRASH = "Trash";
 	
 	/* constructor */
 	public TaskLists() {
 		lists = new TreeMap<String, TaskList>();
-		add(TaskList.INOBX);
-		add(TaskList.TRASH);
+		// add default lists
+		add(INBOX);
+		add(TRASH);
 	}
 	
 	/**
@@ -56,8 +64,8 @@ public class TaskLists {
 	/**
 	 * add a task into list
 	 * 
-	 * @param listName			the list task will be added to
-	 * @param task				the task
+	 * @param listName			the list name of the task will be added to
+	 * @param task				the task object
 	 * @return
 	 */
 	public String addTask(String listName, Task task) {
@@ -107,5 +115,13 @@ public class TaskLists {
 	public TaskList getList(String name) {
 		return lists.get(name);
 	}
-	
+
+	/**
+	 * iteration of lists in TaskLists
+	 */
+    public Iterator<Entry<String, TaskList>> iterator() {
+        Iterator<Entry<String, TaskList>> iterateList = lists.entrySet().iterator();
+        return iterateList;
+    }
+    
 }

@@ -556,7 +556,7 @@ public class ParseCommand {
 		if(command.charAt(0) == '/'){
 			return Commands.SEARCH;
 		} else if(command.charAt(0) == '#'){
-			return Commands.SWITCH;
+			return Commands.SWITCH_LIST;
 		} else{
 			return Commands.ADD_TASK;
 		}

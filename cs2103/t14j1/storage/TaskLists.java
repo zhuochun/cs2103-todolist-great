@@ -42,7 +42,7 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
 	/**
 	 * add a new list
 	 * 
-	 * @param name				new list name
+	 * @param name 					new list name
 	 * @return
 	 */
 	public String add(String name) {

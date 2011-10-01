@@ -193,7 +193,7 @@ public class TaskMeter extends Shell {
 		taskTable.setLinesVisible(true);
 		
 		TableColumn tblclmnId = new TableColumn(taskTable, SWT.CENTER);
-		tblclmnId.setWidth(30);
+		tblclmnId.setWidth(28);
 		tblclmnId.setText(getResourceString("table.id"));
 		
 		TableColumn tblclmnName = new TableColumn(taskTable, SWT.CENTER);
@@ -217,7 +217,7 @@ public class TaskMeter extends Shell {
 		
 		TableColumn tblclmnCompleted = new TableColumn(taskTable, SWT.CENTER);
 		tblclmnCompleted.setMoveable(true);
-		tblclmnCompleted.setWidth(75);
+		tblclmnCompleted.setWidth(73);
 		tblclmnCompleted.setText(getResourceString("table.completed"));
 		
 		TableItem tableItem = new TableItem(taskTable, SWT.NONE);

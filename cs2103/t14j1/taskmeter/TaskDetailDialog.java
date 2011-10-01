@@ -93,7 +93,7 @@ public class TaskDetailDialog extends Dialog {
 		Label lblDash = new Label(shell, SWT.NONE);
 		lblDash.setAlignment(SWT.CENTER);
 		lblDash.setBounds(190, 45, 20, 15);
-		lblDash.setText(resourceBundle.getString("TaskDetailDialog.lblDash.text"));
+		lblDash.setText("-");
 		
 		DateTime DateEnd = new DateTime(shell, SWT.BORDER);
 		DateEnd.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
@@ -118,7 +118,7 @@ public class TaskDetailDialog extends Dialog {
 		lblList.setAlignment(SWT.RIGHT);
 		lblList.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
 		lblList.setBounds(165, 73, 40, 25);
-		lblList.setText(resourceBundle.getString("TaskDetailDialog.lblList.text")); //$NON-NLS-1$
+		lblList.setText("List");
 		
 		txtList = new Text(shell, SWT.BORDER | SWT.READ_ONLY);
 		txtList.setEnabled(false);
@@ -150,7 +150,7 @@ public class TaskDetailDialog extends Dialog {
 	
     private void center() {
 		Rectangle parent = getParent().getBounds();
-		Rectangle rect = shell.getBounds ();
+		Rectangle rect = shell.getBounds();
 		int x = parent.x + (parent.width - rect.width) / 2;
 		int y = parent.y + (parent.height - rect.height) / 2;
 		shell.setLocation (x, y);

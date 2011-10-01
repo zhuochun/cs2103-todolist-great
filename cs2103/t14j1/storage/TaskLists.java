@@ -2,7 +2,6 @@ package cs2103.t14j1.storage;
 
 import java.util.Iterator;
 import java.util.Map.Entry;
-import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -25,6 +24,7 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
 	
 	/* Messages */
 	private static final String ADD_SUCCESS = "List \"%1$s\" is Successfully Added";
+	private static final String ADD_FAIL = "List \"%1$s\" already exists";
 	private static final String REMOVE_SUCCESS = "List \"%1$s\" is Successfully Removed";
 
     /* Default Lists */
@@ -46,6 +46,10 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
 	 * @return
 	 */
 	public String add(String name) {
+	    if (lists.containsKey(name)) {
+	        return String.format(ADD_FAIL, name);
+	    }
+	    
 		lists.put(name, new TaskList(name));
 		return String.format(ADD_SUCCESS, name);
 	}
@@ -93,17 +97,6 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
 		// TODO: left this function for version 0.2, because this method is depreciated
 		
 		return null;
-	}
-	
-	/**
-	 * get a String array of all the list names
-	 * 
-	 * @return
-	 */
-	public String[] getListNames() {
-		Set<String> keys = lists.keySet();
-		String[] listNames = (String[]) keys.toArray();
-		return listNames;
 	}
 	
 	/**

@@ -9,46 +9,31 @@ import cs2103.t14j1.logic.DateFormat;
  * 
  * @author Zhuochun
  * 
- ***********************************
- * Song Yangyu's notes:
- *   When passing the time/date, It would be a better idea to pass an Integer
- * instead of a String -- String may cause some formating problem, and it's 
- * unnecessary to parse this information back to Integer again 
- * 
  */
 public class Task {
 	
-	/** Songyy changed: 
-	 *   add in magic string to standardize the task attribute; this would be 
-	 * useful when using XML to save the task
-	 */
-	public static final String NAME = "name";
-	public static final String START_DATE = "start_date";
-	public static final String END_DATE = "end_date";
-	public static final String START_TIME = "start_time";
-	public static final String END_TIME = "end_time";
-	public static final String PLACE = "place";
-	public static final String LIST = "list_name";
-	public static final String STATUS = "status";
-	public static final String PRIORITY = "priority";
-	/*
-	 * this is not included in Zhuochun's first design, but it's very important 
-	 * also
-	 */
-	public final String DESCRIPTION = ""; 
-	public final String DURATION = "";
-	
+    public static final String  NAME          = "name";
+    public static final String  START_DATE    = "start_date";
+    public static final String  END_DATE      = "end_date";
+    public static final String  START_TIME    = "start_time";
+    public static final String  END_TIME      = "end_time";
+    public static final String  PLACE         = "place";
+    public static final String  LIST          = "list_name";
+    public static final String  STATUS        = "status";
+    public static final String  PRIORITY      = "priority";
+
 	private String name; // define the task action
 	private String list; // belong to which list
-	private Priority priority;
+	private Priority priority; // priority the task
 	private Date startDateTime; // use Date is much easier, check out the DateFormat class
 	private Date endDateTime;   // besides, long cannot use to store minutes and hours
 	private boolean status; // completed or not
 	
-	/** Song Yangyu's Nodes:
-	 * Added startTime/endTime here, to differentiate from the date, because 
-	 *   some task doesn't have start/end time -- i.e., only has start/end date
+	/*
+	 * this is not included in Zhuochun's first design, but it's very important
 	 */
+	public final String description = ""; 
+	public final String duration = "";
 	private Long startTime;
 	private Long endTime;
 	
@@ -58,15 +43,15 @@ public class Task {
 	/**
 	 * A Constructor with all parameters provided
 	 */
-	public Task (String name, String list, Priority priority, Date startDateTime,
-			Date endDateTime, boolean status) {
-		this.name      = name;
-		this.list      = list;
-		this.priority  = priority;
-		this.startDateTime = startDateTime;
-		this.endDateTime   = endDateTime;
-		this.status    = status;
-	}
+    public Task(String name, String list, Priority priority, Date startDateTime, Date endDateTime,
+            boolean status) {
+        this.name = name;
+        this.list = list;
+        this.priority = priority;
+        this.startDateTime = startDateTime;
+        this.endDateTime = endDateTime;
+        this.status = status;
+    }
 	
 	public String getName() {
 		return name;
@@ -160,6 +145,10 @@ public class Task {
 	
 	public boolean getStatus() {
 		return status;
+	}
+	
+	public String getStatusStr() {
+	    return status ? "Completed" : "Not Completed";
 	}
 	
 	public void setStatus(boolean newStatus) {

@@ -35,6 +35,10 @@ public class TaskList implements Iterable<Task> {
 		return tasks.get(index);
 	}
 	
+	public ArrayList<Task> getAllTasks() {
+		return tasks;
+	}
+	
 	public String getName() {
 		return name;
 	}

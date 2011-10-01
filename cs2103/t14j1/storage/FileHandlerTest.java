@@ -10,22 +10,28 @@ import org.junit.Test;
 import cs2103.t14j1.logic.DateFormat;
 
 /**
- * this jUnit test class is used to test the iteration of TaskLists and TaskList
+ * this jUnit class tests the fileHandler on load (save) lists and tasks
  * 
  * @author Zhuochun
- *
+ * 
  */
-public class TaskListsTest {
-    
-    TaskLists lists;
-    
+public class FileHandlerTest {
+
     @Before
     public void setUp() throws Exception {
-        lists = new TaskLists();
-        
+    }
+
+    @After
+    public void tearDown() throws Exception {
+    }
+
+    @Test
+    public void testSaveAll() {
+        TaskLists lists = new TaskLists();
+
         lists.add("list1");
         lists.add("list2");
-        
+
         String name = "new task";
         String list = "Inbox";
         Priority priority = Priority.IMPORTANT;
@@ -34,7 +40,7 @@ public class TaskListsTest {
         boolean status = Task.NOT_COMPLETED;
         Task newTask = new Task(name, list, priority, startDateTime, endDateTime, status);
         lists.addTask(list, newTask);
-        
+
         // add another task
         name = "new task 2";
         list = "Inbox";
@@ -44,34 +50,26 @@ public class TaskListsTest {
         status = Task.NOT_COMPLETED;
         newTask = new Task(name, list, priority, startDateTime, endDateTime, status);
         lists.addTask(list, newTask);
-    }
-
-    @After
-    public void tearDown() throws Exception {
+        
+        FileHandler.saveAll(lists);
     }
 
     @Test
-    public void testIterator() {
-/*
- * Expected result is
- * 
- * Inbox
- *  new task
- *  new task 2
- * --------------
- * Trash
- * --------------
- * list1
- * --------------
- * list2
- * --------------
- * 
- */
-        for (Entry<String, TaskList> list : lists) {
+    public void testLoadAll() {
+        TaskLists newLists = new TaskLists();
+        
+        FileHandler.loadAll(newLists);
+        
+        for (Entry<String, TaskList> list : newLists) {
             System.out.println(list.getKey());
             
             for (Task task : list.getValue()) {
                 System.out.println("\t" + task.getName());
+                System.out.println("\t" + task.getList());
+                System.out.println("\t" + task.getStartLong());
+                System.out.println("\t" + task.getEndLong());
+                System.out.println("\t" + task.getStatusStr());
+                System.out.println("\t=====");
             }
             
             System.out.println("--------------");

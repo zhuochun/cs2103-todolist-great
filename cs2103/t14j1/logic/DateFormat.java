@@ -100,6 +100,8 @@ public class DateFormat {
 	 * @return Date
 	 */
 	public static Date strToDateLong(String str) {
+	    if (str == null) return null;
+	    
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		ParsePosition pos = new ParsePosition(0);
 		Date strtodate = formatter.parse(str, pos);
@@ -115,6 +117,8 @@ public class DateFormat {
 	 * @return Date
 	 */
 	public static Date strToDate(String str) {
+	    if (str == null) return null;
+	    
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 		ParsePosition pos = new ParsePosition(0);
 		Date strtodate = formatter.parse(str, pos);
@@ -130,6 +134,8 @@ public class DateFormat {
 	 * @return Date
 	 */
 	public static Date strToDate(String str, String format) {
+	    if (str == null) return null;
+	    
 		SimpleDateFormat formatter = new SimpleDateFormat(format);
 		ParsePosition pos = new ParsePosition(0);
 		Date strtodate = formatter.parse(str, pos);

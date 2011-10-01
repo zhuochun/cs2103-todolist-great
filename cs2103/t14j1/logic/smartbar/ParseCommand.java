@@ -547,7 +547,7 @@ public class ParseCommand {
 	 * @param command
 	 * @return
 	 */
-	public Commands extractCommand(String input) {
+	public Commands extractCommand() {
 		/*
 		 * check the Commands class for new command
 		 * 
@@ -614,3 +614,4 @@ public class ParseCommand {
 	}
 
 }
+

@@ -1,7 +1,13 @@
 package cs2103.t14j1.logic;
 
+import java.io.IOException;
 import java.util.Date;
 import java.util.Scanner;
+
+import javax.jws.soap.SOAPBinding.ParameterStyle;
+import javax.xml.parsers.ParserConfigurationException;
+
+import org.xml.sax.SAXException;
 
 import cs2103.t14j1.logic.smartbar.ParseCommand;
 import cs2103.t14j1.storage.FileHandler;
@@ -26,8 +32,9 @@ class Control {
 	 * will be replaced by user interface, so I keep it short
 	 * 
 	 * @param args
+	 * @throws Exception 
 	 */
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		Scanner scan = new Scanner(System.in);
 		Control cml  = new Control();
 		String  line, result;
@@ -42,8 +49,11 @@ class Control {
 	
 	/**
 	 * constructor
+	 * @throws ParserConfigurationException 
+	 * @throws IOException 
+	 * @throws SAXException 
 	 */
-	public Control() {
+	public Control() throws SAXException, IOException, ParserConfigurationException {
 		lists = new TaskLists();
 		FileHandler.loadAll(lists); // call storage to load all lists and tasks from file
 	}
@@ -53,9 +63,11 @@ class Control {
 	 * 
 	 * @param input
 	 * @return
+	 * @throws Exception 
 	 */
-	public String processInput(String input) {
-		Commands command = ParseCommand.extractCommand(input);
+	public String processInput(String input) throws Exception {
+		ParseCommand parseCommand = new ParseCommand(input);
+		Commands command = parseCommand.extractCommand();
 		String feedback  = executeCommand(command, input);
 		return feedback;
 	}
@@ -66,8 +78,9 @@ class Control {
 	 * @param command
 	 * @param input
 	 * @return feedback
+	 * @throws Exception 
 	 */
-	public String executeCommand(Commands command, String input) {
+	public String executeCommand(Commands command, String input) throws Exception {
 		switch (command) {
 		case ADD_TASK:
 			return addTask(input);
@@ -96,13 +109,15 @@ class Control {
 	 * 
 	 * @param input
 	 * @return
+	 * @throws Exception 
 	 */
-	private String addTask(String input) {
-		String name        = ParseCommand.extractTaskName(input);
-		String list        = ParseCommand.extractListName(input);
-		Priority priority  = ParseCommand.extractPriority(input);
-		Date startDateTime = ParseCommand.extractStartDate(input);
-		Date endDateTime   = ParseCommand.extractEndDate(input);
+	private String addTask(String input) throws Exception {
+		ParseCommand parseCommand = new ParseCommand(input);
+		String name        = parseCommand.extractTaskName();
+		String list        = parseCommand.extractListName();
+		Priority priority  = parseCommand.extractPriority();
+		Date startDateTime = parseCommand.extractStartDate();
+		Date endDateTime   = parseCommand.extractEndDate();
 		boolean status    = Task.NOT_COMPLETED;
 		
 		Task newTask = new Task(name, list, priority, startDateTime, endDateTime, status);

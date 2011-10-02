@@ -123,11 +123,10 @@ public class ParseCommand {
 			"(" + regDateFormat_dd_$mm$M$_$yy$yy$$ + "|" + regDateFormat_order_weekD + 
 			"|" + regDateFormat_today_tomorrow + ")";
 	
-	private static final String regDateTimeOverallFormat = 
-			"(" + "(" + regDateOverallFormat + "((" + regWordSpacer + ")?" + regTimeFormat + ")?)|((" +
-			regDateOverallFormat+ "(" + regWordSpacer + ")?)?" + regTimeFormat + ")|((" + 
-			regTimeFormat + "(" + regWordSpacer + ")?)?" + regDateOverallFormat + ")|(" +
-			regTimeFormat + "(" +  regDateOverallFormat + "(" + regWordSpacer + ")?)?))";
+	private static final String regDateTimeOverallFormat = "(" +  
+			"(" + regTimeFormat + "("+ regWordSpacer + regDateOverallFormat + ")?)|" +  // time (date)?
+			"(" + regDateOverallFormat+ "(" + regWordSpacer + regTimeFormat + ")?)" + 	// date (time)?
+			")";
 	
 	private static final String regDurationFormat = 
 			"(for(\\ )+[\\d]+(\\ )?" + regTimeUnit + ")";
@@ -277,7 +276,7 @@ public class ParseCommand {
 			if(!regDeadlineProcess(removeTheLeadingAndTailingWordSpacer(matchedStr = regDeadlineMatcher.group()))){
 				
 			}
-		} 
+		}
 		if(!periodMatchedProfermed && regDateTimePointOverallMatcher.find()){	// then try match the date&time
 			if(null == (startDate = dateTimeProcess(startTime,
 					removeTheLeadingAndTailingWordSpacer(matchedStr = regDateTimePointOverallMatcher.group()),
@@ -389,7 +388,7 @@ public class ParseCommand {
 
 	private Calendar dateTimeProcess(Time time, String timeDateStr, Calendar dateSubstitute){
 		Calendar date = null;
-		
+		System.out.println(timeDateStr);
 		// check the date
 		/**
 		 * Date format: 
@@ -420,8 +419,6 @@ public class ParseCommand {
 		Pattern regTimeFormatAllPattern = Pattern.compile(
 				regWordSpacer + regTimeFormat + regWordSpacer, Pattern.CASE_INSENSITIVE);
 		Matcher regTimeFormatAllMatcher = regTimeFormatAllPattern.matcher(timeDateStr);
-		
-		System.out.println(timeDateStr);
 		
 		String matchedStr = null;
 		
@@ -778,11 +775,14 @@ public class ParseCommand {
 	
 	public static void main(String[] args) throws Exception {
 		// test match here
-		String taskStr = "meeting with Shubham tomorrow 3pm~5pm @library";	// test time
+		String taskStr = "Get up at 7am tomorrow";	// test time
+		
+		String testStr = "Do homework";
 		
 //		System.out.println(taskStr.matches(regTimeFormat));
 		
 		ParseCommand test = new ParseCommand(taskStr);
+		System.out.println("Task Title: " + test.extractTaskName());
 		System.out.println("Place: " + test.extractPlace());
 		System.out.println("Priority: " + test.extractPriority());
 		System.out.println("Duration: " + test.extractDuration());

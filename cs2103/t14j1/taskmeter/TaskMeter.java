@@ -1,15 +1,28 @@
 package cs2103.t14j1.taskmeter;
 
+import java.util.Map.Entry;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
+import org.eclipse.core.databinding.DataBindingContext;
+import org.eclipse.core.databinding.beans.BeansObservables;
+import org.eclipse.core.databinding.observable.Realm;
+import org.eclipse.core.databinding.observable.list.IObservableList;
+import org.eclipse.core.databinding.observable.map.IObservableMap;
+import org.eclipse.jface.databinding.swt.SWTObservables;
+import org.eclipse.jface.databinding.viewers.ObservableListContentProvider;
+import org.eclipse.jface.databinding.viewers.ObservableMapLabelProvider;
+import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MouseAdapter;
+import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.events.ShellAdapter;
 import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
@@ -24,9 +37,9 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 import cs2103.t14j1.storage.FileHandler;
+import cs2103.t14j1.storage.Task;
+import cs2103.t14j1.storage.TaskList;
 import cs2103.t14j1.storage.TaskLists;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
 
 /**
  * TaskMeter Main Graphic User Interface
@@ -37,12 +50,17 @@ import org.eclipse.swt.events.MouseEvent;
 public class TaskMeter extends Shell {
 
     private static ResourceBundle resourceBundle = ResourceBundle.getBundle("taskmeter_res");
-    private TaskLists lists;
     private Label statusBar;
     private Table taskTable;
     private Table taskList;
     private Text smartBar;
+
     private boolean isModified;
+    private TaskLists lists;
+    private String presentList;
+    private TableViewer listViewer;
+
+    private DataBindingContext bindingContext;
 
     /**
      * Launch the application.
@@ -50,19 +68,24 @@ public class TaskMeter extends Shell {
      * @param args
      */
     public static void main(String args[]) {
-        try {
-            Display display = Display.getDefault();
-            TaskMeter application = new TaskMeter(display);
-            application.open();
-            application.layout();
-            while (!application.isDisposed()) {
-                if (!display.readAndDispatch()) {
-                    display.sleep();
+        final Display display = Display.getDefault();
+
+        Realm.runWithDefault(SWTObservables.getRealm(display), new Runnable() {
+            public void run() {
+                try {
+                    TaskMeter application = new TaskMeter(display);
+                    application.open();
+                    application.layout();
+                    while (!application.isDisposed()) {
+                        if (!display.readAndDispatch()) {
+                            display.sleep();
+                        }
+                    }
+                } catch (Exception e) {
+                    e.printStackTrace();
                 }
             }
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        });
     }
 
     /**
@@ -104,6 +127,13 @@ public class TaskMeter extends Shell {
 
         lists = new TaskLists();
         FileHandler.loadAll(lists);
+
+        presentList = TaskLists.INBOX;
+
+        bindingContext = initDataBindings();
+
+        // displayLists();
+        // displayTasks();
     }
 
     /**
@@ -138,31 +168,30 @@ public class TaskMeter extends Shell {
 	 * 
 	 */
     private void createTaskList() {
-        taskList = new Table(this, SWT.BORDER | SWT.FULL_SELECTION);
+
+        listViewer = new TableViewer(this, SWT.BORDER | SWT.FULL_SELECTION);
+        taskList = listViewer.getTable();
         taskList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseDoubleClick(MouseEvent e) {
                 TableItem[] items = taskList.getSelection();
-                if (items.length > 0) {
-                    System.out.println(items[0]);
+
+                if (!items[0].getText().equals(presentList)) {
+                    presentList = items[0].getText();
+                    displayTasks();
                 }
             }
         });
         taskList.setBounds(5, 40, 150, 350);
+        taskList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
         taskList.setHeaderVisible(true);
         taskList.setLinesVisible(true);
 
-        TableColumn tblclmnLists = new TableColumn(taskList, SWT.CENTER);
-        tblclmnLists.setResizable(false);
-        tblclmnLists.setWidth(146);
-        tblclmnLists.setText(getResourceString("list"));
-
-        TableItem tableInbox = new TableItem(taskList, SWT.NONE);
-        tableInbox.setChecked(true);
-        tableInbox.setText(getResourceString("list.inbox"));
-
-        TableItem tableTrash = new TableItem(taskList, SWT.NONE);
-        tableTrash.setText(getResourceString("list.trash"));
+        /*
+         * TableColumn tblclmnLists = new TableColumn(taskList, SWT.CENTER);
+         * tblclmnLists.setResizable(false); tblclmnLists.setWidth(146);
+         * tblclmnLists.setText(getResourceString("list"));
+         */
 
         Button btnAddANew = new Button(this, SWT.NONE);
         btnAddANew.addSelectionListener(new SelectionAdapter() {
@@ -180,14 +209,18 @@ public class TaskMeter extends Shell {
         String newList = dialog.open();
         if (newList != null && newList.length() > 1) {
             isModified = true;
+
+            String feedback = lists.add(newList);
+
             addNewList(newList);
-            setStatusBar(newList);
+            setStatusBar(feedback);
         }
     }
 
-    private void addNewList(String name) {
+    private TableItem addNewList(String name) {
         TableItem table = new TableItem(taskList, SWT.NONE);
         table.setText(name);
+        return table;
     }
 
     /**
@@ -235,9 +268,45 @@ public class TaskMeter extends Shell {
         tblclmnCompleted.setMoveable(true);
         tblclmnCompleted.setWidth(73);
         tblclmnCompleted.setText(getResourceString("table.completed"));
+    }
 
-        TableItem tableItem = new TableItem(taskTable, SWT.NONE);
-        tableItem.setText(new String[] { "1", "Test", "Important", "unkown", "unkown", "No" });
+    private void displayTasks() {
+        TaskList list = lists.getList(presentList);
+
+        int idx = 1;
+        TableItem tableItem;
+
+        for (Task task : list) {
+            tableItem = new TableItem(taskTable, SWT.NONE);
+            tableItem.setText(new String[] { Integer.toString(idx++), task.getName(),
+                    task.getPriority().toString().toLowerCase(), task.getStartDate(),
+                    task.getEndDate(), task.getStatusStr() });
+        }
+    }
+
+    private void displayLists() {
+        TableItem item = addNewList(TaskLists.INBOX);
+
+        if (presentList.equals(TaskLists.INBOX)) {
+            item.setBackground(SWTResourceManager.getColor(SWT.COLOR_INFO_BACKGROUND));
+        }
+
+        for (Entry<String, TaskList> list : lists) {
+            if (list.getKey().equalsIgnoreCase(TaskLists.INBOX)
+                    || list.getKey().equalsIgnoreCase(TaskLists.TRASH)) {
+                continue;
+            }
+
+            item = addNewList(list.getKey());
+            if (presentList.equals(list.getKey())) {
+                item.setBackground(SWTResourceManager.getColor(SWT.COLOR_INFO_BACKGROUND));
+            }
+        }
+
+        item = addNewList(TaskLists.TRASH);
+        if (presentList.equals(TaskLists.TRASH)) {
+            item.setBackground(SWTResourceManager.getColor(SWT.COLOR_INFO_BACKGROUND));
+        }
     }
 
     /**
@@ -511,5 +580,22 @@ public class TaskMeter extends Shell {
         } catch (NullPointerException e) {
             return "!" + key + "!";
         }
+    }
+
+    protected DataBindingContext initDataBindings() {
+        DataBindingContext abindingContext = new DataBindingContext();
+        //
+        ObservableListContentProvider listContentProvider = new ObservableListContentProvider();
+        listViewer.setContentProvider(listContentProvider);
+        //
+        IObservableMap observeMap = BeansObservables.observeMap(
+                listContentProvider.getKnownElements(), TaskList.class, "listname");
+        listViewer.setLabelProvider(new ObservableMapLabelProvider(observeMap));
+        //
+        IObservableList groupsGroupsObserveList = BeansObservables.observeList(Realm.getDefault(),
+                lists, "lists");
+        listViewer.setInput(groupsGroupsObserveList);
+        //
+        return abindingContext;
     }
 }

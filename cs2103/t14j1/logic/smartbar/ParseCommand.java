@@ -157,10 +157,10 @@ public class ParseCommand {
 	private String list;
 	private Time deadlineTime;
 	private Calendar deadlineDate;
-	private Calendar beforeDate;
-	private Time beforeTime;
-	private Time afterTime;
-	private Calendar afterDate;
+	private Calendar searchBeforeDate;
+	private Time searchBeforeTime;
+	private Time searchAfterTime;
+	private Calendar searchAfterDate;
 	
 	
 	private void outputErr(String msg){
@@ -186,8 +186,8 @@ public class ParseCommand {
 		this.startTime = new Time(null);
 		this.endTime = new Time(null);
 		this.duration = new Time(null);
-		this.beforeTime = new Time(null);
-		this.afterTime = new Time(null);
+		this.searchBeforeTime = new Time(null);
+		this.searchAfterTime = new Time(null);
 		this.deadlineTime = new Time(null);
 		
 		/**
@@ -347,12 +347,12 @@ public class ParseCommand {
 			
 			if(regBeforeDateTimeMatcher.find()){
 				String timeDateStr = removeTheLeadingAndTailingWordSpacer(matchedStr = regBeforeDateTimeMatcher.group());
-				beforeDate = dateTimeProcess(beforeTime, timeDateStr, null);
+				searchBeforeDate = dateTimeProcess(searchBeforeTime, timeDateStr, null);
 			}
 			
 			if(regAfterDateTimeMatcher.find()){
 				String timeDateStr = removeTheLeadingAndTailingWordSpacer(matchedStr = regBeforeDateTimeMatcher.group());
-				afterDate = dateTimeProcess(afterTime, timeDateStr, null);
+				searchAfterDate = dateTimeProcess(searchAfterTime, timeDateStr, null);
 			}
 		}
 		
@@ -971,21 +971,25 @@ public class ParseCommand {
 		return deadlineTime.getTime();
 	}
 	
-	public Date extractBeforeDate() {
-		return beforeDate==null?null:beforeDate.getTime();
+	
+	
+	
+	/* These four method are for search command only */
+	public Date extractSearchBeforeDate() {
+		return searchBeforeDate==null?null:searchBeforeDate.getTime();
 	}
 	
-	public Long extractBeforeTime(){
-		return beforeTime.getTime();
+	public Long extractSearchBeforeTime(){
+		return searchBeforeTime.getTime();
 	}
 	
-	public Date extractAfterDate() {
-		return afterDate==null?null:afterDate.getTime();
+	public Date extractSearchAfterDate() {
+		return searchAfterDate==null?null:searchAfterDate.getTime();
 	}
 	
-	public Long extractAfterTime(){
-		return afterTime.getTime();
+	public Long extractSearchAfterTime(){
+		return searchAfterTime.getTime();
 	}
-	
+	/* These four method are for search command only */
 }
 

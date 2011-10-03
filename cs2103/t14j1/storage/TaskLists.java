@@ -46,7 +46,7 @@ public class TaskLists extends AbstractModelObject implements Iterable<Entry<Str
 	/**
 	 * add a new list
 	 * 
-	 * @param name				new list name
+	 * @param name 					new list name
 	 * @return
 	 */
 	public String add(String name) {

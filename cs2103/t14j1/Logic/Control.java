@@ -1,12 +1,15 @@
 package cs2103.t14j1.logic;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Scanner;
+import java.util.Map.Entry;
 
 import cs2103.t14j1.logic.smartbar.ParseCommand;
 import cs2103.t14j1.storage.FileHandler;
 import cs2103.t14j1.storage.Priority;
 import cs2103.t14j1.storage.Task;
+import cs2103.t14j1.storage.TaskList;
 import cs2103.t14j1.storage.TaskLists;
 
 /**
@@ -14,7 +17,7 @@ import cs2103.t14j1.storage.TaskLists;
  * It also serves as the command line interface for version 0.1
  * Afterwards, it serve as the bridge between user interface and logic
  *
- * @author Zhuochun, Shubham
+ * @author Shubham, Zhuochun
  * 
  */
 class Control {
@@ -92,7 +95,8 @@ class Control {
 			return editList(input);
 		case SORT:
 			return sortBy(input);
-		// SWITCH_LIST is a GUI action
+		case SWITCH_LIST:
+			switchList(input); 
 		default:
 			return "invalid command";
 		}
@@ -119,13 +123,26 @@ class Control {
 	}
 
 	private String addList(String input) {
-		// TODO Auto-generated method stub
 		
-		return null;
+		String name = parseCommand.extractListName();
+		
+		lists.add(name);
+		
+		String LIST_SUCCESSFULLY_ADDED = "List " + name + " has been successfully created and added";
+		
+		return LIST_SUCCESSFULLY_ADDED;
 	}
 
+	//not yet complete
 	private String search(String input) {
-		// TODO Auto-generated method stub
+		
+		String name = parseCommand.extractTaskName();
+		Date startDate = parseCommand.extractStartDate();
+		Date endDate = parseCommand.extractEndDate();
+		Long startTime = parseCommand.extractStartTime();
+		Long endTime = parseCommand.extractEndTime();
+		String place = parseCommand.extractPlace();
+		Priority priority = parseCommand.extractPriority();
 		
 		return null;
 	}
@@ -158,6 +175,48 @@ class Control {
 		// TODO Auto-generated method stub
 		
 		return null;
+	}
+	
+	public String save() {
+		
+		FileHandler.saveAll(lists);
+		
+		String SAVE_COMPLETED = "Saved";
+		
+		return SAVE_COMPLETED;
+		
+	}
+	
+	public void display(cs2103.t14j1.storage.TaskList listName) {
+		
+		ArrayList<cs2103.t14j1.storage.Task> list = listName.getAllTasks();
+		
+		for(int i = 0; i < list.size(); i ++) { 
+			System.out.println((i + 1) + ". " + list.get(i).getName());
+		}
+		
+	}
+	
+	public void switchList (String input) {
+		
+		String listName = parseCommand.extractListName();
+		
+		cs2103.t14j1.storage.TaskList list = findList(listName);
+		
+		display(list);
+		
+	}
+
+	private TaskList findList(String listName) {
+
+		for(Entry<String, TaskList> list: lists) {
+			String name = list.getKey();
+			if(name.equals(listName))
+				return list.getValue();
+		}
+		
+		return null;
+	
 	}
 	
 }

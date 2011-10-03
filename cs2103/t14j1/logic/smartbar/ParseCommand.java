@@ -103,7 +103,7 @@ public class ParseCommand {
 			"([12][0-9]|3[01]|(0)?[1-9])" + regDateSpacer + "(0[1-9]|1[012])(" + 
 			regDateSpacer + "(19|20)?\\d\\d)?";
 	private static final String regDateFormat_dd_$M$_$yy$yy$$ = // When month is text, year should be a full string if exist
-			"([12][0-9]|3[01]|(0)?[1-9])(st|nd|rd|th)?" + regDateSpacer + regMonthText + "(" + regDateSpacer + "(19|20)\\d\\d)?";
+			"([12][0-9]|3[01]|(0)?[1-9])(st|nd|rd|th)?" + regDateSpacer + "(\\ )?" + regMonthText + "(" + regDateSpacer + "(19|20)\\d\\d)?";
 	private static final String regDateFormat_dd_$mm$M$_$yy$yy$$ = 
 			"(" + regDateFormat_dd_$M$_$yy$yy$$+ ")|(" + regDateFormat_dd_$mm$_$yy$yy$$ + ")";
 	
@@ -177,7 +177,7 @@ public class ParseCommand {
 	 * @throws Exception */ 
 	public ParseCommand(String command){
 		// set the time zone to
-		TimeZone.setDefault(TimeZone.getTimeZone("GMT-0"));
+//		TimeZone.setDefault(TimeZone.getTimeZone("GMT-0"));
 		
 		// initiation
 		this.commandStr = command;
@@ -254,7 +254,7 @@ public class ParseCommand {
 			commandType = Commands.SEARCH;
 			command = command.substring(1);
 		} else if(commandStr.charAt(0) == '#'){
-			commandType = Commands.SWITCH;	// this would be used for parsing later
+			commandType = Commands.SWITCH_LIST;	// this would be used for parsing later
 		} else{
 			commandType = Commands.ADD_TASK;
 		}
@@ -267,12 +267,12 @@ public class ParseCommand {
 		
 		// before matching the date/time, need to check the period first
 		if(regTimePeriodMatcher.find()){
-			if(!periodProcess(removeTheLeadingAndTailingWordSpacer(matchedStr = regDateTimePointOverallMatcher.group()))){
-				outputErr("Date Parsing Problem: error in parsing the date with format dd/mm|M/yy(yy).");
+			if(!periodProcess(removeTheLeadingAndTailingWordSpacer(matchedStr = regTimePeriodMatcher.group()))){
+				outputErr("End date is eailier than the start list. (Not Sure How to deal with this now :)");
 			}
 			periodMatchedProfermed = true;
 			removeMatchedString(command, matchedStr);
-		} 
+		}
 		if(regDeadlineMatcher.find()){	// check the deadline first, cuz it's more restrictive
 			if(!regDeadlineProcess(removeTheLeadingAndTailingWordSpacer(matchedStr = regDeadlineMatcher.group()))){
 				
@@ -421,7 +421,7 @@ public class ParseCommand {
 				regWordSpacer + regTimeFormat + regWordSpacer, Pattern.CASE_INSENSITIVE);
 		Matcher regTimeFormatAllMatcher = regTimeFormatAllPattern.matcher(timeDateStr);
 		
-		
+		System.out.println(timeDateStr);
 		
 		String matchedStr = null;
 		
@@ -432,8 +432,8 @@ public class ParseCommand {
 				outputErr("Date Parsing Problem: error in parsing the date with format dd/mm|M/yy(yy).");
 			}
 		}else if(regDateFormat_today_tomorrow_Matcher.find()){
-			if(!regDateFormat_today_tomorrow_Process(date,
-					removeTheLeadingAndTailingWordSpacer(matchedStr = regDateFormat_today_tomorrow_Matcher.group()))){
+			if(null == (date = regDateFormat_today_tomorrow_Process(
+					removeTheLeadingAndTailingWordSpacer(matchedStr = regDateFormat_today_tomorrow_Matcher.group())))){
 				outputErr("Date Parsing Problem: error in parse the date with format today|tomorrow");
 			}
 		} else if(regDateFormat_order_weekD_Matcher.find()){
@@ -442,6 +442,7 @@ public class ParseCommand {
 				outputErr("Date Parsing Problem: error in parsing the (this|next) day_of_week ");
 			}
 		}
+		
 		removeMatchedString(timeDateStr,matchedStr);
 		
 		// then check the time
@@ -454,7 +455,7 @@ public class ParseCommand {
 				if(dateSubstitute != null){
 					date = (Calendar) dateSubstitute.clone();
 				} else{
-					regDateFormat_today_tomorrow_Process(date,"today");
+					date = regDateFormat_today_tomorrow_Process("today");
 				}
 			}
 		}
@@ -616,17 +617,17 @@ public class ParseCommand {
 		return true;
 	}
 
-	private boolean regDateFormat_today_tomorrow_Process(Calendar date, String today_tomorrow) {
-		date = Calendar.getInstance();
+	private Calendar regDateFormat_today_tomorrow_Process(String today_tomorrow) {
+		Calendar date = Calendar.getInstance();
 		if(today_tomorrow.compareTo("today") == 0){
 			// do nothing here
 		} else if(today_tomorrow.compareTo("tomorrow") == 0){
 			date.set(Calendar.DAY_OF_MONTH, date.get(Calendar.DAY_OF_MONTH) + 1);
 		} else{
-			return false;
+			return null;
 		}
 		
-		return true;
+		return date;
 	}
 
 	/**
@@ -777,13 +778,22 @@ public class ParseCommand {
 	
 	public static void main(String[] args) throws Exception {
 		// test match here
-		String taskStr = "Jogging on 12th Sept at 4:00 am for 2 hours @Climenti";	// test time
+		String taskStr = "meeting with Shubham tomorrow 3pm~5pm @library";	// test time
 		
 //		System.out.println(taskStr.matches(regTimeFormat));
 		
 		ParseCommand test = new ParseCommand(taskStr);
-		System.out.println(test.extractStartDate());
-	
+		System.out.println("Place: " + test.extractPlace());
+		System.out.println("Priority: " + test.extractPriority());
+		System.out.println("Duration: " + test.extractDuration());
+		System.out.println("Start Date: " + test.extractStartDate());
+		System.out.println("Start Date: " + test.extractStartDate());
+		System.out.println("Start Time: " + test.extractStartTime());
+		System.out.println("End Date: " + test.extractEndDate());
+		System.out.println("End Time: " + test.extractEndTime());
+		System.out.println("Deadline Date: " + test.extractDeadlineDate());
+		System.out.println("Deadline Time: " + test.extractDeadlineTime());
+		
 		
 //		taskStr = in.nextLine();
 //		Scanner in = new Scanner(System.in);
@@ -846,7 +856,11 @@ public class ParseCommand {
 	public Priority extractPriority() {
 		return (priority == null)?priority:Priority.NORMAL; // if priority is not specified, use normal
 	}
-
+	
+	public String extractPlace(){
+		return this.place;
+	}
+	
 	/**
 	 * 
 	 * @return

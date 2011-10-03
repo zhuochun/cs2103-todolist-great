@@ -815,7 +815,23 @@ public class ParseCommand {
 	 * @return
 	 */
 	public Commands extractCommand() {
+<<<<<<< local
+		/*
+		 * check the Commands class for new command
+		 * 
+		 * zhuochun
+		 */ 
+		if(command.charAt(0) == '/'){
+			return Commands.SEARCH;
+		} else if(command.charAt(0) == '#'){
+			return Commands.SWITCH_LIST;
+		} else{
+			return Commands.ADD_TASK;
+		}
+//		return Commands.INVALID; // if Command is not found, return INVALID
+=======
 		return (commandType==null?Commands.INVALID:commandType);
+>>>>>>> other
 	}
 	
 	/**

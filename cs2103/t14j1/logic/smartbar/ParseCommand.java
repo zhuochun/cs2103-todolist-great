@@ -264,7 +264,6 @@ public class ParseCommand {
 			}
 		}
 		command = removeMatchedString(command, matchedStr);matchedStr=null;
-		System.err.println("Debug: matched Place: " + command);
 		
 		// the priority
 		Matcher regPriorityFormatMatcher = regPriorityFormatPattern.matcher(command);
@@ -579,6 +578,7 @@ public class ParseCommand {
 	private boolean regTimeFormatProcess(Time timeObj, String timeStr) {
 		// first level: separate by :
 		Long time = new Long(0); 	// initialization
+		timeStr = timeStr.toLowerCase();
 		// capture the [a|p]m. 
 		// This tag is no longer useful after this operation
 		if(timeStr.contains("pm")){
@@ -797,7 +797,7 @@ public class ParseCommand {
 		// test match here
 		String taskStr = "Get up at 7am tomorrow";	// test time
 		
-		String testStr = "!1 Do homework #(What The Fuck) on every Sun @(My place) 10am-12pm by tmr";
+		String testStr = "3AM at sunpark";
 		
 		// for testing
 		BufferedReader in;

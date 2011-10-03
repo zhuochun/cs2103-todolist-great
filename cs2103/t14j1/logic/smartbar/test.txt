@@ -1,0 +1,147 @@
+                                             
+1 Parameter
+Do homework
+
+2 Parameters
+Do homework at 5pm
+at 5pm Do homework
+Do homework at 5pm 10 Oct
+at 5pm 10 Oct Do homework
+Do homework at 5pm 10 Oct 2011
+at 5pm 10 Oct 2011 Do homework
+Do homework by 10pm
+by 10pm Do homework
+Do homework by 10 Oct
+by 10 Oct Do homework
+Do homework by 10pm 10 Oct
+by 10pm 10 Oct Do homework
+Do homework by 10pm 10 Oct 2011
+by 10pm 10 Oct 2011 Do homework
+Do homework on Sat
+Do homework on Saturday
+on Saturday Do homework
+on Sat Do homework
+Do homework on every Sat
+Do homework on every Saturday
+on every Saturday Do homework
+on every Sat Do homework
+Do homework on Sat at 5pm
+Do homework on Saturday at 5pm
+on Saturday at 5pm Do homework
+on Sat at 5pm Do homework
+Do homework on every Sat at 5pm
+Do homework on every Saturday at 5pm
+on every Saturday at 5pm Do homework
+on every Sat at 5pm Do homework
+Do homework by 10pm on Sat
+Do homework by 10pm on Saturday
+on Saturday by 10pm Do homework
+on Sat by 10pm Do homework
+Do homework on every Sat by 10pm
+Do homework on every Saturday by 10pm
+on every Saturday Do homework by 10pm
+on every Sat Do homework by 10pm
+Do homework @dorm
+@dorm Do homework
+Do homework @(dorm)
+@(dorm) Do homework
+Do homework @(my dorm)
+@(my dorm) Do homework
+Do homework #WTF
+#WTF Do homework
+Do homework #(WTF)
+#(WTF) Do homework
+Do homework #(What The Fuck)
+#(What The Fuck) Do homework
+Do homework #Inbox
+#Inbox Do homework
+Do homework !1
+Do homework !2
+Do homework !3
+Do homework !low
+Do homework !normal
+Do homework !high
+!1 Do homework
+!2 Do homework
+!3 Do homework
+!low Do homework
+!normal Do homework
+!high Do homework
+
+3 Parameters
+Do homework 5pm ~ 7pm
+5pm ~ 7pm Do homework
+Do homework 5pm ~ 7pm 10 Oct
+5pm ~ 7pm 10 Oct Do homework
+Do homework 5pm ~ 7pm 10 Oct 2011
+5pm ~ 7pm 10 Oct 2011 Do homework
+Do homework 5pm 10 Oct 2011 ~ 7pm 10 Oct 2011
+5pm 10 Oct 2011 ~ 7pm 10 Oct 2011 Do homework
+@NUS Do homework at 5pm
+@NUS at 5pm Do homework
+Do homework @NUS at 5pm 10 Oct
+at 5pm 10 Oct @NUS Do homework
+Do homework at 5pm 10 Oct 2011 @NUS
+at 5pm 10 Oct 2011 Do homework @NUS
+Do homework on Sat 5pm ~ 7pm
+Do homework on Saturday 5pm ~ 7pm
+5pm ~ 7pm on Saturday Do homework
+5pm ~ 7pm on Sat Do homework
+Do homework 5pm ~ 7pm on every Sat
+Do homework 5pm ~ 7pm on every Saturday
+5pm ~ 7pm on every Saturday Do homework
+5pm ~ 7pm on every Sat Do homework
+#Boring Do homework by 10pm on Sat
+#Boring Do homework by 10pm on Saturday
+on Saturday by 10pm Do homework #Boring
+on Sat by 10pm Do homework #Boring
+Do homework #Boring on every Sat by 10pm
+Do homework #Boring on every Saturday by 10pm
+on every Saturday Do homework by 10pm #Boring
+on every Sat Do homework by 10pm #Boring
+Do homework by 10pm on Sat @Mars
+Do homework by 10pm on Saturday @Mars
+@Mars on Saturday by 10pm Do homework
+@Mars on Sat by 10pm Do homework
+Do homework @Mars on every Sat by 10pm
+Do homework @Mars on every Saturday by 10pm
+on every Saturday @Mars Do homework by 10pm
+on every Sat @Mars Do homework by 10pm
+Do homework @dorm #Boring
+@dorm Do homework #Boring
+#Boring Do homework @(dorm)
+#Boring @(dorm) Do homework
+Do homework #Boring @(my dorm)
+@(my dorm) #Boring Do homework
+Do homework on Sat for 2 hours
+for 2 hours on Sat Do homework
+Do homework on every Sat for 2 hours
+for 2 hours on every Sat Do homework
+Do homework on Sat for 15 mins
+for 15 mins on Sat Do homework
+Do homework on every Sat for 15 mins
+for 15 mins on every Sat Do homework
+Do homework on Sat for 15 minutes
+for 15 minutes on Sat Do homework
+Do homework on every Sat for 15 minutes
+for 15 minutes on every Sat Do homework
+Do homework on Sat for 2 hours 15 mins
+for 2 hours 15 mins on Sat Do homework
+Do homework on every Sat for 2 hours 15 mins
+for 2 hours 15mins on every Sat Do homework
+
+Many Parameters
+!1 Do homework #(What The Fuck) on Sun @(My place) 10am-12pm by 2pm
+!1 Do homework #(What The Fuck) on Sun @(My place) 10:00-12:00 by 14:00
+!1 Do homework #(What The Fuck) on Sun @(My place) 1000-1200 by 1400
+!1 Do homework #(What The Fuck) on Sun @(My place) 10am-12pm by 2pm
+!1 Do homework #(What The Fuck) on Sun @(My place) 10am-12pm by 2am
+!1 Do homework #(What The Fuck) on Sun @(My place) 10am-12pm by tonight
+!1 Do homework #(What The Fuck) on Sun @(My place) 10am-12pm by tomorrow
+!1 Do homework #(What The Fuck) on Sun @(My place) 10am-12pm by tmr
+!1 Do homework #(What The Fuck) on Sun @(My place) for 2 hours by tonight
+!1 Do homework #(What The Fuck) on Sun @(My place) for 2 hours by tomorrow
+!1 Do homework #(What The Fuck) on Sun @(My place) for 2 hours by tmr
+!1 Do homework #(What The Fuck) on every Sun @(My place) 10am-12pm by tonight
+!1 Do homework #(What The Fuck) on every Sun @(My place) 10am-12pm by tomorrow
+!1 Do homework #(What The Fuck) on every Sun @(My place) 10am-12pm by tmr

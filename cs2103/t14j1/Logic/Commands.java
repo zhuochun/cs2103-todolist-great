@@ -9,6 +9,6 @@ public enum Commands {
 	EDIT_TASK,
 	EDIT_LIST,
 	SORT,
-	SWITCH,
-	INVALID
+	SWITCH_LIST,
+	INVALID,
 }

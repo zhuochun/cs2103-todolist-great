@@ -24,6 +24,19 @@ public class TaskList extends AbstractModelObject implements Iterable<Task> {
 		tasks = new ArrayList<Task>();
 	}
 	
+	
+	public int getSize() {
+		return tasks.size();
+	}
+	
+	public Task getTask(int index) {
+		return tasks.get(index);
+	}
+	
+	public ArrayList<Task> getAllTasks() {
+		return tasks;
+	}
+	
 	public String getName() {
 		return name;
 	}

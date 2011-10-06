@@ -12,60 +12,60 @@ import cs2103.t14j1.logic.DateFormat;
  */
 public class Task extends AbstractModelObject {
 	
-    public static final String  NAME          = "name";
-    public static final String  START_DATE    = "start_date";
-    public static final String  END_DATE      = "end_date";
-    public static final String  START_TIME    = "start_time";
-    public static final String  END_TIME      = "end_time";
-    public static final String  PLACE         = "place";
-    public static final String  LIST          = "list_name";
-    public static final String  STATUS        = "status";
-    public static final String  PRIORITY      = "priority";
+    // used as XML tag names
+    public static final String  NAME       = "name";
+    public static final String  LIST       = "list_name";
+    public static final String  PLACE      = "place";
+    public static final String  PRIORITY   = "priority";
+    public static final String  START_DATE = "start_date";
+    public static final String  END_DATE   = "end_date";
+	public static final String  DEADLINE   = "deadline";
+    public static final String  STATUS     = "status";
+	public static final String  DURATION   = "duration";
 
-	private String name; // define the task action
-	private String list; // belong to which list
-	private Priority priority; // priority the task
-	private Date startDateTime; // use Date is much easier, check out the DateFormat class
-	private Date endDateTime;   // besides, long cannot use to store minutes and hours
-	private boolean status; // completed or not
+	// private members
+	private String   name;          // define the task action
+	private String   place;         // define the place of task
+	private String   list;          // belong to which list
+	private Priority priority;      // priority of the task
+	private Date     startDateTime; // start date and time
+	private Date     endDateTime;   // end date and time
+	private Date     deadline;      // deadline date and time
+	private Long     duration;      // duration of task
+	private boolean status;        // completed or not
 	
-	/*
-	 * this is not included in Zhuochun's first design, but it's very important
-	 */
-	public final String description = ""; 
-	//Shubham: I have commented the following because I want the duration to be
-	//stored as Long type
-	//public final String duration = "";
-	private Long startTime;
-	private Long endTime;
-	
-	public static final boolean COMPLETED = true;
-	public static final boolean NOT_COMPLETED = false;
-	
-	/**
-	 * The parameters added by Shubham
-	 */	
-	public static final String DEADLINE = "deadline";
-	public static final String DURATION = "duration";
-	private Date deadline;
-	private Long duration;
-	private String place;
+	public static final boolean COMPLETED   = true;
+	public static final boolean INCOMPLETED = false;
 	
 	/**
 	 * A Constructor with all parameters provided
-	 * Shubham: I have added the deadline parameter
 	 */
-    public Task(String name, String list, Priority priority, Date startDateTime, Date endDateTime,
-            boolean status, Date deadline, Long duration, String place) {
+    public Task(String name, String place, String list, Priority priority,
+            Date startDateTime, Date endDateTime, Date deadline, Long duration, boolean status) {
         this.name = name;
+        this.place = place;
         this.list = list;
         this.priority = priority;
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
-        this.status = status;
         this.deadline = deadline;
         this.duration = duration;
-        this.place = place;
+        this.status = status;
+    }
+    
+    /**
+     * A Constructor with name and list provided only
+     */
+    public Task(String name, String list) {
+        this.name = name;
+        this.place = null;
+        this.list = list;
+        this.priority = Priority.NORMAL;
+        this.startDateTime = null;
+        this.endDateTime = null;
+        this.deadline = null;
+        this.duration = null;
+        this.status = INCOMPLETED;
     }
 	
 	public String getName() {
@@ -80,6 +80,18 @@ public class Task extends AbstractModelObject {
 	    firePropertyChange("name", oldName, name);
 	}
 	
+	public String getPlace() {
+		return place;
+	}
+	
+	public void setPlace(String newPlace) {
+	    String oldPlace = place;
+	    
+	    place = newPlace;
+	    
+	    firePropertyChange("place", oldPlace, place);
+	}
+
 	public String getList() {
 		return list;
 	}
@@ -101,15 +113,26 @@ public class Task extends AbstractModelObject {
 	}
 	
 	public void setPriority(Priority newValue) {
-	    String oldValue = priority.toString();
+	    Priority oldValue = priority;
 	    
 	    priority = newValue;
 	    
-	    firePropertyChange("priority", oldValue, newValue.toString());
+	    firePropertyChange("priority", oldValue, newValue);
+	}
+	
+	public Date getStartDateTime() {
+		return startDateTime;
+	}
+	
+	public void setStartDateTime(Date newDate) {
+	    Date oldDate = startDateTime;
+	    
+	    startDateTime = newDate;
+	    
+	    firePropertyChange("startDateTime", oldDate, newDate);
 	}
 	
 	/**
-	 * 
 	 * @return yyyy-MM-dd HH:mm:ss
 	 */
 	public String getStartLong() {
@@ -120,16 +143,7 @@ public class Task extends AbstractModelObject {
 		return DateFormat.dateToStrLong(startDateTime);
 	}
 	
-	public void setStartLong(String newValue) {
-	    String oldValue = getStartLong();
-	    
-	    startDateTime = DateFormat.strToDateLong(newValue);
-	    
-	    firePropertyChange("startdate", oldValue, newValue);
-	}
-	
 	/**
-	 * 
 	 * @return yyyy-MM-dd
 	 */
 	public String getStartDate() {
@@ -141,19 +155,6 @@ public class Task extends AbstractModelObject {
 	}
 	
 	/**
-	 * Added by Shubham because Control.java needs to get the startDate in Date format sometimes
-	 * @return
-	 */
-	public Date getStartDateInDateFormat() {
-		return startDateTime;
-	}
-	
-	public Date getEndDateInDateFormat() {
-		return endDateTime;
-	}
-	
-	/**
-	 * 
 	 * @return HH:mm
 	 */
 	public String getStartTime() {
@@ -164,11 +165,19 @@ public class Task extends AbstractModelObject {
 		return DateFormat.getTime(startDateTime);
 	}
 	
+	public Date getEndDateTime() {
+		return endDateTime;
+	}
+	
+	public void setEndDateTime(Date newDate) {
+	    Date oldDate = endDateTime;
+	    
+	    endDateTime = newDate;
+	    
+	    firePropertyChange("endDateTime", oldDate, newDate);
+	}
+	
 	/**
-	 *** Songyy's note:
-	 *  This is not a proper name because the "Long" would be easily mistaken as
-	 * a return type (though in DateFormat class, you can also see strToDateLong)
-	 * 
 	 * @return yyyy-MM-dd HH:mm:ss
 	 */
 	public String getEndLong() {
@@ -178,17 +187,8 @@ public class Task extends AbstractModelObject {
 		
 		return DateFormat.dateToStrLong(endDateTime);
 	}
-
-	public void setEndLong(String newValue) {
-	    String oldValue = getEndLong();
-
-	    endDateTime = DateFormat.strToDateLong(newValue);
-
-	    firePropertyChange("enddate", oldValue, newValue);
-	}
 	
 	/**
-	 * 
 	 * @return yyyy-MM-dd
 	 */
 	public String getEndDate() {
@@ -200,7 +200,6 @@ public class Task extends AbstractModelObject {
 	}
 	
 	/**
-	 * 
 	 * @return HH:mm
 	 */
 	public String getEndTime() {
@@ -211,40 +210,77 @@ public class Task extends AbstractModelObject {
 		return DateFormat.getTime(endDateTime);
 	}
 	
+    public Date getDeadline() {
+        return deadline;
+    }
+    
+    public void setDeadline(Date newDate) {
+        Date oldDate = deadline;
+        
+        deadline = newDate;
+        
+        firePropertyChange("deadline", oldDate, newDate);
+    }
+    
+    /**
+     * @return yyyy-MM-dd HH:mm:ss
+     */
+    public String getDeadlineLong() {
+        if (deadline == null) {
+            return null;
+        }
+        
+        return DateFormat.dateToStrLong(deadline);
+    }
+    
+    /**
+     * @return yyyy-MM-dd
+     */
+    public String getDeadlineDate() {
+        if (deadline == null) {
+            return null;
+        }
+        
+        return DateFormat.dateToStr(deadline);
+    }
+    
+    /**
+     * @return HH:mm
+     */
+    public String getDeadlineTime() {
+		if (deadline == null) {
+			return null;
+		}
+		
+		return DateFormat.getTime(deadline);
+    }
+    
+    public Long getDuration() {
+        return duration;
+    }
+    
+    public void setDuration(Long newDuration) {
+        Long oldDuration = duration;
+        
+        duration = newDuration;
+        
+        firePropertyChange("duration", oldDuration, newDuration);
+    }
+    
 	public boolean getStatus() {
 		return status;
 	}
 	
 	public String getStatusStr() {
-	    return status ? "Completed" : "Not Completed";
+	    return status ? "Completed" : "Incompleted";
 	}
 	
 	public void setStatus(boolean newStatus) {
-	    
+	    boolean oldStatus = status;
 	    
 		status = newStatus;
+		
+		firePropertyChange("status", oldStatus, status);
 	}
 	
-	// TODO change this
-	public String toString() {
-		return name;
-	}
-	
-	// TODO change this
-	public String[] toArray() {
-		return new String[2];
-	}
-	
-	public Long getDuration() {
-		return duration;
-	}
-	
-	/**
-	 * added by Shubham
-	 * @return
-	 */
-	public String getPlace() {
-		return place;
-	}
-
 }

@@ -10,8 +10,7 @@ import cs2103.t14j1.logic.DateFormat;
  * @author Zhuochun, Shubham
  * 
  */
-
-public class Task {
+public class Task extends AbstractModelObject {
 	
     public static final String  NAME          = "name";
     public static final String  START_DATE    = "start_date";
@@ -22,8 +21,6 @@ public class Task {
     public static final String  LIST          = "list_name";
     public static final String  STATUS        = "status";
     public static final String  PRIORITY      = "priority";
-    
-    
 
 	private String name; // define the task action
 	private String list; // belong to which list
@@ -35,12 +32,13 @@ public class Task {
 	/*
 	 * this is not included in Zhuochun's first design, but it's very important
 	 */
-	public final String description = "";
+	public final String description = ""; 
 	//Shubham: I have commented the following because I want the duration to be
 	//stored as Long type
 	//public final String duration = "";
 	private Long startTime;
 	private Long endTime;
+	
 	public static final boolean COMPLETED = true;
 	public static final boolean NOT_COMPLETED = false;
 	
@@ -74,23 +72,40 @@ public class Task {
 		return name;
 	}
 	
-	/** Songyy's note:
-	 * The list here can be a ArrayList so that we can support multiple lists
-	 */
+	public void setName(String newName) {
+	    String oldName = name;
+	    
+	    name = newName;
+	    
+	    firePropertyChange("name", oldName, name);
+	}
+	
 	public String getList() {
 		return list;
+	}
+	
+	public void setList(String newName) {
+	    String oldName = name;
+	    
+	    name = newName;
+	    
+	    firePropertyChange("list", oldName, name);
 	}
 	
 	public Priority getPriority() {
 		return priority;
 	}
 	
-	/**
-	 * added by Shubham
-	 * @return
-	 */
-	public Date getDeadline() {
-		return deadline;
+	public String getPriorityStr() {
+	    return priority.toString();
+	}
+	
+	public void setPriority(Priority newValue) {
+	    String oldValue = priority.toString();
+	    
+	    priority = newValue;
+	    
+	    firePropertyChange("priority", oldValue, newValue.toString());
 	}
 	
 	/**
@@ -103,6 +118,14 @@ public class Task {
 		}
 		
 		return DateFormat.dateToStrLong(startDateTime);
+	}
+	
+	public void setStartLong(String newValue) {
+	    String oldValue = getStartLong();
+	    
+	    startDateTime = DateFormat.strToDateLong(newValue);
+	    
+	    firePropertyChange("startdate", oldValue, newValue);
 	}
 	
 	/**
@@ -156,6 +179,14 @@ public class Task {
 		return DateFormat.dateToStrLong(endDateTime);
 	}
 
+	public void setEndLong(String newValue) {
+	    String oldValue = getEndLong();
+
+	    endDateTime = DateFormat.strToDateLong(newValue);
+
+	    firePropertyChange("enddate", oldValue, newValue);
+	}
+	
 	/**
 	 * 
 	 * @return yyyy-MM-dd
@@ -189,6 +220,8 @@ public class Task {
 	}
 	
 	public void setStatus(boolean newStatus) {
+	    
+	    
 		status = newStatus;
 	}
 	

@@ -303,12 +303,13 @@ class Control {
 	
 	public void display(cs2103.t14j1.storage.TaskList listName) {
 		
-		ArrayList<cs2103.t14j1.storage.Task> list = listName.getAllTasks();
+	    /*
+		List<cs2103.t14j1.storage.Task> list = listName.getAllTasks();
 		
 		for(int i = 0; i < list.size(); i ++) { 
 			System.out.println((i + 1) + ". " + list.get(i).getName());
 		}
-		
+		*/
 	}
 	
 	public void display(ArrayList<Task> a) {

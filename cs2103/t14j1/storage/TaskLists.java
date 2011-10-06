@@ -1,6 +1,8 @@
 package cs2103.t14j1.storage;
 
+import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
 import java.util.TreeMap;
 
@@ -10,7 +12,7 @@ import java.util.TreeMap;
  * @author Zhuochun
  *
  */
-public class TaskLists implements Iterable<Entry<String, TaskList>> {
+public class TaskLists extends AbstractModelObject implements Iterable<Entry<String, TaskList>> {
 	
 	/*
      * Zhuochun's note:
@@ -21,6 +23,7 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
 	 *  possible to traverse the tree, but impossible for the hash table
 	 */
 	private TreeMap<String, TaskList> lists;
+	private List<TaskList> m_lists; // it seems that data binding only support List
 	
 	/* Messages */
 	private static final String ADD_SUCCESS = "List \"%1$s\" is Successfully Added";
@@ -34,6 +37,7 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
 	/* constructor */
 	public TaskLists() {
 		lists = new TreeMap<String, TaskList>();
+		m_lists = new ArrayList<TaskList>();
 		// add default lists
 		add(INBOX);
 		add(TRASH);
@@ -50,10 +54,24 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
 	        return String.format(ADD_FAIL, name);
 	    }
 	    
-		lists.put(name, new TaskList(name));
-		return String.format(ADD_SUCCESS, name);
+	    return addList(new TaskList(name));
 	}
 
+	/**
+	 * add an existing tasklist
+	 * 
+	 * @param list
+	 * @return
+	 */
+	public String addList(TaskList list) {
+	    lists.put(list.getName(), list);
+	    m_lists.add(list);
+	    
+	    firePropertyChange("lists", null, m_lists);
+	    
+		return String.format(ADD_SUCCESS, list.getName());
+	}
+	
 	/**
 	 * delete a existing list
 	 * 
@@ -62,6 +80,11 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
 	 */
 	public String remove(String name) {
 		TaskList list = lists.remove(name);
+		
+		// remove from m_lists, efficient way?
+		
+	    firePropertyChange("lists", null, m_lists);
+		
 		return String.format(REMOVE_SUCCESS, list.getName());
 	}
 	
@@ -109,6 +132,10 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
 		return lists.get(name);
 	}
 
+	public List<TaskList> getLists() {
+	    return m_lists;
+	}
+	
 	/**
 	 * iteration of lists in TaskLists
 	 */

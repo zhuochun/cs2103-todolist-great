@@ -96,12 +96,12 @@ public class Task extends AbstractModelObject {
 		return list;
 	}
 	
-	public void setList(String newName) {
-	    String oldName = name;
+	public void setList(String newList) {
+	    String oldList = list;
 	    
-	    name = newName;
+	    list = newList;
 	    
-	    firePropertyChange("list", oldName, name);
+	    firePropertyChange("list", oldList, list);
 	}
 	
 	public Priority getPriority() {

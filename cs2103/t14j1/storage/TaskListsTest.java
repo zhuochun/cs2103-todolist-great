@@ -89,5 +89,23 @@ Expected result is
             System.out.println("--------------");
         }
     }
+    
+    @Test
+    public void testMoveTask() {
+        System.out.println(lists.moveTask("Inbox", "list1", 1));
+        
+        for (Entry<String, TaskList> tlist : lists) {
+            System.out.println(tlist.getKey());
+            
+            for (Task task : tlist.getValue()) {
+                System.out.println("\t" + task.getName());
+                System.out.println("\t" + task.getPriorityStr());
+                System.out.println("\t" + task.getStatusStr());
+                System.out.println("\t--------------");
+            }
+            
+            System.out.println("--------------");
+        }
+    }
 
 }

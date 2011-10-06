@@ -35,13 +35,6 @@ import cs2103.t14j1.logic.DateFormat;
  */
 public class FileHandler {
     
-/*
- * Zhuochun's Note
- * 
- *  In the end, exceptions must end at some places and deal with them, so do not keep throwing
- *  exceptions all around the places. Try to deal them at the correct places
- */
-	
 	private static final String fileFolder   = "user/";
 	private static final String taskFileName = "tasks.xml";
 	private static final String listFileName = "lists.xml";

@@ -14,16 +14,8 @@ import java.util.TreeMap;
  */
 public class TaskLists extends AbstractModelObject implements Iterable<Entry<String, TaskList>> {
 	
-	/*
-     * Zhuochun's note:
-	 *  Use tree because we need to use list name frequently
-	 *
-	 * Songyy's note:
-	 *  Another good thing of using a tree, instead of hash table, is that it's 
-	 *  possible to traverse the tree, but impossible for the hash table
-	 */
 	private TreeMap<String, TaskList> lists;
-	private List<TaskList> m_lists; // it seems that data binding only support List
+	//private List<TaskList> m_lists; // it seems that data binding only support List
 	
 	/* Messages */
 	private static final String ADD_SUCCESS = "List \"%1$s\" is Successfully Added";
@@ -37,7 +29,7 @@ public class TaskLists extends AbstractModelObject implements Iterable<Entry<Str
 	/* constructor */
 	public TaskLists() {
 		lists = new TreeMap<String, TaskList>();
-		m_lists = new ArrayList<TaskList>();
+		//m_lists = new ArrayList<TaskList>();
 		// add default lists
 		add(INBOX);
 		add(TRASH);
@@ -54,20 +46,19 @@ public class TaskLists extends AbstractModelObject implements Iterable<Entry<Str
 	        return String.format(ADD_FAIL, name);
 	    }
 	    
-	    return addList(new TaskList(name));
+	    return add(new TaskList(name));
 	}
 
 	/**
-	 * add an existing tasklist
+	 * add an existing TaskList
 	 * 
 	 * @param list
 	 * @return
 	 */
-	public String addList(TaskList list) {
+	public String add(TaskList list) {
 	    lists.put(list.getName(), list);
-	    m_lists.add(list);
 	    
-	    firePropertyChange("lists", null, m_lists);
+	    firePropertyChange("lists", null, lists);
 	    
 		return String.format(ADD_SUCCESS, list.getName());
 	}
@@ -81,9 +72,7 @@ public class TaskLists extends AbstractModelObject implements Iterable<Entry<Str
 	public String remove(String name) {
 		TaskList list = lists.remove(name);
 		
-		// remove from m_lists, efficient way?
-		
-	    firePropertyChange("lists", null, m_lists);
+	    firePropertyChange("lists", null, lists);
 		
 		return String.format(REMOVE_SUCCESS, list.getName());
 	}
@@ -109,20 +98,6 @@ public class TaskLists extends AbstractModelObject implements Iterable<Entry<Str
 	}
 	
 	/**
-	 * edit a task by replace the original task with the new task passed in
-	 * 
-	 * @param listName			the list of task stays
-	 * @param task				the new task used to replace old task
-	 * @return
-	 */
-	public String editTask(String listName, Task task) {
-		
-		// TODO: left this function for version 0.2, because this method is depreciated
-		
-		return null;
-	}
-	
-	/**
 	 * get the specific list with name passed
 	 * 
 	 * @param name
@@ -132,10 +107,6 @@ public class TaskLists extends AbstractModelObject implements Iterable<Entry<Str
 		return lists.get(name);
 	}
 
-	public List<TaskList> getLists() {
-	    return m_lists;
-	}
-	
 	/**
 	 * iteration of lists in TaskLists
 	 */

@@ -29,28 +29,45 @@ public class FileHandlerTest {
     public void testSaveAll() {
         TaskLists lists = new TaskLists();
 
-        lists.add("list1");
-        lists.add("list2");
-
+        // add one task
         String name = "new task";
+        String place = null;
         String list = "Inbox";
         Priority priority = Priority.IMPORTANT;
         Date startDateTime = null;
         Date endDateTime = null;
-        boolean status = Task.NOT_COMPLETED;
-        Task newTask = new Task(name, list, priority, startDateTime, endDateTime, status);
+        Date deadline = null;
+        Long duration = new Long(20);
+        boolean status = Task.INCOMPLETED;
+        
+        Task newTask = new Task(name, place, list, priority, startDateTime, endDateTime, deadline, duration, status);
         lists.addTask(list, newTask);
-
+        
         // add another task
         name = "new task 2";
-        list = "Inbox";
+        place = "i dont have a place";
+        list = "List 1";
         priority = Priority.NORMAL;
         startDateTime = DateFormat.strToDateLong("2011-9-20 14:20:20");
         endDateTime = DateFormat.strToDateLong("2011-9-20 15:20:30");
-        status = Task.NOT_COMPLETED;
-        newTask = new Task(name, list, priority, startDateTime, endDateTime, status);
+        deadline = DateFormat.strToDateLong("2011-10-6 20:20:20");
+        status = Task.INCOMPLETED;
+        
+        newTask = new Task(name, place, list, priority, startDateTime, endDateTime, deadline, duration, status);
         lists.addTask(list, newTask);
         
+        // add an empty task and set properties one by one
+        newTask = new Task("task 3", "Inbox");
+        lists.addTask("Inbox", newTask);
+        
+        newTask.setPlace("hell");
+        newTask.setPriority(Priority.LOW);
+        newTask.setStartDateTime(null);
+        newTask.setEndDateTime(null);
+        newTask.setDeadline(DateFormat.strToDate("2011-10-10"));
+        newTask.setDuration(new Long(20));
+        newTask.setStatus(Task.COMPLETED);
+
         FileHandler.saveAll(lists);
     }
 
@@ -68,6 +85,7 @@ public class FileHandlerTest {
                 System.out.println("\t" + task.getList());
                 System.out.println("\t" + task.getStartLong());
                 System.out.println("\t" + task.getEndLong());
+                System.out.println("\t" + task.getDeadlineLong());
                 System.out.println("\t" + task.getStatusStr());
                 System.out.println("\t=====");
             }

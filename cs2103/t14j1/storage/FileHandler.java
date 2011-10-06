@@ -30,7 +30,7 @@ import cs2103.t14j1.logic.DateFormat;
 /**
  * the file handler to load from and save to files
  * 
- * @author Yangyu, Zhuochun
+ * @author Zhuochun, Yangyu
  *
  */
 public class FileHandler {
@@ -97,13 +97,11 @@ public class FileHandler {
 
             result = saveXmlDocument(fileFolder, listFileName, doc);
         } catch (ParserConfigurationException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
         return result;
     }
-    
 
     private static void loadLists(TaskLists lists) {
     	Document doc = openXmlDocument(fileFolder, listFileName);
@@ -145,17 +143,16 @@ public class FileHandler {
                     taskElement.setAttribute(xmlListTag, task.getList());
                     taskElement.setAttribute(Task.PRIORITY, task.getPriority().toString());
                     taskElement.appendChild(createElement(Task.NAME, task.getName(), doc));
+                    taskElement.appendChild(createElement(Task.PLACE, task.getPlace(), doc));
                     taskElement.appendChild(createElement(Task.START_DATE, task.getStartLong(), doc));
                     taskElement.appendChild(createElement(Task.END_DATE, task.getEndLong(), doc));
-                    //taskElement.appendChild(createElement(Task.START_TIME, task.getStartTime(), doc));
-                    //taskElement.appendChild(createElement(Task.END_TIME, task.getEndTime(), doc));
+                    taskElement.appendChild(createElement(Task.DEADLINE, task.getDeadlineLong(), doc));
+                    taskElement.appendChild(createElement(Task.DURATION, Long.toString(task.getDuration()), doc));
                     taskElement.appendChild(createElement(Task.STATUS, task.getStatusStr(), doc));
-                    //taskElement.appendChild(createElement(Task.Place, task.getPlace(), doc));
                 }
             }
             result = saveXmlDocument(fileFolder, taskFileName, doc);
         } catch (ParserConfigurationException e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 
@@ -183,26 +180,27 @@ public class FileHandler {
             
             // load task element's attributes
             NamedNodeMap taskAttr = taskNode.getAttributes();
-            String list = taskAttr.getNamedItem(xmlListTag).getNodeValue();
-            Priority priority  = getPriorityAttr(taskAttr);
-            
             // load task element's tags
             Element taskElement = (Element) taskNode;
-            String name = getTagValue(Task.NAME, taskElement);
-            String startDateStr = getTagValue(Task.START_DATE, taskElement);
-            Date startDate = DateFormat.strToDateLong(startDateStr);
-            String endDateStr = getTagValue(Task.END_DATE, taskElement);
-            Date endDate = DateFormat.strToDateLong(endDateStr);
-            String statusStr = getTagValue(Task.STATUS, taskElement);
-            boolean status = statusStr.compareToIgnoreCase("completed") == 0 ?
-                    Task.COMPLETED : Task.NOT_COMPLETED;
             
-            // Long start_time =
-            // Long.parseLong((taskAttr.getNamedItem(Task.START_TIME)).getNodeValue());
-            // Long end_time =
-            // Long.parseLong((taskAttr.getNamedItem(Task.END_TIME)).getNodeValue());
-
-            lists.addTask(list, new Task(name, list, priority, startDate, endDate, status));
+            // extract all task informations
+            String   name       = getTagValue(Task.NAME, taskElement);
+            String   place      = getTagValue(Task.PLACE, taskElement);
+            String   list       = taskAttr.getNamedItem(xmlListTag).getNodeValue();
+            Priority priority   = getPriorityAttr(taskAttr);
+            String startDateStr = getTagValue(Task.START_DATE, taskElement);
+            Date   startDate    = DateFormat.strToDateLong(startDateStr);
+            String endDateStr   = getTagValue(Task.END_DATE, taskElement);
+            Date   endDate      = DateFormat.strToDateLong(endDateStr);
+            String deadlineStr  = getTagValue(Task.DEADLINE, taskElement);
+            Date   deadline     = DateFormat.strToDateLong(deadlineStr);
+            String durationStr  = getTagValue(Task.DURATION, taskElement);
+            Long   duration     = Long.parseLong(durationStr);
+            String statusStr    = getTagValue(Task.STATUS, taskElement);
+            boolean status     = statusStr.compareToIgnoreCase("completed") == 0;
+            
+            // add task to correct list
+            lists.addTask(list, new Task(name, place, list, priority, startDate, endDate, deadline, duration, status));
         }
 	}
 

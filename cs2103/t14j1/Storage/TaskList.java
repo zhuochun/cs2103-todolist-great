@@ -40,18 +40,28 @@ public class TaskList extends AbstractModelObject implements Iterable<Task> {
 	}
 	
 	/**
-	 * set the list name
+	 * set the list name or rename the list name
 	 * 
 	 * @param newName
 	 */
 	public void setName(String newName) {
 	    String oldName = name;
 	    name = newName;
+	    
+	    // change all task in lists
+	    for (Task i : tasks) {
+	        i.setList(name);
+	    }
+	    
 	    firePropertyChange("name", oldName, name);
 	}
 	
 	public Task getTask(int index) {
-    	return tasks.get(index);
+		if (index < 1 || index > tasks.size()) {
+			return null;
+		}
+		
+    	return tasks.get(index-1);
     }
 
     public List<Task> getTasks() {

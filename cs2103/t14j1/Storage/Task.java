@@ -283,4 +283,16 @@ public class Task extends AbstractModelObject {
 		firePropertyChange("status", oldStatus, status);
 	}
 	
+	public String toString() {
+	    StringBuilder str = new StringBuilder();
+	    
+	    str.append(name);
+	    str.append(" | ");
+	    str.append(getPriorityStr());
+	    str.append(" | ");
+	    str.append(getStatus());
+	    
+	    return str.toString();
+	}
+	
 }

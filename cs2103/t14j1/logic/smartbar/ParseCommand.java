@@ -91,7 +91,7 @@ public class ParseCommand {
 	private static final String regTimePoint24H = 
 			"([01]?\\d|2[0-3])(:[0-5]\\d){1,2}";
 	private static final String regTimeFormat = // can be either 24 hour, or am/pm
-			"((at" + regWordSpacer + ")?" + regTimePointAmPm + "|" + regTimePoint24H + ")";
+			"((at" + regWordSpacer + ")?" + "(" + regTimePointAmPm + "|" + regTimePoint24H +")" +  ")";
 	
 		// regular expression for matching the date
 	private static final String regMonthText =
@@ -127,6 +127,7 @@ public class ParseCommand {
 			"|" + regDateFormat_today_tomorrow + ")";
 	
 	private static final String regDateTimeOverallFormat = "(" +
+//				regTimeFormat +
 //			regDateOverallFormat + regWordSpacer + regTimeFormat + 
 			"(" + regDateOverallFormat+ "(" + regWordSpacer + regTimeFormat + ")?)|" + 	// date (time)?
 			"(" + regTimeFormat + "("+ regWordSpacer + regDateOverallFormat + ")?)" +  // time (date)?
@@ -163,8 +164,8 @@ public class ParseCommand {
 	private Calendar searchAfterDate;
 	
 	
-	private void outputErr(String msg){
-		System.err.println("Command: " + ((this.commandStr == null)?"Not Specified.":this.commandStr));
+	private static void outputErr(String msg){
+	//	System.err.println("Message: " + msg);//((this.commandStr == null)?"Not Specified.":this.commandStr));
 		try{
 			// throw new exception for print stack
 			throw new Exception(msg);
@@ -615,15 +616,22 @@ public class ParseCommand {
 		
 		// spacer is here
 		String[] dayInfo = weekDStr.split(regWordSpacer);
+		weekDStr = dayInfo[dayInfo.length - 1];
+		
+		boolean nextWeek = false;
+		if(dayInfo.length > 1 && dayInfo[dayInfo.length - 2].substring(0, 4).compareToIgnoreCase("next")==0){
+			nextWeek = true;
+		}
 		
 		int dayOfTheWeek = dateParseGetDayOfWeekFromText(weekDStr);
+		
 		int currentDay = date.get(Calendar.DAY_OF_WEEK);
 		
 		if(currentDay == -1){	// failure in day parsing
 			return null;
 		}
 		
-		if(currentDay > dayOfTheWeek){	// indicating the day of next week
+		if(nextWeek || currentDay > dayOfTheWeek){	// indicating the day of next week
 			date.set(Calendar.DAY_OF_WEEK_IN_MONTH, date.get(Calendar.DAY_OF_WEEK_IN_MONTH)+1);
 			date.set(Calendar.DAY_OF_WEEK, dayOfTheWeek);
 		} else{	// indicating this week. if on the same date, it's still this week
@@ -698,21 +706,23 @@ public class ParseCommand {
 	 * @return
 	 */
 	private static int dateParseGetDayOfWeekFromText(String day) {
-		if(day.substring(0, 2).compareToIgnoreCase("Mon") == 0){
+		
+		if(day.substring(0, 3).compareToIgnoreCase("Mon") == 0){
 			return Calendar.MONDAY;
-		} else if(day.substring(0, 2).compareToIgnoreCase("Tue") == 0){
+		} else if(day.substring(0, 3).compareToIgnoreCase("Tue") == 0){
 			return Calendar.TUESDAY;
-		} else if(day.substring(0, 2).compareToIgnoreCase("Wed") == 0){
+		} else if(day.substring(0, 3).compareToIgnoreCase("Wed") == 0){
 			return Calendar.WEDNESDAY;
-		} else if(day.substring(0, 2).compareToIgnoreCase("Thu") == 0){
+		} else if(day.substring(0, 3).compareToIgnoreCase("Thu") == 0){
 			return Calendar.THURSDAY;
-		} else if(day.substring(0, 2).compareToIgnoreCase("Fri") == 0){
+		} else if(day.substring(0, 3).compareToIgnoreCase("Fri") == 0){
 			return Calendar.FRIDAY;
-		} else if(day.substring(0, 2).compareToIgnoreCase("Sat") == 0){
+		} else if(day.substring(0, 3).compareToIgnoreCase("Sat") == 0){
 			return Calendar.SATURDAY;
-		} else if(day.substring(0, 2).compareToIgnoreCase("Sun") == 0){
+		} else if(day.substring(0, 3).compareToIgnoreCase("Sun") == 0){
 			return Calendar.SUNDAY;
 		} else{
+			outputErr("Error in day parsing, String: " + day.substring(0,3));
 			return -1;
 		}
 		
@@ -797,7 +807,7 @@ public class ParseCommand {
 		// test match here
 		String taskStr = "Get up at 7am tomorrow";	// test time
 		
-		String testStr = "3AM at sunpark";
+		String testStr = "come to school at 9:00 next wednesday  ";
 		
 		// for testing
 		BufferedReader in;

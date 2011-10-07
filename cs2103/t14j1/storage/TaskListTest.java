@@ -22,7 +22,7 @@ public class TaskListTest {
         Date endDateTime = null;
         Date deadline = null;
         Long duration = new Long(20);
-        boolean status = Task.INCOMPLETED;
+        boolean status = Task.INCOMPLETE;
         
         Task newTask = new Task(name, place, list, priority, startDateTime, endDateTime, deadline, duration, status);
         

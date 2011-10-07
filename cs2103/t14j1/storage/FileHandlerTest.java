@@ -38,7 +38,7 @@ public class FileHandlerTest {
         Date endDateTime = null;
         Date deadline = null;
         Long duration = new Long(20);
-        boolean status = Task.INCOMPLETED;
+        boolean status = Task.INCOMPLETE;
         
         Task newTask = new Task(name, place, list, priority, startDateTime, endDateTime, deadline, duration, status);
         lists.addTask(list, newTask);
@@ -51,7 +51,7 @@ public class FileHandlerTest {
         startDateTime = DateFormat.strToDateLong("2011-9-20 14:20:20");
         endDateTime = DateFormat.strToDateLong("2011-9-20 15:20:30");
         deadline = DateFormat.strToDateLong("2011-10-6 20:20:20");
-        status = Task.INCOMPLETED;
+        status = Task.INCOMPLETE;
         
         newTask = new Task(name, place, list, priority, startDateTime, endDateTime, deadline, duration, status);
         lists.addTask(list, newTask);

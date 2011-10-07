@@ -1,5 +1,6 @@
 package cs2103.t14j1.taskmeter;
 
+import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.eclipse.swt.SWT;
@@ -40,7 +41,7 @@ public class AddListDialog extends Dialog {
 	 */
 	public AddListDialog(Shell parent) {
 		super(parent, SWT.NONE);
-		setText(resourceBundle.getString("app.add.list.title"));
+		setText(getResourceString("addListDialog.title"));
 		button = false;
 	}
 
@@ -87,7 +88,7 @@ public class AddListDialog extends Dialog {
 		Label lblEnterNewList = new Label(shell, SWT.NONE);
 		lblEnterNewList.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
 		lblEnterNewList.setBounds(5, 5, 230, 20);
-		lblEnterNewList.setText("Enter New List Name:");
+		lblEnterNewList.setText(getResourceString("addListDialog.msg"));
 		
 		text = new Text(shell, SWT.BORDER);
 		text.addModifyListener(new ModifyListener() {
@@ -112,7 +113,7 @@ public class AddListDialog extends Dialog {
 			}
 		});
 		btnAdd.setBounds(5, 60, 75, 28);
-		btnAdd.setText("Add");
+		btnAdd.setText(getResourceString("button.add"));
 		
 		Button btnCancel = new Button(shell, SWT.NONE);
 		btnCancel.addSelectionListener(new SelectionAdapter() {
@@ -124,20 +125,16 @@ public class AddListDialog extends Dialog {
 			}
 		});
 		btnCancel.setBounds(85, 60, 75, 28);
-		btnCancel.setText("Cancel");
+		btnCancel.setText(getResourceString("button.cancel"));
 		
 		shell.setDefaultButton(btnAdd);
 	}
 	
-	/**
-	 * 
-	 * @return
-	 */
 	private boolean closeAddTask() {
 		if (button == false && text.getText().trim().length() > 1) {
 			MessageBox box = new MessageBox(shell, SWT.ICON_WARNING | SWT.YES | SWT.NO | SWT.CANCEL);
 			box.setText(this.getText());
-			box.setMessage(resourceBundle.getString("msg.close.addtask"));
+			box.setMessage(getResourceString("addListDialog.close.msg"));
 		
 			int choice = box.open();
 			if(choice == SWT.CANCEL) {
@@ -159,5 +156,18 @@ public class AddListDialog extends Dialog {
 		int y = parent.y + (parent.height - rect.height) / 2;
 		shell.setLocation (x, y);
     }
-	
+    
+    /**
+     * Returns a string from the resource bundle. We don't want to crash because
+     * of a missing String. Returns the key if not found.
+     */
+    public static String getResourceString(String key) {
+        try {
+            return resourceBundle.getString(key);
+        } catch (MissingResourceException e) {
+            return key;
+        } catch (NullPointerException e) {
+            return "!" + key + "!";
+        }
+    }
 }

@@ -35,7 +35,7 @@ public class Task {
 	private boolean status;        // completed or not
 	
 	public static final boolean COMPLETED   = true;
-	public static final boolean INCOMPLETED = false;
+	public static final boolean INCOMPLETE = false;
 	
 	/**
 	 * A Constructor with all parameters provided
@@ -65,7 +65,7 @@ public class Task {
         this.endDateTime = null;
         this.deadline = null;
         this.duration = null;
-        this.status = INCOMPLETED;
+        this.status = INCOMPLETE;
     }
 	
 	public String getName() {
@@ -276,7 +276,7 @@ public class Task {
 	}
 	
 	public String getStatusStr() {
-	    return status ? "Completed" : "Incompleted";
+	    return status ? "Completed" : "Incomplete";
 	}
 	
 	public void setStatus(boolean newStatus) {

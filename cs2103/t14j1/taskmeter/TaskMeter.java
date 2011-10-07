@@ -4,10 +4,9 @@ import java.util.Map.Entry;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
-import org.eclipse.core.databinding.observable.Realm;
-import org.eclipse.jface.databinding.swt.SWTObservables;
-import org.eclipse.jface.viewers.TableViewer;
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.MenuAdapter;
+import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MouseAdapter;
 import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -19,7 +18,9 @@ import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.widgets.Button;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.Listener;
 import org.eclipse.swt.widgets.Menu;
 import org.eclipse.swt.widgets.MenuItem;
 import org.eclipse.swt.widgets.MessageBox;
@@ -44,7 +45,6 @@ import cs2103.t14j1.storage.TaskLists;
 public class TaskMeter extends Shell {
 
     private static ResourceBundle resourceBundle = ResourceBundle.getBundle("taskmeter_res");
-    private TableViewer listViewer;
     private Label statusBar;
     private Table taskTable;
     private Table taskList;
@@ -63,22 +63,18 @@ public class TaskMeter extends Shell {
     public static void main(String args[]) {
         final Display display = Display.getDefault();
 
-        Realm.runWithDefault(SWTObservables.getRealm(display), new Runnable() {
-            public void run() {
-                try {
-                    TaskMeter application = new TaskMeter(display);
-                    application.open();
-                    application.layout();
-                    while (!application.isDisposed()) {
-                        if (!display.readAndDispatch()) {
-                            display.sleep();
-                        }
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
+        try {
+            TaskMeter application = new TaskMeter(display);
+            application.open();
+            application.layout();
+            while (!application.isDisposed()) {
+                if (!display.readAndDispatch()) {
+                    display.sleep();
                 }
             }
-        });
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
     /**
@@ -88,6 +84,16 @@ public class TaskMeter extends Shell {
      */
     public TaskMeter(Display display) {
         super(display, SWT.CLOSE | SWT.MIN | SWT.TITLE);
+        
+        // global hotkey to focus on smartBar
+        display.addFilter(SWT.KeyDown, new Listener() {
+            @Override
+            public void handleEvent(Event e) {
+                if (((e.stateMask & SWT.CTRL) == SWT.CTRL) && (e.keyCode == 'k')) {
+                    smartBar.setFocus();
+                }
+            }
+        });
 
         setImage(new Image(display, "taskMeter.png"));
         setMinimumSize(new Point(750, 500));
@@ -112,7 +118,7 @@ public class TaskMeter extends Shell {
                 e.doit = closeTaskMeter();
             }
         });
-
+        
         setText(getResourceString("app.title.full"));
         setSize(750, 500);
 
@@ -155,9 +161,7 @@ public class TaskMeter extends Shell {
 	 * create the task list viewer that shows all the lists
 	 */
     private void createTaskList() {
-
-        listViewer = new TableViewer(this, SWT.BORDER | SWT.FULL_SELECTION);
-        taskList = listViewer.getTable();
+        taskList = new Table(this, SWT.BORDER | SWT.FULL_SELECTION);
         taskList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseDoubleClick(MouseEvent e) { // switch lists
@@ -182,11 +186,9 @@ public class TaskMeter extends Shell {
         taskList.setHeaderVisible(true);
         taskList.setLinesVisible(true);
 
-        
         TableColumn tblclmnLists = new TableColumn(taskList, SWT.CENTER);
         tblclmnLists.setResizable(false); tblclmnLists.setWidth(146);
         tblclmnLists.setText(getResourceString("list"));
-         
 
         Button btnAddANew = new Button(this, SWT.NONE);
         btnAddANew.addSelectionListener(new SelectionAdapter() {
@@ -237,12 +239,7 @@ public class TaskMeter extends Shell {
         taskTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseDoubleClick(MouseEvent e) {
-                TableItem[] items = taskTable.getSelection();
-                if (items.length > 0) {
-                    int index = Integer.parseInt(items[0].getText());
-                    
-                    editTask(index);
-                }
+                editTask();
             }
         });
         taskTable.setBounds(160, 40, 579, 350);
@@ -451,30 +448,37 @@ public class TaskMeter extends Shell {
         Menu menuEdit = new Menu(mntmEdit);
         mntmEdit.setMenu(menuEdit);
 
-        MenuItem mntmUndo = new MenuItem(menuEdit, SWT.NONE);
+        final MenuItem mntmUndo = new MenuItem(menuEdit, SWT.NONE);
         mntmUndo.setText(getResourceString("undo"));
 
-        MenuItem mntmRedo = new MenuItem(menuEdit, SWT.NONE);
+        final MenuItem mntmRedo = new MenuItem(menuEdit, SWT.NONE);
         mntmRedo.setText(getResourceString("redo"));
 
         new MenuItem(menuEdit, SWT.SEPARATOR);
 
-        MenuItem mntmEditTask = new MenuItem(menuEdit, SWT.NONE);
+        final MenuItem mntmEditTask = new MenuItem(menuEdit, SWT.NONE);
         mntmEditTask.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                
+                editTask();
             }
         });
         mntmEditTask.setText("Edit");
 
-        MenuItem mntmDeleteTask = new MenuItem(menuEdit, SWT.NONE);
+        final MenuItem mntmDeleteTask = new MenuItem(menuEdit, SWT.NONE);
         mntmDeleteTask.setText("Delete");
 
         new MenuItem(menuEdit, SWT.SEPARATOR);
 
-        MenuItem mntmSearch = new MenuItem(menuEdit, SWT.NONE);
+        final MenuItem mntmSearch = new MenuItem(menuEdit, SWT.NONE);
         mntmSearch.setText(getResourceString("find"));
+        
+        menuEdit.addMenuListener(new MenuAdapter() {
+            public void menuShown(MenuEvent e) {
+                mntmEditTask.setEnabled(taskTable.getSelectionCount() != 0);
+                mntmDeleteTask.setEnabled(taskTable.getSelectionCount() != 0);
+            }
+        });
     }
 
     /**
@@ -488,6 +492,7 @@ public class TaskMeter extends Shell {
         mntmUser.setMenu(menuUser);
 
         MenuItem mntmAddList = new MenuItem(menuUser, SWT.NONE);
+        mntmAddList.setAccelerator(SWT.MOD1 + 'L');
         mntmAddList.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -497,6 +502,13 @@ public class TaskMeter extends Shell {
         mntmAddList.setText("Add List");
 
         MenuItem mntmAddTask = new MenuItem(menuUser, SWT.NONE);
+        mntmAddTask.setAccelerator(SWT.MOD1 + 'N');
+        mntmAddTask.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                addTask();
+            }
+        });
         mntmAddTask.setText("Add New Task");
 
         new MenuItem(menuUser, SWT.SEPARATOR);
@@ -553,10 +565,28 @@ public class TaskMeter extends Shell {
      * 
      * @param tableItem
      */
-    private void editTask(int index) {
-        TaskDetailDialog dialog = new TaskDetailDialog(this);
+    private void editTask() {
+        TableItem[] items = taskTable.getSelection();
+        if (items.length > 0) {
+            int index = Integer.parseInt(items[0].getText());
+
+            TaskDetailDialog dialog = new TaskDetailDialog(this, 0);
+            dialog.setTask(currentList.getTask(index));
+
+            String feedback = dialog.open();
+            if (feedback != null) {
+                setStatusBar(feedback);
+                isModified = true;
+            }
+        }
+    }
+    
+    private void addTask() {
+        TaskDetailDialog dialog = new TaskDetailDialog(this, 1);
         
-        dialog.setTask(currentList.getTask(index));
+        Task newTask = new Task();
+        
+        dialog.setTask(newTask);
         
         String feedback = dialog.open();
         
@@ -564,11 +594,6 @@ public class TaskMeter extends Shell {
             setStatusBar(feedback);
             isModified = true;
         }
-    }
-    
-    private void addTask() {
-        TaskDetailDialog dialog = new TaskDetailDialog(this);
-        
     }
 
     private void setStatusBar(String msg) {

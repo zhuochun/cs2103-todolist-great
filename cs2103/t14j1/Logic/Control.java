@@ -141,7 +141,7 @@ class Control {
 		convertLongTimeToDate(startDateTime, startTime);
 		convertLongTimeToDate(endDateTime, endTime);
 		convertLongTimeToDate(deadline, deadlineTime);
-		boolean status     = Task.INCOMPLETED;
+		boolean status     = Task.INCOMPLETE;
 		
 		Task newTask = new Task(name, place, list, priority, startDateTime, endDateTime, deadline, duration, status);
 		String result = lists.addTask(list, newTask);

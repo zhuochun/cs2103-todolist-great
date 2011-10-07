@@ -7,10 +7,10 @@ import cs2103.t14j1.logic.DateFormat;
 /**
  * a basic Task and its properties
  * 
- * @author Zhuochun, Shubham
+ * @author Zhuochun
  * 
  */
-public class Task extends AbstractModelObject {
+public class Task {
 	
     // used as XML tag names
     public static final String  NAME       = "name";
@@ -56,10 +56,10 @@ public class Task extends AbstractModelObject {
     /**
      * A Constructor with name and list provided only
      */
-    public Task(String name, String list) {
-        this.name = name;
+    public Task() {
+        this.name = null;
         this.place = null;
-        this.list = list;
+        this.list = TaskLists.INBOX;
         this.priority = Priority.NORMAL;
         this.startDateTime = null;
         this.endDateTime = null;
@@ -73,11 +73,7 @@ public class Task extends AbstractModelObject {
 	}
 	
 	public void setName(String newName) {
-	    String oldName = name;
-	    
 	    name = newName;
-	    
-	    firePropertyChange("name", oldName, name);
 	}
 	
 	public String getPlace() {
@@ -85,11 +81,7 @@ public class Task extends AbstractModelObject {
 	}
 	
 	public void setPlace(String newPlace) {
-	    String oldPlace = place;
-	    
 	    place = newPlace;
-	    
-	    firePropertyChange("place", oldPlace, place);
 	}
 
 	public String getList() {
@@ -97,11 +89,7 @@ public class Task extends AbstractModelObject {
 	}
 	
 	public void setList(String newList) {
-	    String oldList = list;
-	    
 	    list = newList;
-	    
-	    firePropertyChange("list", oldList, list);
 	}
 	
 	public Priority getPriority() {
@@ -113,11 +101,21 @@ public class Task extends AbstractModelObject {
 	}
 	
 	public void setPriority(Priority newValue) {
-	    Priority oldValue = priority;
-	    
 	    priority = newValue;
+	}
+	
+	public String getDate() {
+	    if (startDateTime != null & endDateTime != null) {
+	        StringBuffer fullstr = new StringBuffer();
+	        
+	        fullstr.append(getStartLong());
+	        fullstr.append(" - ");
+	        fullstr.append(getEndLong());
+	        
+	        return fullstr.toString();
+	    }
 	    
-	    firePropertyChange("priority", oldValue, newValue);
+	    return null;
 	}
 	
 	public Date getStartDateTime() {
@@ -125,15 +123,11 @@ public class Task extends AbstractModelObject {
 	}
 	
 	public void setStartDateTime(Date newDate) {
-	    Date oldDate = startDateTime;
-	    
 	    startDateTime = newDate;
-	    
-	    firePropertyChange("startDateTime", oldDate, newDate);
 	}
 	
 	/**
-	 * @return yyyy-MM-dd HH:mm:ss
+	 * @return yyyy-MM-dd HH:mm
 	 */
 	public String getStartLong() {
 		if (startDateTime == null) {
@@ -170,15 +164,11 @@ public class Task extends AbstractModelObject {
 	}
 	
 	public void setEndDateTime(Date newDate) {
-	    Date oldDate = endDateTime;
-	    
 	    endDateTime = newDate;
-	    
-	    firePropertyChange("endDateTime", oldDate, newDate);
 	}
 	
 	/**
-	 * @return yyyy-MM-dd HH:mm:ss
+	 * @return yyyy-MM-dd HH:mm
 	 */
 	public String getEndLong() {
 		if (endDateTime == null) {
@@ -215,11 +205,7 @@ public class Task extends AbstractModelObject {
     }
     
     public void setDeadline(Date newDate) {
-        Date oldDate = deadline;
-        
         deadline = newDate;
-        
-        firePropertyChange("deadline", oldDate, newDate);
     }
     
     /**
@@ -260,14 +246,32 @@ public class Task extends AbstractModelObject {
     }
     
     public void setDuration(Long newDuration) {
-        Long oldDuration = duration;
-        
         duration = newDuration;
-        
-        firePropertyChange("duration", oldDuration, newDuration);
     }
     
-	public boolean getStatus() {
+	public String getDurationStr() {
+	    if (duration == null) {
+	        return null;
+	    }
+	    
+	    int d         = duration.intValue();
+        int hours     = d / 3600;
+        int minutes   = (d - hours * 3600) / 60;
+	    
+        StringBuffer dStr = new StringBuffer();
+        
+        if (hours != 0) {
+            dStr.append(hours + "H");
+        }
+        
+        if (minutes != 0) {
+            dStr.append(minutes + "M");
+        }
+        
+        return dStr.toString();
+    }
+
+    public boolean getStatus() {
 		return status;
 	}
 	
@@ -276,11 +280,7 @@ public class Task extends AbstractModelObject {
 	}
 	
 	public void setStatus(boolean newStatus) {
-	    boolean oldStatus = status;
-	    
 		status = newStatus;
-		
-		firePropertyChange("status", oldStatus, status);
 	}
 	
 	public String toString() {

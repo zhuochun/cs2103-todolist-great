@@ -1,20 +1,13 @@
 package cs2103.t14j1.logic.smartbar;
 
 import java.io.BufferedReader;
-import java.io.FileNotFoundException;
 import java.io.FileReader;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.TimeZone;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.eclipse.jface.text.templates.GlobalTemplateVariables.WordSelection;
-import org.eclipse.ui.SubActionBars;
-import org.omg.CORBA.DynAnyPackage.Invalid;
-
 import cs2103.t14j1.logic.Commands;
-import cs2103.t14j1.logic.DateFormat;
 import cs2103.t14j1.storage.Priority;
 
 /*

@@ -10,7 +10,7 @@ import java.util.TreeMap;
  * @author Zhuochun
  *
  */
-public class TaskLists extends AbstractModelObject implements Iterable<Entry<String, TaskList>> {
+public class TaskLists implements Iterable<Entry<String, TaskList>> {
 	
 	private TreeMap<String, TaskList> lists;
 	
@@ -56,8 +56,6 @@ public class TaskLists extends AbstractModelObject implements Iterable<Entry<Str
 	public String add(TaskList list) {
 	    lists.put(list.getName(), list);
 	    
-	    firePropertyChange("lists", null, lists);
-	    
 		return String.format(ADD_SUCCESS, list.getName());
 	}
 	
@@ -69,8 +67,6 @@ public class TaskLists extends AbstractModelObject implements Iterable<Entry<Str
 	 */
 	public String remove(String name) {
 		TaskList list = lists.remove(name);
-		
-	    firePropertyChange("lists", null, lists);
 		
 		return String.format(REMOVE_SUCCESS, list.getName());
 	}
@@ -141,7 +137,7 @@ public class TaskLists extends AbstractModelObject implements Iterable<Entry<Str
 	public TaskList getList(String name) {
 		return lists.get(name);
 	}
-
+	
 	/**
 	 * iteration of lists in TaskLists
 	 */

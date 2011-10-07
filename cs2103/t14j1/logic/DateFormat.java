@@ -32,11 +32,11 @@ public class DateFormat {
 	/**
 	 * get current date and time
 	 * 
-	 * @return String 			 yyyy-MM-dd HH:mm:ss
+	 * @return String 			 yyyy-MM-dd HH:mm
 	 */
 	public static String getNowDateLong() {
 		Date currentTime = new Date();
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		String nowDateTime = formatter.format(currentTime);
 		return nowDateTime;
 	}
@@ -60,7 +60,7 @@ public class DateFormat {
 	 * @return hour
 	 */
 	public static int getHour(Date date) {
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		String dateString = formatter.format(date);
 		String hour = dateString.substring(11, 13);
 		return Integer.parseInt(hour);
@@ -73,7 +73,7 @@ public class DateFormat {
 	 * @return minute
 	 */
 	public static int getMinute(Date date) {
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		String dateString = formatter.format(date);
 		String min = dateString.substring(14, 16);
 		return Integer.parseInt(min);
@@ -102,7 +102,7 @@ public class DateFormat {
 	public static Date strToDateLong(String str) {
 	    if (str == null) return null;
 	    
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		ParsePosition pos = new ParsePosition(0);
 		Date strtodate = formatter.parse(str, pos);
 		return strtodate;
@@ -151,7 +151,7 @@ public class DateFormat {
 	 * @return String
 	 */
 	public static String dateToStrLong(Date date) {
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		String dateString = formatter.format(date);
 		return dateString;
 	}
@@ -197,7 +197,7 @@ public class DateFormat {
 		String newDate = null;
 		
 		try {
-			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 			Date date = format.parse(fullDate);
 			
 			long Time = (date.getTime() / 1000) + delay * 60;

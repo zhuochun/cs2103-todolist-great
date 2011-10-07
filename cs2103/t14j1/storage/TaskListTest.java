@@ -1,14 +1,10 @@
 package cs2103.t14j1.storage;
 
-import static org.junit.Assert.*;
-
 import java.util.Date;
 
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
-
-import cs2103.t14j1.logic.DateFormat;
 
 public class TaskListTest {
     

@@ -14,6 +14,8 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import cs2103.t14j1.storage.Task;
+
 /**
  * a task detail dialog for editing task details
  * 
@@ -24,7 +26,8 @@ public class TaskDetailDialog extends Dialog {
 
 	private static ResourceBundle resourceBundle = ResourceBundle.getBundle("taskmeter_res");
 	protected Shell shell;
-	protected String[] values;
+	protected Task  task;
+	private String result;
 	private Text txtName;
 	private Text txtList;
 	private DateTime DateStart;
@@ -41,23 +44,24 @@ public class TaskDetailDialog extends Dialog {
 	public TaskDetailDialog(Shell parent) {
 		super(parent, SWT.NONE);
 		setText(resourceBundle.getString("app.task.detail.title"));
+		
+		task   = new Task();
+		result = null;
 	}
 
-	public void setTitle(String title) {
-		setText(title);
-	}
-	
-	public void setTask(String[] columns) {
-		values = columns;
+	public void setTask(Task task) {
+		this.task = task;
 	}
 	
 	/**
 	 * Open the dialog.
 	 * @return the result
 	 */
-	public String[] open() {
+	public String open() {
 		createContents();
+		
 		center();
+		
 		shell.open();
 		shell.layout();
 		Display display = getParent().getDisplay();
@@ -66,7 +70,8 @@ public class TaskDetailDialog extends Dialog {
 				display.sleep();
 			}
 		}
-		return values;
+		
+		return result;
 	}
 
 	/**

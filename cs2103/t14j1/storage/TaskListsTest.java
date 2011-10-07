@@ -54,9 +54,10 @@ public class TaskListsTest {
         lists.addTask(list, newTask);
         
         // add an empty task and set properties one by one
-        newTask = new Task("task 3", "Inbox");
+        newTask = new Task();
         lists.addTask("Inbox", newTask);
         
+        newTask.setName("task 3");
         newTask.setPlace("hell");
         newTask.setPriority(Priority.LOW);
         newTask.setStartDateTime(null);

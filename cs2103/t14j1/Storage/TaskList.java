@@ -10,10 +10,10 @@ import java.util.List;
  * @author Zhuochun
  *
  */
-public class TaskList extends AbstractModelObject implements Iterable<Task> {
+public class TaskList implements Iterable<Task> {
 
-	private String name; // name of the list
-	private List<Task> tasks;
+	private String listname; // name of the list
+	private final List<Task> tasks;
 	
 	private static final String ADD_SUCCESS    = "Task \"%1$s\" is Successfully Added";
 	private static final String DELETE_SUCCESS = "Task \"%1$s\" is Successfully Deleted";
@@ -23,7 +23,7 @@ public class TaskList extends AbstractModelObject implements Iterable<Task> {
 	 * constructor with list name
 	 */
 	public TaskList(String name) {
-		this.name = name;
+		this.listname = name;
 		tasks = new ArrayList<Task>();
 	}
 	
@@ -36,7 +36,7 @@ public class TaskList extends AbstractModelObject implements Iterable<Task> {
     }
 
     public String getName() {
-		return name;
+		return listname;
 	}
 	
 	/**
@@ -45,15 +45,12 @@ public class TaskList extends AbstractModelObject implements Iterable<Task> {
 	 * @param newName
 	 */
 	public void setName(String newName) {
-	    String oldName = name;
-	    name = newName;
+	    listname = newName;
 	    
 	    // change all task in lists
 	    for (Task i : tasks) {
-	        i.setList(name);
+	        i.setList(listname);
 	    }
-	    
-	    firePropertyChange("name", oldName, name);
 	}
 	
 	public Task getTask(int index) {
@@ -67,11 +64,17 @@ public class TaskList extends AbstractModelObject implements Iterable<Task> {
     public List<Task> getTasks() {
         return tasks;
     }
+    
+    public void addTask(Task group) {
+        tasks.add(group);
+    }
+
+    public void removeTask(Task group) {
+        tasks.remove(group);
+    }
 
     public String add(Task task) {
 		tasks.add(task);
-		
-		firePropertyChange("tasks", null, tasks);
 		
 		return String.format(ADD_SUCCESS, task.getName());
 	}
@@ -82,8 +85,6 @@ public class TaskList extends AbstractModelObject implements Iterable<Task> {
 		}
 		
 		Task task = tasks.remove(index-1);
-		
-        firePropertyChange("tasks", null, tasks);
         
 		return String.format(DELETE_SUCCESS, task.getName());
 	}

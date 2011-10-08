@@ -108,9 +108,9 @@ public class Task {
 	    if (startDateTime != null & endDateTime != null) {
 	        StringBuffer fullstr = new StringBuffer();
 	        
-	        fullstr.append(getStartLong());
+	        fullstr.append(getStartShort());
 	        fullstr.append(" - ");
-	        fullstr.append(getEndLong());
+	        fullstr.append(getEndShort());
 	        
 	        return fullstr.toString();
 	    }
@@ -127,7 +127,7 @@ public class Task {
 	}
 	
 	/**
-	 * @return yyyy-MM-dd HH:mm
+	 * @return yyyy-MM-dd HH:mm:ss
 	 */
 	public String getStartLong() {
 		if (startDateTime == null) {
@@ -135,6 +135,17 @@ public class Task {
 		}
 		
 		return DateFormat.dateToStrLong(startDateTime);
+	}
+	
+	/**
+	 * @return yyyy-MM-dd HH:mm
+	 */
+	public String getStartShort() {
+		if (startDateTime == null) {
+			return null;
+		}
+		
+		return DateFormat.dateToStrShort(startDateTime);
 	}
 	
 	/**
@@ -170,7 +181,7 @@ public class Task {
 	}
 	
 	/**
-	 * @return yyyy-MM-dd HH:mm
+	 * @return yyyy-MM-dd HH:mm:ss
 	 */
 	public String getEndLong() {
 		if (endDateTime == null) {
@@ -178,6 +189,17 @@ public class Task {
 		}
 		
 		return DateFormat.dateToStrLong(endDateTime);
+	}
+	
+	/**
+	 * @return yyyy-MM-dd HH:mm
+	 */
+	public String getEndShort() {
+		if (endDateTime == null) {
+			return null;
+		}
+		
+		return DateFormat.dateToStrShort(endDateTime);
 	}
 	
 	/**
@@ -259,17 +281,28 @@ public class Task {
 	    }
 	    
 	    int d         = duration.intValue();
+	    int days      = d / 86400;
+	    d = d - days * 86400;
         int hours     = d / 3600;
-        int minutes   = (d - hours * 3600) / 60;
+        d = d - hours * 3600;
+        int minutes   = d / 60;
 	    
         StringBuffer dStr = new StringBuffer();
         
+        if (days != 0) {
+            dStr.append(days + " Days ");
+        }
+        
         if (hours != 0) {
-            dStr.append(hours + "H");
+            dStr.append(hours + " Hours ");
         }
         
         if (minutes != 0) {
-            dStr.append(minutes + "M");
+            dStr.append(minutes + " Minutes ");
+        }
+        
+        if (dStr.length() == 0) {
+            dStr.append("0 Minutes");
         }
         
         return dStr.toString();

@@ -1,12 +1,11 @@
 package cs2103.t14j1.taskmeter;
 
+import java.util.Calendar;
 import java.util.Date;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.eclipse.swt.SWT;
-import org.eclipse.swt.events.MouseAdapter;
-import org.eclipse.swt.events.MouseEvent;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
 import org.eclipse.swt.graphics.Rectangle;
@@ -16,10 +15,12 @@ import org.eclipse.swt.widgets.DateTime;
 import org.eclipse.swt.widgets.Dialog;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Label;
+import org.eclipse.swt.widgets.MessageBox;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import cs2103.t14j1.storage.Priority;
 import cs2103.t14j1.storage.Task;
 
 /**
@@ -65,7 +66,7 @@ public class TaskDetailDialog extends Dialog {
 		
 		mode = choice;
 		
-		if (mode == 1) {
+		if (mode == ADD_TASK) {
 		    setText(getResourceString("taskDetailDialog.new.title"));
 		} else {
 		    setText(getResourceString("taskDetailDialog.title"));
@@ -133,6 +134,8 @@ public class TaskDetailDialog extends Dialog {
 		lblList.setText(getResourceString("taskDetailDialog.list"));
 		
 		txtList = new Text(shell, SWT.BORDER);
+		txtList.setEnabled(false);
+		txtList.setEditable(false);
 		txtList.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
 		txtList.setBounds(66, 157, 324, 25);
 		txtList.setText(getTaskList());
@@ -140,11 +143,27 @@ public class TaskDetailDialog extends Dialog {
 		createDropdowns();
 		
 		Button btnSave = new Button(shell, SWT.NONE);
+		btnSave.addSelectionListener(new SelectionAdapter() {
+		    @Override
+		    public void widgetSelected(SelectionEvent e) {
+		        if (saveTaskDetail()) {
+		            result = "saved";
+		            shell.close();
+		        }
+		    }
+		});
 		btnSave.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
 		btnSave.setBounds(230, 254, 80, 30);
 		btnSave.setText(getResourceString("button.save"));
 		
 		Button btnClose = new Button(shell, SWT.NONE);
+		btnClose.addSelectionListener(new SelectionAdapter() {
+		    @Override
+		    public void widgetSelected(SelectionEvent e) {
+		        result = null;
+		        shell.close();
+		    }
+		});
 		btnClose.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
 		btnClose.setBounds(315, 254, 75, 30);
 		btnClose.setText(getResourceString("button.cancel"));
@@ -153,18 +172,6 @@ public class TaskDetailDialog extends Dialog {
 
     private void createDateTime() {
         dateStart = new DateTime(shell, SWT.BORDER | SWT.DROP_DOWN);
-    	dateStart.addSelectionListener(new SelectionAdapter() {
-    	    @Override
-    	    public void widgetSelected(SelectionEvent e) {
-    	        toggleEnable(dateStart);
-    	    }
-    	});
-    	dateStart.addMouseListener(new MouseAdapter() {
-    	    @Override
-    	    public void mouseDoubleClick(MouseEvent e) {
-    	        toggleEnable(dateStart);
-    	    }
-    	});
     	dateStart.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
     	dateStart.setBounds(10, 40, 90, 25);
     	
@@ -193,6 +200,15 @@ public class TaskDetailDialog extends Dialog {
     	    public void widgetSelected(SelectionEvent e) {
     	        toggleEnable(dateStart);
     	        toggleEnable(dateEnd);
+    	        // toggle time as well
+    	        if (!dateStart.isEnabled()) {
+    	            timeStart.setEnabled(false);
+    	            timeEnd.setEnabled(false);
+    	            btnAllDay.setSelection(true);
+    	            btnAllDay.setEnabled(false);
+    	        } else {
+    	            btnAllDay.setEnabled(true);
+    	        }
     	    }
     	});
     	btnNoDate.setBounds(10, 70, 97, 23);
@@ -299,25 +315,30 @@ public class TaskDetailDialog extends Dialog {
     private void setStartEndDateTime() {
         boolean hasDate = task.getStartDate() != null && task.getEndDate() != null;
         boolean hasTime = task.getStartTime() != null && task.getEndTime() != null;
-        
+
         if (hasDate) {
             setDate(dateStart, task.getStartDateTime());
             setDate(dateEnd, task.getEndDateTime());
             btnNoDate.setSelection(false);
+
+            if (hasTime) {
+                setTime(timeStart, task.getStartDateTime());
+                setTime(timeEnd, task.getEndDateTime());
+                btnAllDay.setSelection(false);
+            } else if (mode == EDIT_TASK) {
+                timeStart.setEnabled(false);
+                timeEnd.setEnabled(false);
+                btnAllDay.setSelection(true);
+            }
         } else if (mode == EDIT_TASK) {
             dateStart.setEnabled(false);
             dateEnd.setEnabled(false);
             btnNoDate.setSelection(true);
-        }
-        
-        if (hasTime) {
-            setTime(timeStart, task.getStartDateTime());
-            setTime(timeEnd, task.getEndDateTime());
-            btnAllDay.setSelection(false);
-        } else if (mode == EDIT_TASK) {
+            
             timeStart.setEnabled(false);
             timeEnd.setEnabled(false);
             btnAllDay.setSelection(true);
+            btnAllDay.setEnabled(false);
         }
     }
     
@@ -337,18 +358,99 @@ public class TaskDetailDialog extends Dialog {
 
     private void setDate(DateTime dt, Date date) {
 	    if (date != null) {
-	        dt.setYear(date.getYear());
-	        dt.setMonth(date.getMonth());
-	        dt.setDay(date.getDay());
+	        Calendar c = Calendar.getInstance();
+	        c.setTime(date);
+	        dt.setDate(c.get(Calendar.YEAR), c.get(Calendar.MONTH), c.get(Calendar.DAY_OF_MONTH));
 	    }
     }
 	
 	private void setTime(DateTime dt, Date date) {
 	    if (date != null) {
-	        dt.setHours(date.getHours());
-	        dt.setMinutes(date.getMinutes());
+	        Calendar c = Calendar.getInstance();
+	        c.setTime(date);
+	        dt.setTime(c.get(Calendar.HOUR_OF_DAY), c.get(Calendar.MINUTE), c.get(Calendar.SECOND));
 	    }
 	}
+	
+	private boolean saveTaskDetail() {
+	    String newName  = getText(txtName);
+	    if (newName == null) {
+	        displayError("Task Name Cannot be Empty");
+	        return false;
+	    }
+	    
+	    String newPlace = getText(txtWhere);
+	    //String newList  = getText(txtWhere);
+	    Priority newPriority = Priority.valueOf(cboPriority.getText().trim().toUpperCase());
+	    
+	    Calendar newStartDT = null;
+	    Calendar newEndDT   = null;
+	    Long newDuration = null;
+	    if (!btnNoDate.getSelection()) { // if no date is not selected
+	        newStartDT = Calendar.getInstance();
+	        newEndDT   = Calendar.getInstance();
+	        getDateSet(dateStart, newStartDT);
+	        getDateSet(dateEnd, newEndDT);
+
+	        if (!btnAllDay.getSelection()) { // if all day is not selected
+	            getTimeSet(timeStart, newStartDT);
+	            getTimeSet(timeEnd, newEndDT);
+	            
+	            newDuration = (newEndDT.getTimeInMillis() - newStartDT.getTimeInMillis()) / 1000;
+	        }
+	        
+	        if (newEndDT.compareTo(newStartDT) < 0) {
+	            displayError("End Date and Time should come after Start Date and Time");
+	            return false;
+	        }
+	    }
+	    
+	    Calendar newDeadlineDT = null;
+	    if (!btnNoDeadline.getSelection()) { // if no deadline is not selected
+	        newDeadlineDT = Calendar.getInstance();
+	        
+	        getDateSet(dateDeadline, newDeadlineDT);
+	        getTimeSet(timeDeadline, newDeadlineDT);
+	    }
+	    
+	    Boolean newStatus  = Task.INCOMPLETE;
+	    newStatus = cboStatus.getText().equals(" Completed") ? Task.COMPLETED : Task.INCOMPLETE;
+	    
+	    // set new values
+	    task.setName(newName);
+	    task.setPlace(newPlace);
+	    task.setPriority(newPriority);
+	    task.setStartDateTime(newStartDT == null ? null : newStartDT.getTime());
+	    task.setEndDateTime(newEndDT == null ? null : newEndDT.getTime());
+	    task.setDuration(newDuration);
+	    task.setDeadline(newDeadlineDT == null ? null : newDeadlineDT.getTime());
+	    task.setStatus(newStatus);
+	    
+	    return true;
+	}
+	
+	private void getDateSet(DateTime date, Calendar ndate) {
+	    ndate.set(date.getYear(), date.getMonth(), date.getDay(), 0, 0, 0);
+    }
+	
+	private void getTimeSet(DateTime time, Calendar ndate) {
+	    ndate.set(Calendar.HOUR_OF_DAY, time.getHours());
+	    ndate.set(Calendar.MINUTE, time.getMinutes());
+	    ndate.set(Calendar.SECOND, 0);
+	}
+
+    private String getText(Text s) {
+	    String str = s.getText().trim();
+	    str = (str == "") ? null : str;
+	    return str;
+	}
+	
+    private void displayError(String msg) {
+        MessageBox box = new MessageBox(shell, SWT.ICON_ERROR);
+        box.setText("Error");
+        box.setMessage(msg);
+        box.open();
+    }
 
     /**
 	 * center the dialog with respect to the application window

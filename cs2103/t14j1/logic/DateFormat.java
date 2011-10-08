@@ -18,6 +18,9 @@ import java.util.GregorianCalendar;
  * 
  */
 public class DateFormat {
+    
+    public static final String ZERO_OCLOCK_TIME = "2012-12-25 00:00:00";
+    public static final String LAST_MINTUE_TIME = "2012-12-25 23:59:00";
 
 	/**
 	 * get current date and time without formatting
@@ -32,11 +35,11 @@ public class DateFormat {
 	/**
 	 * get current date and time
 	 * 
-	 * @return String 			 yyyy-MM-dd HH:mm
+	 * @return String 			 yyyy-MM-dd HH:mm:ss
 	 */
 	public static String getNowDateLong() {
 		Date currentTime = new Date();
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		String nowDateTime = formatter.format(currentTime);
 		return nowDateTime;
 	}
@@ -57,7 +60,7 @@ public class DateFormat {
 	 * get the hour from the date passed in
 	 * 
 	 * @param date
-	 * @return hour
+	 * @return int             hour
 	 */
 	public static int getHour(Date date) {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
@@ -70,7 +73,7 @@ public class DateFormat {
 	 * get the minute from the date passed in
 	 * 
 	 * @param date
-	 * @return minute
+	 * @return int             minute
 	 */
 	public static int getMinute(Date date) {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
@@ -92,9 +95,9 @@ public class DateFormat {
 	}
 
 	/**
-	 * convert date in string to Date format
+	 * convert a date in String to Date format
 	 * 
-	 * (default format yyyy-MM-dd HH:mm:ss)
+	 * String format yyyy-MM-dd HH:mm:ss
 	 * 
 	 * @param str
 	 * @return Date
@@ -102,16 +105,35 @@ public class DateFormat {
 	public static Date strToDateLong(String str) {
 	    if (str == null) return null;
 	    
-		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 		ParsePosition pos = new ParsePosition(0);
 		Date strtodate = formatter.parse(str, pos);
 		return strtodate;
 	}
+	
+	/**
+	 * convert a date in String to Date format
+	 * 
+	 * String format yyyy-MM-dd HH:mm
+	 * 
+	 * @param str
+	 * @return Date
+	 */
+	public static Date strToDateShort(String str) {
+	    if (str == null) return null;
+	    
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		ParsePosition pos = new ParsePosition(0);
+		Date strtodate = formatter.parse(str, pos);
+		strtodate.setSeconds(0);
+		
+		return strtodate;
+	}
 
 	/**
-	 * convert String to Date format
+	 * convert a date in String to Date format
 	 * 
-	 * (default format yyyy-MM-dd)
+	 * String format yyyy-MM-dd
 	 * 
 	 * @param str
 	 * @return Date
@@ -122,13 +144,14 @@ public class DateFormat {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
 		ParsePosition pos = new ParsePosition(0);
 		Date strtodate = formatter.parse(str, pos);
+		
 		return strtodate;
 	}
 	
 	/**
 	 * convert string to user defined date format
 	 * 
-	 * eg. format can be "yyyy-MM-dd HH:mm:ss"
+	 * eg. user defined format can be "yyyy-MM-dd HH:mm:ss"
 	 * 
 	 * @param format
 	 * @return Date
@@ -139,18 +162,29 @@ public class DateFormat {
 		SimpleDateFormat formatter = new SimpleDateFormat(format);
 		ParsePosition pos = new ParsePosition(0);
 		Date strtodate = formatter.parse(str, pos);
+		
 		return strtodate;
 	}
 
 	/**
 	 * convert Date to string long format
 	 * 
-	 * (default format yyyy-MM-dd HH:mm:ss)
-	 * 
 	 * @param Date
-	 * @return String
+	 * @return String              yyyy-MM-dd HH:mm:ss
 	 */
 	public static String dateToStrLong(Date date) {
+		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		String dateString = formatter.format(date);
+		return dateString;
+	}
+	
+	/**
+	 * convert Date to string long format
+	 * 
+	 * @param Date
+	 * @return String              yyyy-MM-dd HH:mm
+	 */
+	public static String dateToStrShort(Date date) {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		String dateString = formatter.format(date);
 		return dateString;
@@ -159,10 +193,8 @@ public class DateFormat {
 	/**
 	 * convert Date to string format
 	 * 
-	 * (default format yyyy-MM-dd)
-	 * 
 	 * @param Date
-	 * @return String
+	 * @return String              yyyy-MM-dd
 	 */
 	public static String dateToStr(Date date) {
 		SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
@@ -173,7 +205,7 @@ public class DateFormat {
 	/**
 	 * convert Date to user defined format
 	 * 
-	 * eg. format can be "yyyy-MM-dd HH:mm:ss"
+	 * eg. user defined format can be "yyyy-MM-dd HH:mm:ss"
 	 * 
 	 * @param format
 	 * @return String
@@ -197,7 +229,7 @@ public class DateFormat {
 		String newDate = null;
 		
 		try {
-			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			Date date = format.parse(fullDate);
 			
 			long Time = (date.getTime() / 1000) + delay * 60;

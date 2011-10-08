@@ -51,9 +51,13 @@ public class TaskMeter extends Shell {
     private Text  smartBar;
 
     private boolean  isModified;
+    private int       mode;
     private TaskLists lists;
     private TaskList  currentList;
     private TaskList  searchResult;
+    
+    private static final int LIST_MODE   = 0;
+    private static final int SEARCH_MODE = 1;
 
     /**
      * Launch the application.
@@ -123,6 +127,7 @@ public class TaskMeter extends Shell {
         setSize(750, 500);
 
         isModified = false;
+        mode       = LIST_MODE;
 
         lists = new TaskLists();
         FileHandler.loadAll(lists);
@@ -292,7 +297,7 @@ public class TaskMeter extends Shell {
                     Integer.toString(idx++),
                     task.getName(),
                     task.getPriority().toString().toLowerCase(),
-                    task.getDate(),
+                    task.getStartEndDate(),
                     task.getDurationStr(),
                     task.getStatusStr()
                     });
@@ -570,7 +575,7 @@ public class TaskMeter extends Shell {
         if (items.length > 0) {
             int index = Integer.parseInt(items[0].getText());
 
-            TaskDetailDialog dialog = new TaskDetailDialog(this, 0);
+            TaskDetailDialog dialog = new TaskDetailDialog(this, TaskDetailDialog.EDIT_TASK);
             dialog.setTask(currentList.getTask(index));
 
             String feedback = dialog.open();
@@ -582,15 +587,16 @@ public class TaskMeter extends Shell {
     }
     
     private void addTask() {
-        TaskDetailDialog dialog = new TaskDetailDialog(this, 1);
+        TaskDetailDialog dialog = new TaskDetailDialog(this, TaskDetailDialog.ADD_TASK);
         
         Task newTask = new Task();
         
         dialog.setTask(newTask);
         
         String feedback = dialog.open();
-        
         if (feedback != null) {
+            feedback = currentList.add(newTask);
+            
             setStatusBar(feedback);
             isModified = true;
         }

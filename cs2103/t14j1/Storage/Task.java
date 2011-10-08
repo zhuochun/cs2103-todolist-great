@@ -104,7 +104,7 @@ public class Task {
 	    priority = newValue;
 	}
 	
-	public String getDate() {
+	public String getStartEndDate() {
 	    if (startDateTime != null & endDateTime != null) {
 	        StringBuffer fullstr = new StringBuffer();
 	        
@@ -154,6 +154,8 @@ public class Task {
 	public String getStartTime() {
 		if (startDateTime == null) {
 			return null;
+		} else if (duration == null) {
+		    return null;
 		}
 		
 		return DateFormat.getTime(startDateTime);
@@ -195,6 +197,8 @@ public class Task {
 	public String getEndTime() {
 		if (endDateTime == null) {
 			return null;
+		} else if (duration == null) {
+		    return null;
 		}
 		
 		return DateFormat.getTime(endDateTime);

@@ -147,7 +147,7 @@ public class FileHandler {
                     taskElement.appendChild(createElement(Task.START_DATE, task.getStartLong(), doc));
                     taskElement.appendChild(createElement(Task.END_DATE, task.getEndLong(), doc));
                     taskElement.appendChild(createElement(Task.DEADLINE, task.getDeadlineLong(), doc));
-                    taskElement.appendChild(createElement(Task.DURATION, Long.toString(task.getDuration()), doc));
+                    taskElement.appendChild(createElement(Task.DURATION, task.getDuration() == null ? null : Long.toString(task.getDuration()), doc));
                     taskElement.appendChild(createElement(Task.STATUS, task.getStatusStr(), doc));
                 }
             }
@@ -195,7 +195,7 @@ public class FileHandler {
             String deadlineStr  = getTagValue(Task.DEADLINE, taskElement);
             Date   deadline     = DateFormat.strToDateLong(deadlineStr);
             String durationStr  = getTagValue(Task.DURATION, taskElement);
-            Long   duration     = Long.parseLong(durationStr);
+            Long   duration     = durationStr == null ? null : Long.parseLong(durationStr);
             String statusStr    = getTagValue(Task.STATUS, taskElement);
             boolean status     = statusStr.compareToIgnoreCase("completed") == 0;
             

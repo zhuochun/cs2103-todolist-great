@@ -56,8 +56,8 @@ public class TaskMeter extends Shell {
     private TaskList  currentList;
     private TaskList  searchResult;
     
-    private static final int LIST_MODE   = 0;
-    private static final int SEARCH_MODE = 1;
+    private static final int MODE_LIST   = 0;
+    private static final int MODE_SEARCH = 1;
 
     /**
      * Launch the application.
@@ -127,7 +127,7 @@ public class TaskMeter extends Shell {
         setSize(750, 500);
 
         isModified = false;
-        mode       = LIST_MODE;
+        mode       = MODE_LIST;
 
         lists = new TaskLists();
         FileHandler.loadAll(lists);
@@ -289,20 +289,41 @@ public class TaskMeter extends Shell {
         taskTable.removeAll(); // remove all items for redraw
         
         int idx = 1;
-        
-        TableItem tableItem;
         for (Task task : tlist) {
-            tableItem = new TableItem(taskTable, SWT.NONE);
-            tableItem.setText(new String[] {
-                    Integer.toString(idx++),
-                    task.getName(),
-                    task.getPriority().toString().toLowerCase(),
-                    task.getStartEndDate(),
-                    task.getDurationStr(),
-                    task.getStatusStr()
-                    });
+            idx = addNewTask(idx, task);
         }
-        
+    }
+
+    /**
+     * @param idx
+     * @param task
+     * @return
+     */
+    private int addNewTask(int idx, Task task) {
+        TableItem tableItem;
+        tableItem = new TableItem(taskTable, SWT.NONE);
+        tableItem.setText(new String[] {
+                Integer.toString(idx),
+                task.getName(),
+                task.getPriority().toString().toLowerCase(),
+                task.getStartEndDate() == null ? "" : task.getStartEndDate(),
+                task.getDurationStr() == null ? "" : task.getDurationStr(),
+                task.getStatusStr()
+                });
+        return idx + 1;
+    }
+    
+    private int refreshTask(int idx, Task task) {
+        TableItem item = taskTable.getItem(idx);
+        item.setText(new String[] {
+                Integer.toString(idx),
+                task.getName(),
+                task.getPriority().toString().toLowerCase(),
+                task.getStartEndDate() == null ? "" : task.getStartEndDate(),
+                task.getDurationStr() == null ? "" : task.getDurationStr(),
+                task.getStatusStr()
+                });
+        return idx;
     }
 
     private void displayLists() {
@@ -504,7 +525,7 @@ public class TaskMeter extends Shell {
                 addNewList();
             }
         });
-        mntmAddList.setText("Add List");
+        mntmAddList.setText(getResourceString("newList"));
 
         MenuItem mntmAddTask = new MenuItem(menuUser, SWT.NONE);
         mntmAddTask.setAccelerator(SWT.MOD1 + 'N');
@@ -514,11 +535,19 @@ public class TaskMeter extends Shell {
                 addTask();
             }
         });
-        mntmAddTask.setText("Add New Task");
+        mntmAddTask.setText(getResourceString("newTask"));
 
         new MenuItem(menuUser, SWT.SEPARATOR);
 
-        MenuItem mntmSave = new MenuItem(menuUser, SWT.NONE);
+        final MenuItem mntmSave = new MenuItem(menuUser, SWT.NONE);
+        mntmSave.setAccelerator(SWT.MOD1 + 'S');
+        mntmSave.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                saveLists();
+                setStatusBar(getResourceString("msg.saved"));
+            }
+        });
         mntmSave.setText(getResourceString("save"));
 
         new MenuItem(menuUser, SWT.SEPARATOR);
@@ -531,6 +560,12 @@ public class TaskMeter extends Shell {
             }
         });
         mntmExit.setText(getResourceString("exit"));
+        
+        menuUser.addMenuListener(new MenuAdapter() {
+            public void menuShown(MenuEvent e) {
+                mntmSave.setEnabled(isModified == true);
+            }
+        });
     }
 
     /**
@@ -549,7 +584,7 @@ public class TaskMeter extends Shell {
             if (choice == SWT.CANCEL) {
                 return false;
             } else if (choice == SWT.YES) {
-                if (!save())
+                if (!saveLists())
                     return false;
             }
         }
@@ -561,8 +596,9 @@ public class TaskMeter extends Shell {
      * 
      * @return
      */
-    private boolean save() {
+    private boolean saveLists() {
         FileHandler.saveAll(lists);
+        isModified = false;
         return true;
     }
 
@@ -576,10 +612,13 @@ public class TaskMeter extends Shell {
             int index = Integer.parseInt(items[0].getText());
 
             TaskDetailDialog dialog = new TaskDetailDialog(this, TaskDetailDialog.EDIT_TASK);
-            dialog.setTask(currentList.getTask(index));
+            
+            Task task = currentList.getTask(index);
+            dialog.setTask(task);
 
             String feedback = dialog.open();
             if (feedback != null) {
+                refreshTask(index-1, task);
                 setStatusBar(feedback);
                 isModified = true;
             }
@@ -590,6 +629,7 @@ public class TaskMeter extends Shell {
         TaskDetailDialog dialog = new TaskDetailDialog(this, TaskDetailDialog.ADD_TASK);
         
         Task newTask = new Task();
+        newTask.setList(currentList.getName());
         
         dialog.setTask(newTask);
         
@@ -597,6 +637,7 @@ public class TaskMeter extends Shell {
         if (feedback != null) {
             feedback = currentList.add(newTask);
             
+            addNewTask(taskTable.getItemCount()+1, newTask);
             setStatusBar(feedback);
             isModified = true;
         }

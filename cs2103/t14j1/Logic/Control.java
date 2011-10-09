@@ -111,7 +111,9 @@ class Control {
 		case SORT:
 			return sortBy(input);
 		case SWITCH_LIST:
-			switchList(input); 
+			switchList(input);
+		case EXIT:
+			return save();
 		default:
 			return "invalid command";
 		}
@@ -185,6 +187,7 @@ class Control {
 		
 		String name = parseCommand.extractTaskName();
 		Date startDateTime = parseCommand.extractStartDate();
+		
 		Date endDateTime = parseCommand.extractEndDate();
 		Long startTime = parseCommand.extractStartTime();
 		Long endTime = parseCommand.extractEndTime();
@@ -294,12 +297,27 @@ class Control {
 	// you can set the hour, minute, seconds to 0.
 	//
 	private void convertLongTimeToDate (Date d, Long secondsFromStartOfDay) {
-		int hours     = secondsFromStartOfDay.intValue() / 3600;
-		int minutes   = (secondsFromStartOfDay.intValue() - hours * 60*60)/60;
-		int seconds   = secondsFromStartOfDay.intValue() - hours * 3600 - minutes * 60;
-		d.setHours(hours);
-		d.setMinutes(minutes);
-		d.setSeconds(seconds);
+		
+		if(d == null)
+			return;
+		
+		else if(secondsFromStartOfDay == null) {
+			/*A value of null indicates that the user did not specify any time and
+			so, we assume the time to be 00:00:00*/
+			
+			d.setHours(0);
+			d.setMinutes(0);
+			d.setSeconds(0);
+		}
+		
+		else {
+			int hours     = secondsFromStartOfDay.intValue() / 3600;
+			int minutes   = (secondsFromStartOfDay.intValue() - hours * 60*60)/60;
+			int seconds   = secondsFromStartOfDay.intValue() - hours * 3600 - minutes * 60;
+			d.setHours(hours);
+			d.setMinutes(minutes);
+			d.setSeconds(seconds);
+		}
 	}
 
 	private String deleteTask(String input) {

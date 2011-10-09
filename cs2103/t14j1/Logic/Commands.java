@@ -17,5 +17,7 @@ public enum Commands {
 	DISPLAY_LISTS,
 	DISPLAY_TASKS,
 	// Invalid Command
-	INVALID
+	INVALID,
+	//Exit Command
+	EXIT
 }

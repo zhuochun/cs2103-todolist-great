@@ -95,9 +95,9 @@ class Control {
 	public String executeCommand(Commands command, String input) {
 		switch (command) {
 		case ADD_TASK:
-			return addTask(input);
+			return addTask(input);	// 100% implemented
 		case ADD_LIST:
-			return addList(input);
+			return addList(input);	// 100%
 		case SEARCH:
 			return search(input);
 		case DELETE_TASK:

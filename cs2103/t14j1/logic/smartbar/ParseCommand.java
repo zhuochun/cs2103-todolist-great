@@ -132,6 +132,10 @@ public class ParseCommand {
 	private static final String regPriorityFormat = "(![123])";
 	private static final String regListFormat = "((#[\\w]+)|(#\\([^\\)]+\\)))";//"((#[\\w]+)|(#\\([.]+\\)))";
 	
+	private static final String regDeleteTaskCmd = "^(delete|del)\\ [\\d]+$";
+	private static final String regDeleteListCmd = "^(delete|del)\\ "+ regListFormat + "$";
+	private static final String regDisplayTaskCmd = "^(display|dis)\\ [\\d]+";
+	
 	// @endgroup regex
 	
 	// basic properities 
@@ -146,7 +150,7 @@ public class ParseCommand {
 	
 	private String taskTitle = null;
 	
-	// filed of this class
+	// fields of this class
 	private String commandStr;
 	private String list;
 	private Time deadlineTime;
@@ -156,7 +160,9 @@ public class ParseCommand {
 	private Time searchAfterTime;
 	private Calendar searchAfterDate;
 	
-	
+	// fields for other commands
+	private Integer taskNum = null;
+		
 	private static void outputErr(String msg){
 	//	System.err.println("Message: " + msg);//((this.commandStr == null)?"Not Specified.":this.commandStr));
 		try{
@@ -235,9 +241,20 @@ public class ParseCommand {
 		Pattern regListFormatPattern = Pattern.compile(
 				regWordSpacer + regListFormat + regWordSpacer, Pattern.CASE_INSENSITIVE);
 		
+		
+		
+		
+		// then the command matching
+		Pattern regDeleteTaskCmdPattern = Pattern.compile(regDeleteTaskCmd,Pattern.CASE_INSENSITIVE);
+		Matcher regDeleteTaskCmdMatcher = regDeleteTaskCmdPattern.matcher(commandStr);
+		Pattern regDeleteListCmdPattern = Pattern.compile(regDeleteListCmd,Pattern.CASE_INSENSITIVE);
+		Matcher regDeleteListCmdMatcher = regDeleteListCmdPattern.matcher(commandStr);
+		Pattern regDisplayTaskCmdPattern = Pattern.compile(regDisplayTaskCmd,Pattern.CASE_INSENSITIVE);
+		Matcher regDisplayTaskCmdMatcher = regDisplayTaskCmdPattern.matcher(commandStr);
+		
 		// start parsing
 		
-		if(command.charAt(0) == '/'){
+		if(commandStr.charAt(0) == '/'){
 			commandType = Commands.SEARCH;
 			command = command.substring(1);
 		} else if(commandStr.charAt(0) == '#'){
@@ -246,11 +263,65 @@ public class ParseCommand {
 			//return Commands.
 			commandType = Commands.EXIT;
 			return;
-		} else{
+		} else if(regDeleteTaskCmdMatcher.find()){
+			commandType = Commands.DELETE_TASK;
+			String delParams[] = commandStr.split("\\ ");
+			taskNum = Integer.parseInt(delParams[1]);
+			return;
+		} 
+		// when it's to delete a list; list would be handled by the task
+		else if(regDeleteListCmdMatcher.find()){
+			commandType = Commands.DELETE_LIST;
+		} else if(regDisplayTaskCmdMatcher.find()){
+			commandType = Commands.DISPLAY_TASKS;
+			String disParams[] = commandStr.split("\\ ");
+			taskNum = Integer.parseInt(disParams[1]);
+			return;
+		} else if(commandStr.substring(0, 4).compareToIgnoreCase("add ") == 0){
+			commandStr = commandStr.substring(4);
 			commandType = Commands.ADD_TASK;
+		} 
+		 else{
+			System.err.println("Invalid command");
+			commandType = Commands.INVALID;
+			return;
 		}
 		
+		System.err.println("going to parse");
+		
+		command = commandStr;
+		
 		String matchedStr = null;
+		
+		// extra parameter for search: before/after time
+		if(this.commandType == Commands.SEARCH){
+			/**
+			 * Before Time Format:
+			 *  before + [space] + [any time point]
+			 */
+			Pattern regBeforeDateTimePattern = Pattern.compile(
+					regWordSpacer + "before\\ " + regDateTimeOverallFormat + regWordSpacer,Pattern.CASE_INSENSITIVE);
+			Matcher regBeforeDateTimeMatcher = regBeforeDateTimePattern.matcher(command);
+			
+			/**
+			 * Similar to before time format
+			 */
+			Pattern regAfterDateTimePattern = Pattern.compile(
+					regWordSpacer + "after\\ " + regDateTimeOverallFormat + regWordSpacer,Pattern.CASE_INSENSITIVE);
+			Matcher regAfterDateTimeMatcher = regAfterDateTimePattern.matcher(command);
+			
+			if(regBeforeDateTimeMatcher.find()){
+				String timeDateStr = removeTheLeadingAndTailingWordSpacer(matchedStr = regBeforeDateTimeMatcher.group());
+				searchBeforeDate = dateTimeProcess(searchBeforeTime, timeDateStr, null);
+			}
+			
+			if(regAfterDateTimeMatcher.find()){
+				String timeDateStr = removeTheLeadingAndTailingWordSpacer(matchedStr = regBeforeDateTimeMatcher.group());
+				searchAfterDate = dateTimeProcess(searchAfterTime, timeDateStr, null);
+			}
+		}
+		
+		
 		
 		// need to proform these first cuz the date/time may be separate by other parameters
 		// place
@@ -326,33 +397,6 @@ public class ParseCommand {
 		command = removeMatchedString(command, matchedStr);matchedStr=null;
 		
 		
-		// extra parameter for search: before/after time
-		if(this.commandType == Commands.SEARCH){
-			/**
-			 * Before Time Format:
-			 *  before + [space] + [any time point]
-			 */
-			Pattern regBeforeDateTimePattern = Pattern.compile(
-					regWordSpacer + "before\\ " + regDateTimeOverallFormat + regWordSpacer,Pattern.CASE_INSENSITIVE);
-			Matcher regBeforeDateTimeMatcher = regBeforeDateTimePattern.matcher(command);
-			
-			/**
-			 * Similar to before time format
-			 */
-			Pattern regAfterDateTimePattern = Pattern.compile(
-					regWordSpacer + "after\\ " + regDateTimeOverallFormat + regWordSpacer,Pattern.CASE_INSENSITIVE);
-			Matcher regAfterDateTimeMatcher = regAfterDateTimePattern.matcher(command);
-			
-			if(regBeforeDateTimeMatcher.find()){
-				String timeDateStr = removeTheLeadingAndTailingWordSpacer(matchedStr = regBeforeDateTimeMatcher.group());
-				searchBeforeDate = dateTimeProcess(searchBeforeTime, timeDateStr, null);
-			}
-			
-			if(regAfterDateTimeMatcher.find()){
-				String timeDateStr = removeTheLeadingAndTailingWordSpacer(matchedStr = regBeforeDateTimeMatcher.group());
-				searchAfterDate = dateTimeProcess(searchAfterTime, timeDateStr, null);
-			}
-		}
 		
 		this.taskTitle = command.trim();
 	}
@@ -813,7 +857,7 @@ public class ParseCommand {
 		// test match here
 		String taskStr = "Get up tomorrow";	// test time
 		
-		String testStr = "exit";
+		String testStr = "dis 123";
 		
 		// for testing
 		BufferedReader in;
@@ -1093,7 +1137,7 @@ public class ParseCommand {
 	
 	/* These four method are for search command only */
 	public Date extractSearchBeforeDate() {
-		return searchBeforeDate==null?null:searchBeforeDate.getTime();
+		return _extractDateHelper(searchBeforeDate, searchBeforeTime);
 	}
 	
 	
@@ -1102,12 +1146,23 @@ public class ParseCommand {
 	}
 	
 	public Date extractSearchAfterDate() {
-		return searchAfterDate==null?null:searchAfterDate.getTime();
+		return _extractDateHelper(searchAfterDate, searchAfterTime);
 	}
 	
 	public Long extractSearchAfterTime(){
 		return searchAfterTime.getTime();
 	}
 	/* These four method are for search command only */
+	
+	/* START: These methods are for other commands, not add task */
+	
+	/** 
+	 * called by edit task, delete task; used to specify the task number
+	 * @return The task number
+	 */
+	public Integer extractTaskNum(){
+		return taskNum;
+	}
+	/* END: These methods are for other commands, not add task */
 }
 

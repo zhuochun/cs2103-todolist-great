@@ -2,7 +2,7 @@ package cs2103.t14j1.logic;
 
 public enum Commands {
     // Task related Commands
-	ADD_TASK,	// shubham wants it to be "any commands else"
+	ADD_TASK,	// Syntax: add + task str
 	DELETE_TASK,	// Syntax: del + [num]
 	MOVE_TASK,		// TODO: currently didn't implement
 	EDIT_TASK,		// Only in GUI
@@ -18,10 +18,14 @@ public enum Commands {
 	SORT,			// TODO: currently didn't implement
 		// 
 	SEARCH,			// Syntax: / + string to search
-	DISPLAY_LISTS,	// Syntax: dis/display + [#list] 
+	DISPLAY_LISTS,	// Syntax: dis/display + [#list]
+		// notes on 2011-10-9 16:47:26 -- don't necessary to put it here
+		// if the user want to display a list, the user simply switch to a list
+		// using display command; or can simply search for that list.
 	DISPLAY_TASKS,	// Syntax: dis/display + [num]
-	// Invalid Command
-	INVALID,		
+		// note on 2011-10-9 16:46:54	
+		// if the user want to display a task
+	INVALID,
 	//Exit Command
 	EXIT
 }

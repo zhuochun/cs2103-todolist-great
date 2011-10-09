@@ -106,23 +106,23 @@ class Control {
 	public String executeCommand(Commands command, String input) {
 		switch (command) {
 		case ADD_TASK:
-			return addTask(input);	// 100% implemented
+			return addTask();	// 100% implemented
 		case ADD_LIST:
-			return addList(input);	// 100%
+			return addList();	// 100%
 		case SEARCH:
-			return search(input);
+			return search();
 		case DELETE_TASK:
-			return deleteTask(input);
+			return deleteTask();
 		case DELETE_LIST:
-			return deleteList(input);
+			return deleteList();
 		case EDIT_TASK:
-			return editTask(input);
+			return editTask();
 		case EDIT_LIST:
-			return editList(input);
+			return editList();
 		case SORT:
-			return sortBy(input);
+			return sortBy();
 		case SWITCH_LIST:
-			switchList(input);
+			switchList();
 		case EXIT:
 			return saveAndExit();
 		default:
@@ -135,10 +135,9 @@ class Control {
 	 * 
 	 * Shubham: Have to add functionality for deadline
 	 * 
-	 * @param input
 	 * @return
 	 */
-	private String addTask(String input) {
+	private String addTask() {
 		String name        = parseCommand.extractTaskName();
 		String list        = parseCommand.extractListName();
 		Priority priority  = parseCommand.extractPriority();
@@ -162,7 +161,7 @@ class Control {
 		return result;
 	}
 
-	private String addList(String input) {
+	private String addList() {
 		String name = parseCommand.extractListName();
 		
 		lists.add(name);
@@ -180,20 +179,24 @@ class Control {
 	//    we create TaskList class).
 	//
 	// 1. if any of the name/startDateTime properties is not set in search input, comparison is going to fail
-	//    TODO: so you need to change the is...() functions to return true if any of the properties is null
+	//     so you need to change the is...() functions to return true if any of the properties is null
 	// 
 	// 2. TODO: if the listName is set, you only need to search within that list.
 	//    btw, the parseCommand.extractList return "INBOX" when the search input has not specify which list.
+	//Noted, will be done in V0.2
 	//    
-	// 3. TODO: you need to decide whether by default (when the user does not specified a list), you search
+	// 3.  you need to decide whether by default (when the user does not specified a list), you search
 	//    only the list the user is now viewing or all the lists
+	//Decided, all the lists
 	// 
-	// 4. TODO: for name and space, you can use regular expression to match the terms.
+	// 4.  for name and space, you can use regular expression to match the terms.
+	//Why, isn't String matching good enough?
 	//
 	// 5. TODO: all those is..() functions should put into a separate search class in logic. And, I think function
 	//    names like isDateBeforeGivenDateAndTime() is too long. 
+	// Okay, would put into a separate Search file in Logic in V0.2
 	//
-	private String search(String input) {
+	private String search() {
 	    searchResult = new TaskList("search result");
 		
 		String name = parseCommand.extractTaskName();
@@ -447,31 +450,47 @@ class Control {
 		}
 	}
 
-	private String deleteTask(String input) {
+	private String deleteTask() {
+		
+		int numberOfTask = parseCommand.extractTaskNum();
+		Task taskToBeDeleted = searchResult.getTask(numberOfTask - 1);
+		TaskList listToWhichTaskBelongs = getListToWhichTaskBelongs(taskToBeDeleted);
+		int indexOfTaskInTaskList = listToWhichTaskBelongs.findIndexOfTask(taskToBeDeleted);
+		String postDeletionMessage = listToWhichTaskBelongs.delete(indexOfTaskInTaskList);
+		
+		return postDeletionMessage;
+		
+	}
+
+	private TaskList getListToWhichTaskBelongs(Task task) {
+		
+		String listName = task.getList();
+		
+		TaskList list = lists.getList(listName);
+		
+		return list;
+		
+	}
+
+	private String deleteList() {
 		// TODO Auto-generated method stub
 		
 		return null;
 	}
 
-	private String deleteList(String input) {
+	private String editTask() {
 		// TODO Auto-generated method stub
 		
 		return null;
 	}
 
-	private String editTask(String input) {
+	private String editList() {
 		// TODO Auto-generated method stub
 		
 		return null;
 	}
 
-	private String editList(String input) {
-		// TODO Auto-generated method stub
-		
-		return null;
-	}
-
-	private String sortBy(String input) {
+	private String sortBy() {
 		// TODO Auto-generated method stub
 		
 		return null;
@@ -515,7 +534,7 @@ class Control {
 	    }
 	}
 	
-	public void switchList (String input) {
+	public void switchList () {
 		String listName = parseCommand.extractListName();
 		
 		TaskList list = lists.getList(listName);

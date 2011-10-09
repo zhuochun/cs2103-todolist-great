@@ -97,4 +97,13 @@ public class TaskList implements Iterable<Task> {
 	    return iterateTasks;
 	}
 	
+	public int findIndexOfTask(Task task) {
+		for(int i = 0; i < tasks.size(); i ++) {	
+			if(tasks.get(i).equals(task)) {
+				return i;
+			}
+		}	
+		return -1;
+	}	
 }
+

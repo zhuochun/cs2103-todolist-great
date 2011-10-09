@@ -25,6 +25,8 @@ Functions completed:
 	extractEndDate: don't know how we're doing with this now...
 */
 
+//TODO Please support durations like 2 hours and 15 minutes
+
 /**
  * @author SongYY
  * A time wrapper for the time

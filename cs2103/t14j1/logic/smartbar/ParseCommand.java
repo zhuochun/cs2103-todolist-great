@@ -255,7 +255,7 @@ public class ParseCommand {
 		else if(regDeleteListCmdMatcher.find()){
 			commandType = Commands.DELETE_LIST;
 		} else if(regDisplayTaskCmdMatcher.find()){
-			commandType = Commands.DISPLAY_TASKS;
+			commandType = Commands.DISPLAY_TASK;
 			String disParams[] = commandStr.split("\\ ");
 			taskNum = Integer.parseInt(disParams[1]);
 			return;
@@ -563,7 +563,7 @@ public class ParseCommand {
 	}
 
 	/**
-	 * Extract the "duration"; it would also set the enddate/time if it's not 
+	 * Extract the "duration"; it would also set the end date/time if it's not 
 	 * 	set
 	 * 
 	 * @param duration

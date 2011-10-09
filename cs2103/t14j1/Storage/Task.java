@@ -336,4 +336,32 @@ public class Task {
 	    return str.toString();
 	}
 	
+	/**
+	 * added by Songyy -- used in logic, necessary to put it here.
+	 * @return
+	 */
+	public String getDisplayTaskStr(){
+		StringBuilder str = new StringBuilder();
+		
+		str.append("Task: " + name);	// name cannot be null
+		addOutputOnNotNull(str,"Place: " + place, place,true);
+		addOutputOnNotNull(str,"Place: " + place, place,true);
+		addOutputOnNotNull(str,"Priority: " + getPriorityStr(), priority,true);
+		addOutputOnNotNull(str,"Start Date: " + getStartDate(),startDateTime,true);
+		addOutputOnNotNull(str,"End Date: " + getEndDate(), endDateTime,true);
+		addOutputOnNotNull(str,"Duration: " + getDurationStr(), duration,true);
+		
+		return str.toString();
+	}
+	
+	private void addOutputOnNotNull(StringBuilder str, String info, Object objToCheckNull, boolean newLineInFront){
+		if(objToCheckNull == null){
+			return;
+		}
+		
+		if(newLineInFront){
+			str.append("\n");
+		}
+		str.append(info);
+	}
 }

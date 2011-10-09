@@ -18,20 +18,32 @@ import cs2103.t14j1.storage.TaskLists;
  * It also serves as the command line interface for version 0.1
  * Afterwards, it serve as the bridge between user interface and logic
  *
- * @author Shubham, Zhuochun
+ * @author Shubham
  * 
+ */
+/**
+ * @author Shubham Goyal
+ *
+ */
+/**
+ * @author Shubham Goyal
+ *
+ */
+/**
+ * @author Shubham Goyal
+ *
  */
 class Control {
 	
 	TaskLists lists;        // stores all the lists
-	TaskList  searchResult; // stores the last search result
+	TaskList  searchResult; // stores the tasks which were short listed after user's last search query
 	String    currentList;  // stores the current list name of the user is viewing
 	ParseCommand parseCommand;
-	private static boolean shouldExit;
+	private static boolean shouldExit;//stores whether the user wants to exit or not so that the application can exit after save command is completed
 
 	/**
-	 * command line interface, just for version 0.1
-	 * will be replaced by user interface, so I keep it short
+	 * CLI just for version 0.1.
+	 * It will be replaced by GUI in Version 0.2, so I just keep it short
 	 * 
 	 * @param args
 	 */
@@ -59,7 +71,7 @@ class Control {
 	}
 
 	/**
-	 * constructor
+	 * Constructor
 	 */
 	public Control() {
 		currentList = TaskLists.INBOX;
@@ -68,47 +80,38 @@ class Control {
 	}
 	
 	/**
-	 * process input line
+	 * Process input line
 	 * 
 	 * @param input
 	 * @return
 	 */
 	public String processInput(String input) {
 		try {
-            parseCommand = new ParseCommand(input);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+			parseCommand = new ParseCommand(input);
+		} catch (Exception e) {
+			e.printStackTrace();
+		}
 		
 		Commands command = Commands.INVALID;
 		
-		// Zhuochun's Note
-		// used to display lists and tasks in command line
-		if (input.equals("ll")) { // ll = list all lists
-		    displayList();
-		} else if (input.equals("lt")) { // lt = list all tasks in current list
-		    display(lists.getList(currentList));
-		} else {
-		    command = parseCommand.extractCommand();
-		}
+		command = parseCommand.extractCommand();
 		
-		String feedback = executeCommand(command, input);
+		String feedback = executeCommand(command);
 		return feedback;
 	}
 
 	/**
-	 * execute command
+	 * Execute command
 	 * 
-	 * @param command
-	 * @param input
-	 * @return feedback
+	 * @param command Stores the command which is to be executed
+	 * @return feedback This is the success or failure message. In some cases, it can also provide additional information.
 	 */
-	public String executeCommand(Commands command, String input) {
+	public String executeCommand(Commands command) {
 		switch (command) {
 		case ADD_TASK:
-			return addTask();	// 100% implemented
+			return addTask();
 		case ADD_LIST:
-			return addList();	// 100%
+			return addList();
 		case SEARCH:
 			return search();
 		case DELETE_TASK:
@@ -130,12 +133,10 @@ class Control {
 		}
 	}
 
+	
 	/**
-	 * add task into TaskLists
-	 * 
-	 * Shubham: Have to add functionality for deadline
-	 * 
-	 * @return
+	 * Adds the task
+	 * @return the feedback
 	 */
 	private String addTask() {
 		String name        = parseCommand.extractTaskName();
@@ -418,6 +419,12 @@ class Control {
 	}
 
 	private boolean isNameSame(String name, Task task) {
+		
+		System.out.println(name);
+		
+		if(name == null)
+			return true;
+		
 		return name.equals(task.getName());
 	}
 
@@ -518,11 +525,16 @@ class Control {
 	    System.out.println(tasklist.getName());
 	    
 	    int index = 1;
-	    for (Task t : tasklist) {
-	        System.out.print((index++) + "\t");
-	        System.out.print(t.toString());
-	        System.out.print("\n");
-	    }
+	    
+	    if(tasklist.getSize() == 0)
+	    	System.out.println("Sorry, no task exists for this list.");
+	    
+	    else
+	    	for (Task t : tasklist) {
+	    		System.out.print((index++) + "\t");
+	    		System.out.print(t.toString());
+	    		System.out.print("\n");
+	    	}
 	}
 	
 	/**
@@ -530,6 +542,9 @@ class Control {
 	 */
 	public void displayList() {
 	    int index = 1;
+	    
+	    int countTasks = 0;
+	    
 	    for (Entry<String, TaskList> tl : lists) {
 	        System.out.print((index++) + "\t");
 	        System.out.print(tl.getKey());

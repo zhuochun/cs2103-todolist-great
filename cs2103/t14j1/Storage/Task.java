@@ -307,6 +307,10 @@ public class Task {
         
         return dStr.toString();
     }
+	
+	public boolean isCompleted() {
+	    return status;
+	}
 
     public boolean getStatus() {
 		return status;

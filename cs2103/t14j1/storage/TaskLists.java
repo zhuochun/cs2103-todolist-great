@@ -139,6 +139,16 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
 	}
 	
 	/**
+	 * check whether the list name already exists
+	 * 
+	 * @param name
+	 * @return
+	 */
+	public boolean hasList(String name) {
+	    return lists.containsKey(name);
+	}
+	
+	/**
 	 * iteration of lists in TaskLists
 	 */
     public Iterator<Entry<String, TaskList>> iterator() {

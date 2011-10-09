@@ -126,7 +126,7 @@ public class ParseCommand {
 			"(" + regTimeFormat + "("+ regWordSpacer + regDateOverallFormat + ")?)" +  // time (date)?
 			")";
 	private static final String regDurationFormat = 
-			"(for(\\ )+[\\d]+(\\ )?" + regTimeUnit + ")";
+			"(for(\\ [\\d]+\\ " + regTimeUnit + ")+)";
 	private static final String regPlaceFormat = 
 		"((@[\\w]+)|(@\\([^\\)]+\\)))";	// format: @ + word; or: @ + (words)
 	private static final String regPriorityFormat = "(![123])";
@@ -274,7 +274,7 @@ public class ParseCommand {
 			String disParams[] = commandStr.split("\\ ");
 			taskNum = Integer.parseInt(disParams[1]);
 			return;
-		} else if(commandStr.substring(0, 4).compareToIgnoreCase("add ") == 0){
+		} else if((commandStr.length() > 3) && commandStr.substring(0, 4).compareToIgnoreCase("add ") == 0){
 			commandStr = commandStr.substring(4);
 			commandType = Commands.ADD_TASK;
 		} 
@@ -590,27 +590,38 @@ public class ParseCommand {
 	 */
 	private boolean regDurationFormatProcess(String durationStr) {
 		String[] durationParts = durationStr.split("\\ ");
-		long base = Long.parseLong(durationParts[1]);
+		
+		long res = 0;
 		
 		// then try to tell the duration information
-		String unit = durationParts[2];
-		if(unit.substring(0, 3).compareToIgnoreCase("sec") == 0){
-			duration.setTime(base);
-		} else if(unit.substring(0, 3).compareToIgnoreCase("min") == 0){
-			duration.setTime(base * 60);
-		} else if(unit.substring(0, 1).compareToIgnoreCase("h") == 0){
-			duration.setTime(base * 3600);
-		} else if(unit.substring(0, 3).compareToIgnoreCase("day") == 0){
-			duration.setTime(base * 3600 * 24);
-		} else {
-			return false;
+		for(int i=1; i<durationParts.length; i+=2){
+			long base = Long.parseLong(durationParts[i]);
+			String unit = durationParts[i+1];
+			if(unit == null || unit.compareTo("")==0){
+				continue;
+			}
+			if(unit.length() >= 3 && unit.substring(0, 3).compareToIgnoreCase("sec") == 0){
+				res += base;
+			} else if(unit.length() >= 3 && unit.substring(0, 3).compareToIgnoreCase("min") == 0){
+				res += base * 60;
+			} else if(unit.length() >= 1 && unit.substring(0, 1).compareToIgnoreCase("h") == 0){
+				res += base * 3600;
+			} else if(unit.length() >= 3 && unit.substring(0, 3).compareToIgnoreCase("day") == 0){
+				res += base * 3600 * 24;
+			} else {
+				System.err.println("duration str: " + durationStr);
+				return false;
+			}
 		}
 		
+		duration.setTime(res);
 		// after getting the duration, if the end_date is not set, set the end date/time
-		if(endDate == null){
-			endDate = (Calendar) startDate.clone();
+		if(startTime.getTime() != null){
+			endTime.setTime(startTime.getTime() + duration.getTime());
+			if(endDate == null){
+				endDate = (Calendar) startDate.clone();
+			}
 		}
-		endTime.setTime(startTime.getTime() + duration.getTime());
 		
 		return true;
 	}
@@ -846,7 +857,7 @@ public class ParseCommand {
 		// test match here
 		String taskStr = "Get up tomorrow";	// test time
 		
-		String testStr = "dis 123";
+		String testStr = "add Jogging tomorrow for 3 hours 2 min";
 		
 		// for testing
 		BufferedReader in;
@@ -1102,6 +1113,7 @@ public class ParseCommand {
 		if(deadlineTime.getTime() == null){
 			
 			deadlineTime.setTime((long)3600 * 24 -1);
+			System.out.println(deadlineTime.getTime());
 		}
 		
 		return _extractDateHelper(deadlineDate, deadlineTime);

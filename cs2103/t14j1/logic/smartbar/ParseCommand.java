@@ -77,7 +77,6 @@ public class ParseCommand {
 	private static final String regNonSpaceWordSpacer = "([^\\d\\w\\ ]|(^)|($))";
 	private static final String regDateSpacer = "[,-/. ]";
 	
-
 		// regular expression for matching the time
 	private static final String regTimePointAmPm = // match the 5am/pm, 5 am/pm, or 5:00 am/pm. 
 			"(1[012]|\\d)(:[0-5]\\d){0,2}((\\ )?[ap]m)";
@@ -174,9 +173,9 @@ public class ParseCommand {
 	}
 	
 	
-	/* The constructor
+	/** The constructor
 	 * @param command - the command passed from the smart bar GUI
-	 * @throws Exception */ 
+	 */
 	public ParseCommand(String command){
 		// set the time zone to
 //		TimeZone.setDefault(TimeZone.getTimeZone("GMT-0"));
@@ -241,9 +240,6 @@ public class ParseCommand {
 		Pattern regListFormatPattern = Pattern.compile(
 				regWordSpacer + regListFormat + regWordSpacer, Pattern.CASE_INSENSITIVE);
 		
-		
-		
-		
 		// then the command matching
 		Pattern regDeleteTaskCmdPattern = Pattern.compile(regDeleteTaskCmd,Pattern.CASE_INSENSITIVE);
 		Matcher regDeleteTaskCmdMatcher = regDeleteTaskCmdPattern.matcher(commandStr);
@@ -286,8 +282,6 @@ public class ParseCommand {
 			commandType = Commands.INVALID;
 			return;
 		}
-		
-		System.err.println("going to parse");
 		
 		command = commandStr;
 		
@@ -396,8 +390,6 @@ public class ParseCommand {
 		}
 		command = removeMatchedString(command, matchedStr);matchedStr=null;
 		
-		
-		
 		this.taskTitle = command.trim();
 	}
 	
@@ -407,7 +399,6 @@ public class ParseCommand {
 		deadlineDate = dateTimeProcess(deadlineTime, deadlineStr, null);
 		return deadlineDate != null;
 	}
-
 
 	private boolean periodProcess(String periodStr) {
 		String[] timePoint = periodStr.split("[\\~\\-]");
@@ -996,14 +987,17 @@ public class ParseCommand {
 		Long definedTime = time.getTime();
 		int setHour = 0;
 		int setMinute = 0;
+		int setSecond = 0;
 		
 		if(definedTime !=null){
 			setHour = (int) (definedTime/3600);
 			setMinute = (int) (definedTime%3600)/60;
+			setSecond = (int) (definedTime%60);
 		}
 		
 		date.set(Calendar.HOUR_OF_DAY, setHour);
 		date.set(Calendar.MINUTE, setMinute);
+		date.set(Calendar.SECOND, setSecond);
 		return date.getTime();
 	}
 	
@@ -1028,14 +1022,7 @@ public class ParseCommand {
 	
 	/**
 	 * @return
-	 *  the number of minutes for the duration
-	 *  
-	 *********************************
-	 *  Initially: The number of seconds for the duration.
-	 *
-	 *  Change made on 2011-10-9 10:38:57:
-	 *  	return the # of minutes for the duration, as Zhuochun required.
-	 *  
+	 *  the number of seconds for the duration
 	 *  @code null @endcode on doesn't exist
 	 */
 	public Long extractDuration(){
@@ -1066,7 +1053,7 @@ public class ParseCommand {
 		// return 0
 		else if(startTime.getTime() != null){
 			return (long)0;
-		} 
+		}
 		
 		// when there's a no start time, with a date, then return null
 		else if(startTime.getTime() == null){
@@ -1103,7 +1090,7 @@ public class ParseCommand {
 	 * @return
 	 * 	the date and time for a deadline.
 	 *  As long as a task has a start date, we'll assume it has a deadline 
-	 *  (the last minute of a day); and
+	 *  (the last second of a day); and
 	 *   the deadline has a fixed time
 	 */
 	public Date extractDeadlineDate() {
@@ -1112,7 +1099,6 @@ public class ParseCommand {
 		if(startDate == null){
 			return null;
 		}
-		
 		
 		// set it as the last minute of the day
 		if(deadlineTime.getTime() == null){

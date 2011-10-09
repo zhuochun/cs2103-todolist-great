@@ -169,7 +169,7 @@ public class DateFormat {
 	/**
 	 * convert Date to string long format
 	 * 
-	 * @param Date
+	 * @param date
 	 * @return String              yyyy-MM-dd HH:mm:ss
 	 */
 	public static String dateToStrLong(Date date) {
@@ -181,7 +181,7 @@ public class DateFormat {
 	/**
 	 * convert Date to string long format
 	 * 
-	 * @param Date
+	 * @param date
 	 * @return String              yyyy-MM-dd HH:mm
 	 */
 	public static String dateToStrShort(Date date) {
@@ -193,7 +193,7 @@ public class DateFormat {
 	/**
 	 * convert Date to string format
 	 * 
-	 * @param Date
+	 * @param date
 	 * @return String              yyyy-MM-dd
 	 */
 	public static String dateToStr(Date date) {
@@ -273,7 +273,8 @@ public class DateFormat {
 	/**
 	 * check if the passed date is in a leap year
 	 * 
-	 * @param yyyy-MM-dd
+	 * @param date
+	 * 	in the format of yyyy-MM-dd
 	 * @return boolean
 	 */
 	public static boolean isLeapYear(String date) {
@@ -298,7 +299,8 @@ public class DateFormat {
 	/**
 	 * get the number of days in a month (pass in a Date)
 	 * 
-	 * @param yyyy-MM-dd
+	 * @param date
+	 * 	in the format of yyyy-MM-dd
 	 * @return number of days
 	 */
 	public static int getDaysInMonth(String date) {

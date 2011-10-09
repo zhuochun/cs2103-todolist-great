@@ -1,14 +1,21 @@
 package cs2103.t14j1.logic;
 
 public enum Commands {
+    // Task related Commands
 	ADD_TASK,
-	ADD_LIST,
 	DELETE_TASK,
-	DELETE_LIST,
-	SEARCH,
+	MOVE_TASK,
 	EDIT_TASK,
+	// List related Commands
+	ADD_LIST,
 	EDIT_LIST,
-	SORT,
+	DELETE_LIST,
 	SWITCH_LIST,
-	INVALID,
+	// General Commands
+	SORT,
+	SEARCH,
+	DISPLAY_LISTS,
+	DISPLAY_TASKS,
+	// Invalid Command
+	INVALID
 }

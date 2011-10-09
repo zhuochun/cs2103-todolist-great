@@ -227,7 +227,7 @@ class Control {
 			TaskList taskList = iterator.next().getValue();
 			
 			for(int i = 0; i < taskList.getSize(); i ++) {
-				if(isNameSame(name, taskList.getTask(i))
+				if(isNameSame(name, taskList.getTask(i + 1))
 						&& isStartDateSame(startDateTime, taskList.getTask(i))
 						&& isEndDateSame(endDateTime, taskList.getTask(i))
 						&& isDeadlineDateSame(deadlineDate, taskList.getTask(i))
@@ -419,8 +419,6 @@ class Control {
 	}
 
 	private boolean isNameSame(String name, Task task) {
-		
-		System.out.println(name);
 		
 		if(name == null)
 			return true;

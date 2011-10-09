@@ -10,25 +10,8 @@ import java.util.regex.Pattern;
 import cs2103.t14j1.logic.Commands;
 import cs2103.t14j1.storage.Priority;
 
-/*
-Functions completed:
-	extractTaskName() // simply return the string passed in
-	extractListName() // only support one list now
-	extractPriority()  // as Zhuochun requested, 1 measn High, 3 means low
-	extractStartDate() // returning a Date class as Zhuochun requested; personally I prefer Calendar class. or simply a Long integer with the meaning we've defined;
-	extractStartTime() // return an Long, is the number of seconds passed since 0:00.
-	extractDuration() // return an Long.
-	Function Partially Completed:
-	extractCommand:
-	I've only done for search task, switch task, and add task; cuz we didn't define syntax for the rest of the commands
-	Function not implemented:
-	extractEndDate: don't know how we're doing with this now...
-*/
-
-//TODO Please support durations like 2 hours and 15 minutes
-
 /**
- * @author SongYY
+ * @author Song Yangyu
  * A time wrapper for the time
  * Creating this wrapper for internal use now; it can be move to the task
  *  package if others found it useful
@@ -166,7 +149,6 @@ public class ParseCommand {
 	private Integer taskNum = null;
 		
 	private static void outputErr(String msg){
-	//	System.err.println("Message: " + msg);//((this.commandStr == null)?"Not Specified.":this.commandStr));
 		try{
 			// throw new exception for print stack
 			throw new Exception(msg);
@@ -213,7 +195,7 @@ public class ParseCommand {
 		Pattern regDurationFormatPattern = Pattern.compile(
 				regWordSpacer + regDurationFormat + regWordSpacer, Pattern.CASE_INSENSITIVE);
 		
-		/** 
+		/**
 		 * Place Format:
 		 *  @ + word
 		 *  @ + ( + words + )
@@ -256,6 +238,7 @@ public class ParseCommand {
 		if(commandStr.charAt(0) == '/'){
 			commandType = Commands.SEARCH;
 			command = command.substring(1);
+			commandStr = command;
 		} else if(commandStr.charAt(0) == '#'){
 			commandType = Commands.SWITCH_LIST;	// this would be used for parsing later
 		} else if(commandStr.trim().compareToIgnoreCase("exit") == 0){
@@ -860,7 +843,7 @@ public class ParseCommand {
 		// test match here
 		String taskStr = "Get up tomorrow";	// test time
 		
-		String testStr = "add Do homework on next Sat for 2 hours";
+		String testStr = "/add Do homework on next Sat for 2 hours";
 		
 		// for testing
 		BufferedReader in;

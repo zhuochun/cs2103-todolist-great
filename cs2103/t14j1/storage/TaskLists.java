@@ -82,7 +82,6 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
 	 * @param listName			the list name of the task will be added to
 	 * @param task				the task object
 	 * @return
-	 * 	// added by Songyy
 	 *  The result of adding a list
 	 */
 	public String addTask(String listName, Task task) {

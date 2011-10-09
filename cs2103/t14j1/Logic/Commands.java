@@ -74,7 +74,7 @@ public enum Commands {
 	 *  note on 2011-10-9 16:46:54
 	 *  if the user want to display a task
 	 */
-	DISPLAY_TASKS,
+	DISPLAY_TASK,
 
 	/**
 	 * When it's to exit

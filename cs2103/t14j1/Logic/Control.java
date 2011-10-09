@@ -26,6 +26,7 @@ class Control {
 	TaskList  searchResult; // stores the last search result
 	String    currentList;  // stores the current list name of the user is viewing
 	ParseCommand parseCommand;
+	private static boolean shouldExit;
 
 	/**
 	 * command line interface, just for version 0.1
@@ -43,9 +44,19 @@ class Control {
 			line = scan.nextLine();
 			result = cml.processInput(line); // result is a String that will be display in statusBar in GUI
 			System.out.println(result);
+			
+			checkForExit();
 		}
 	}
 	
+	/**
+	 * Check if the user wants the program to exit, and exit if he wants it to
+	 */
+	private static void checkForExit() {
+		if(shouldExit)
+			System.exit(0);
+	}
+
 	/**
 	 * constructor
 	 */
@@ -113,7 +124,7 @@ class Control {
 		case SWITCH_LIST:
 			switchList(input);
 		case EXIT:
-			return save();
+			return saveAndExit();
 		default:
 			return "invalid command";
 		}
@@ -350,10 +361,12 @@ class Control {
 		return null;
 	}
 	
-	public String save() {
+	public String saveAndExit() {
 		FileHandler.saveAll(lists);
 		
 		String SAVE_COMPLETED = "Saved";
+		
+		shouldExit = true;
 		
 		return SAVE_COMPLETED;
 	}

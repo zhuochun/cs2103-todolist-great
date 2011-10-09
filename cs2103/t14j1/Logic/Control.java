@@ -473,9 +473,12 @@ class Control {
 	}
 
 	private String deleteList() {
-		// TODO Auto-generated method stub
 		
-		return null;
+		String listName = parseCommand.extractListName();
+		
+		String postDeletionMessage = lists.remove(listName);
+		
+		return postDeletionMessage;
 	}
 
 	private String editTask() {

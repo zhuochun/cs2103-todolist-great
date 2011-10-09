@@ -60,14 +60,15 @@ class Time{
  *  
  * Example:
  *  
- *  @code
+ *  <pre>
+ *  {@code
  *  // smartBarStr is the String passed from smart bar GUI
  *  SmartBarParseCommand newCommand = new SmartBarParseCommand(smartBarStr); 
  *	 
  *	// to get the command type
  *	newCommend.[the properity you want to get]
- * 	@endcode
- * 	
+ *	}
+ * 	</pre> 	
  * @author Song Yangyu
  */
 public class ParseCommand {
@@ -280,7 +281,6 @@ public class ParseCommand {
 			commandType = Commands.ADD_TASK;
 		} 
 		 else{
-			System.err.println("Invalid command");
 			commandType = Commands.INVALID;
 			return;
 		}
@@ -319,7 +319,7 @@ public class ParseCommand {
 		
 		
 		
-		// need to proform these first cuz the date/time may be separate by other parameters
+		// need to perform these first cuz the date/time may be separate by other parameters
 		// place
 		Matcher regPlaceFormatMatcher = regPlaceFormatPattern.matcher(command);
 		if(regPlaceFormatMatcher.find()){
@@ -428,7 +428,6 @@ public class ParseCommand {
 
 	private Calendar dateTimeProcess(Time time, String timeDateStr, Calendar dateSubstitute){
 		Calendar date = null;
-		System.out.println("Debug: date/time Str: " + timeDateStr);
 		// check the date
 		/**
 		 * Date format: 
@@ -553,7 +552,6 @@ public class ParseCommand {
 			listStr = listStr.substring(0,listStr.length()-1);
 		}
 		list = listStr;
-		System.out.println(listStr);
 		return list;
 	}
 
@@ -925,9 +923,8 @@ public class ParseCommand {
 	 *   Therefore I only support these 3 in this phase.
 	 * 
 	 ****
-	 * This function would return the type of the Command for the Input String
-	 * @param commandStr
-	 * @return
+	 * 
+	 * @return the type of the Command for the Input String
 	 */
 	public Commands extractCommand() {
 		return commandType==null?Commands.INVALID:commandType;
@@ -937,10 +934,10 @@ public class ParseCommand {
 	 * @return
 	 *  Get the task name; it has removed the properties of the task.
 	 *  For example, if the input String is:
-	 *  @group
+	 *  <quote>
 	 *  	Meeting with Shubham tomorrow 3pm @(PGP Canteen) !3
-	 *  @endgroup
 	 *   it would return Meeting with Shubham
+	 *  </quote>
 	 */
 	public String extractTaskName() {
 		return taskTitle; // if TaskTitle is not found, return null
@@ -969,6 +966,7 @@ public class ParseCommand {
 	/**
 	 * Since Zhuochun decided to use the date only, so we don't put this one public first
 	 * @return
+	 *  the number of seconds from the start of the day, as a start time
 	 */
 	public Long extractStartTime() {
 		return startTime.getTime();
@@ -1117,7 +1115,7 @@ public class ParseCommand {
 	 * 
 	 * But currently leave it so for consistency with Shubham
 	 * 
-	 * @return
+	 * @return the number of seconds from the start of the day, as a deadline time
 	 */
 	public Long extractDeadlineTime(){
 		return deadlineTime.getTime();

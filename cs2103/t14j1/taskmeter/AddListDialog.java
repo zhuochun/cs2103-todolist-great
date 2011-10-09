@@ -37,7 +37,6 @@ public class AddListDialog extends Dialog {
 	/**
 	 * Create the dialog.
 	 * @param parent
-	 * @param style
 	 */
 	public AddListDialog(Shell parent) {
 		super(parent, SWT.NONE);

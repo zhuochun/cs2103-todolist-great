@@ -38,6 +38,8 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
 	 * 
 	 * @param name 					new list name
 	 * @return
+	 * 	// added by Songyy
+	 *  The result of adding a list
 	 */
 	public String add(String name) {
 	    if (lists.containsKey(name)) {
@@ -52,6 +54,8 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
 	 * 
 	 * @param list
 	 * @return
+	 * 	// added by Songyy
+	 *  The result of adding a list
 	 */
 	public String add(TaskList list) {
 	    lists.put(list.getName(), list);
@@ -64,6 +68,7 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
 	 * 
 	 * @param name
 	 * @return
+	 * 	result of return
 	 */
 	public String remove(String name) {
 		TaskList list = lists.remove(name);
@@ -77,6 +82,8 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
 	 * @param listName			the list name of the task will be added to
 	 * @param task				the task object
 	 * @return
+	 * 	// added by Songyy
+	 *  The result of adding a list
 	 */
 	public String addTask(String listName, Task task) {
 		String result;
@@ -97,6 +104,8 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
 	 * @param listName         the list which the task stays
 	 * @param index            index of the task in list
 	 * @return
+	 * // added by Songyy
+	 *  The result of adding a list
 	 */
 	public String deleteTask(String listName, int index) {
 	    return lists.get(listName).delete(index);
@@ -109,6 +118,7 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
 	 * @param newList          the new list name
 	 * @param index            index of the task in old list
 	 * @return
+	 * 	the result shown to the user
 	 */
 	public String moveTask(String oldList, String newList, int index) {
 	    TaskList oldlist = getList(oldList);
@@ -133,6 +143,7 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
 	 * 
 	 * @param name
 	 * @return
+	 *  the result shown to the user
 	 */
 	public TaskList getList(String name) {
 		return lists.get(name);
@@ -143,6 +154,7 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
 	 * 
 	 * @param name
 	 * @return
+	 *  the result shown to the user
 	 */
 	public boolean hasList(String name) {
 	    return lists.containsKey(name);

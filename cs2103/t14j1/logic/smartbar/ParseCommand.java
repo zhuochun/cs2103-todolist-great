@@ -242,6 +242,10 @@ public class ParseCommand {
 			command = command.substring(1);
 		} else if(commandStr.charAt(0) == '#'){
 			commandType = Commands.SWITCH_LIST;	// this would be used for parsing later
+		} else if(commandStr.trim().compareToIgnoreCase("exit") == 0){
+			//return Commands.
+			commandType = Commands.EXIT;
+			return;
 		} else{
 			commandType = Commands.ADD_TASK;
 		}
@@ -314,7 +318,7 @@ public class ParseCommand {
 		// then the duration
 		Matcher regDurationFormatMatcher = regDurationFormatPattern.matcher(command);
 		if(regDurationFormatMatcher.find()){
-			if(!regDurationFormatProcess(duration,
+			if(!regDurationFormatProcess(
 					removeTheLeadingAndTailingWordSpacer(matchedStr = regDurationFormatMatcher.group()))){
 				outputErr("Duration Parsing Problem.");
 			}
@@ -333,7 +337,7 @@ public class ParseCommand {
 			Matcher regBeforeDateTimeMatcher = regBeforeDateTimePattern.matcher(command);
 			
 			/**
-			 * Similar to before time foramt
+			 * Similar to before time format
 			 */
 			Pattern regAfterDateTimePattern = Pattern.compile(
 					regWordSpacer + "after\\ " + regDateTimeOverallFormat + regWordSpacer,Pattern.CASE_INSENSITIVE);
@@ -541,6 +545,9 @@ public class ParseCommand {
 	}
 
 	/**
+	 * Extract the "duration"; it would also set the enddate/time if it's not 
+	 * 	set
+	 * 
 	 * @param duration
 	 *  Long -- would store the result into this; unit is second.
 	 *  E.g., if the 
@@ -548,7 +555,7 @@ public class ParseCommand {
 	 *   
 	 * @return
 	 */
-	private static boolean regDurationFormatProcess(Time duration, String durationStr) {
+	private boolean regDurationFormatProcess(String durationStr) {
 		String[] durationParts = durationStr.split("\\ ");
 		long base = Long.parseLong(durationParts[1]);
 		
@@ -565,6 +572,12 @@ public class ParseCommand {
 		} else {
 			return false;
 		}
+		
+		// after getting the duration, if the end_date is not set, set the end date/time
+		if(endDate == null){
+			endDate = (Calendar) startDate.clone();
+		}
+		endTime.setTime(startTime.getTime() + duration.getTime());
 		
 		return true;
 	}
@@ -798,9 +811,9 @@ public class ParseCommand {
 	
 	public static void main(String[] args){
 		// test match here
-		String taskStr = "Get up at 7am tomorrow";	// test time
+		String taskStr = "Get up tomorrow";	// test time
 		
-		String testStr = "come to school at 9:00 next wednesday  ";
+		String testStr = "exit";
 		
 		// for testing
 		BufferedReader in;
@@ -826,6 +839,7 @@ public class ParseCommand {
 				System.out.println ("input: " + strLine);
 				
 				ParseCommand test = new ParseCommand(strLine);
+				System.out.println("Command Type: " + test.extractCommand());
 				System.out.println("Task Title: " + test.extractTaskName());
 				System.out.println("List: " + test.extractListName());
 				System.out.println("Place: " + test.extractPlace());
@@ -916,13 +930,43 @@ public class ParseCommand {
 	}
 	
 	/**
-	 * 
+	 * Since Zhuochun decided to use the date only, so we don't put this one public first
 	 * @return
 	 */
 	public Long extractStartTime() {
 		return startTime.getTime();
 	}
 	
+	/**
+	 * Helper function to help set the Date&Time when "extractDate" is necessary
+	 * 
+	 * @param date
+	 * @param time
+	 * @return
+	 */
+	private static Date _extractDateHelper(Calendar date, Time time){
+		if(date == null){
+			return null;
+		}
+		
+		Long definedTime = time.getTime();
+		int setHour = 0;
+		int setMinute = 0;
+		
+		if(definedTime !=null){
+			setHour = (int) (definedTime/3600);
+			setMinute = (int) (definedTime%3600)/60;
+		}
+		
+		date.set(Calendar.HOUR_OF_DAY, setHour);
+		date.set(Calendar.MINUTE, setMinute);
+		return date.getTime();
+	}
+	
+	/**
+	 * @return
+	 * 	The start date and time for a task
+	 */
 	public Date extractStartDate() {
 		/* Zhuochun: use DateFormat.strToDate(str) or DateFormat.strToDateLong(str) 
 		 * Yangyu's reply: this would not work because: 
@@ -931,56 +975,127 @@ public class ParseCommand {
 		 *   2. the date can be extracted in the constructor; no point of using this again 
 		 */
 		
-		/* Because zhuochun don't want the return type to be cahnged to (Long 
-		 *   we've discusseed --), nor does Calendar... do I have to use the 
+		/* Because zhuochun don't want the return type to be change to (Long 
+		 *   we've discussed --), nor does Calendar... do I have to use the 
 		 *   seemingly depreciated "Date" class here.
 		 */
-		if(startDate == null){
-			return null;
-		} else{
-			return startDate.getTime();
-		}
+		return _extractDateHelper(startDate,startTime);
 	}
 	
 	/**
 	 * @return
-	 *  The number of seconds for the duration.
+	 *  the number of minutes for the duration
+	 *  
+	 *********************************
+	 *  Initially: The number of seconds for the duration.
+	 *
+	 *  Change made on 2011-10-9 10:38:57:
+	 *  	return the # of minutes for the duration, as Zhuochun required.
+	 *  
 	 *  @code null @endcode on doesn't exist
 	 */
 	public Long extractDuration(){
-		return duration.getTime();
+		
+		// call this two method to add the "time" to Date
+		_extractDateHelper(startDate,startTime);
+		_extractDateHelper(endDate,endTime);
+		
+		// when there is a duration already
+		// don't necessarily have a startDate, because sometimes the user only
+		// define the duration. For example, input like "jogging on Saturday for 2 hours".
+		if(duration.getTime() != null){
+			return duration.getTime();
+		}
+		
+		// when there is no duration, no start date, then return null
+		else if(startDate == null){
+			return null;
+		}
+		
+		// when there's a start date, and an end date also, then return the 
+		// difference
+		else if(endDate != null){
+			return (endDate.getTimeInMillis() - startDate.getTimeInMillis())/1000;
+		}
+		
+		// when there is start time, but a start date; and no duration.
+		// return 0
+		else if(startTime.getTime() != null){
+			return (long)0;
+		} 
+		
+		// when there's a no start time, with a date, then return null
+		else if(startTime.getTime() == null){
+			return null;
+		}
+		
+		// this is an not-considered case; have to output an error here.
+		else{
+			outputErr("Nor-considered case in pase duration");
+			return null;
+		}
 	}
 	
 	/**
-	 * Currently not supported in this phase
+	 * 
+	 * *******************************************
+	 * Initially: Currently not supported in this phase
+	 * 
+	 * Changes on 2011-10-9 10:41:50:
+	 * 	It seems that the team want this method. so put it in.
+	 * *******************************************
 	 * @return
+	 * 	The end date and time as a Date class 
 	 */
 	public Date extractEndDate() {
-		if(endDate == null){
-			return null;
-		}
-		return endDate.getTime();
+		return _extractDateHelper(endDate, endTime);
 	}
 	
 	public Long extractEndTime() {
 		return endTime.getTime();
 	}
 	
+	/**
+	 * @return
+	 * 	the date and time for a deadline.
+	 *  As long as a task has a start date, we'll assume it has a deadline 
+	 *  (the last minute of a day); and
+	 *   the deadline has a fixed time
+	 */
 	public Date extractDeadlineDate() {
-		return deadlineDate==null?null:deadlineDate.getTime();
+		
+		// the only null case is when startDate is not specified
+		if(startDate == null){
+			return null;
+		}
+		
+		
+		// set it as the last minute of the day
+		if(deadlineTime.getTime() == null){
+			
+			deadlineTime.setTime((long)3600 * 24 -1);
+		}
+		
+		return _extractDateHelper(deadlineDate, deadlineTime);
 	}
 	
+	/**
+	 * Should make this history function private; initially wanted to use it to extract
+	 *  the time; but later on Zhuochun proposed a more systematic way
+	 * 
+	 * But currently leave it so for consistency with Shubham
+	 * 
+	 * @return
+	 */
 	public Long extractDeadlineTime(){
 		return deadlineTime.getTime();
 	}
-	
-	
-	
 	
 	/* These four method are for search command only */
 	public Date extractSearchBeforeDate() {
 		return searchBeforeDate==null?null:searchBeforeDate.getTime();
 	}
+	
 	
 	public Long extractSearchBeforeTime(){
 		return searchBeforeTime.getTime();

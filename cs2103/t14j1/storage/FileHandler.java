@@ -107,6 +107,7 @@ public class FileHandler {
     	Document doc = openXmlDocument(fileFolder, listFileName);
     	
     	if (doc == null) { // if doc failed to load
+    	    saveLists(lists);
     	    return ;
     	}
     	
@@ -170,6 +171,7 @@ public class FileHandler {
         Document doc = openXmlDocument(fileFolder, taskFileName);
 
         if (doc == null) { // if doc failed to load
+            saveTasks(lists);
             return;
         }
 
@@ -284,7 +286,7 @@ public class FileHandler {
     }
     
     /**
-     * create an empty text file under filename
+     * create an empty xml file under filename
      * 
      * @param filename
      * @return true if successfully created

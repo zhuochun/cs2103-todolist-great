@@ -671,7 +671,8 @@ public class ParseCommand {
 		weekDStr = dayInfo[dayInfo.length - 1];
 		
 		boolean nextWeek = false;
-		if(dayInfo.length > 1 && dayInfo[dayInfo.length - 2].substring(0, 4).compareToIgnoreCase("next")==0){
+		
+		if(dayInfo.length > 1 && dayInfo[dayInfo.length - 2].matches("next")){
 			nextWeek = true;
 		}
 		
@@ -859,7 +860,7 @@ public class ParseCommand {
 		// test match here
 		String taskStr = "Get up tomorrow";	// test time
 		
-		String testStr = "add Jogging tomorrow for 3 hours 2 min";
+		String testStr = "add Do homework on next Sat for 2 hours";
 		
 		// for testing
 		BufferedReader in;

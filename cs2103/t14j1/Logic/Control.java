@@ -1,5 +1,6 @@
 package cs2103.t14j1.logic;
 
+import java.sql.Time;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -26,6 +27,7 @@ class Control {
 	TaskList  searchResult; // stores the last search result
 	String    currentList;  // stores the current list name of the user is viewing
 	ParseCommand parseCommand;
+	private static boolean shouldExit;
 
 	/**
 	 * command line interface, just for version 0.1
@@ -43,9 +45,19 @@ class Control {
 			line = scan.nextLine();
 			result = cml.processInput(line); // result is a String that will be display in statusBar in GUI
 			System.out.println(result);
+			
+			checkForExit();
 		}
 	}
 	
+	/**
+	 * Check if the user wants the program to exit, and exit if he wants it to
+	 */
+	private static void checkForExit() {
+		if(shouldExit)
+			System.exit(0);
+	}
+
 	/**
 	 * constructor
 	 */
@@ -65,7 +77,6 @@ class Control {
 		try {
             parseCommand = new ParseCommand(input);
         } catch (Exception e) {
-            // TODO Auto-generated catch block
             e.printStackTrace();
         }
 		
@@ -113,7 +124,7 @@ class Control {
 		case SWITCH_LIST:
 			switchList(input);
 		case EXIT:
-			return save();
+			return saveAndExit();
 		default:
 			return "invalid command";
 		}
@@ -218,8 +229,8 @@ class Control {
 						&& isDeadlineDateSame(deadlineDate, taskList.getTask(i))
 						&& isPlaceSame(place, taskList.getTask(i))
 						&& isPrioritySame(priority, taskList.getTask(i))
-						&& isDateAfterGivenDateAndTime(afterDate, taskList.getTask(i))
-						&& isDateBeforeGivenDateAndTime(beforeDate, taskList.getTask(i))
+						&& isDateAfterGivenDateAndTime(afterDate, duration, taskList.getTask(i))
+						&& isDateBeforeGivenDateAndTime(beforeDate, duration, taskList.getTask(i))
 						&& isDurationSame(duration, taskList.getTask(i))
 						&& isListNameSame(listName, taskList.getTask(i))) {
 					searchResult.add(taskList.getTask(i));
@@ -241,50 +252,166 @@ class Control {
 	}
 	
 	private boolean isListNameSame(String listName, Task task) {
-	    if (listName == null)
-	        return true;
 	    
 		return (listName.equals(task.getList()));
 	}
 
 	private boolean isDurationSame(Long duration, Task task) {
+		
+		if(duration == null)
+			return true;
+		
+		if(task.getDuration() == null)
+			return false;
+		
 		return (duration == task.getDuration());
 	}
 
-	private boolean isDateBeforeGivenDateAndTime(Date beforeDate, Task task) {
-		return (isDateBefore(task.getDeadline(), beforeDate) || isDateBefore(task.getEndDateTime(), beforeDate) || isDateBefore(task.getStartDateTime(), beforeDate));
+	private boolean isDateBeforeGivenDateAndTime(Date beforeDate, Long duration, Task task) {
+		
+		if((task.getDuration() == null) || (duration == null)) {
+			//This means that the user didn't specify the end time for this task and so we can just rely on the end date
+			return (isDateBefore(task.getDeadline(), beforeDate) || isDateBefore(task.getEndDateTime(), beforeDate) || isDateBefore(task.getStartDateTime(), beforeDate));
+		}
+		
+		else {
+			return (isDateAndTimeBefore(task.getDeadline(), beforeDate) || isDateAndTimeBefore(task.getEndDateTime(), beforeDate) || isDateAndTimeBefore(task.getStartDateTime(), beforeDate));
+		}
 	}
 	
 	private boolean isDateBefore(Date a, Date b) {
-		return (a.getTime() <= b.getTime()); 
+		if (a.getYear() < b.getYear())
+			return true;
+		else if (a.getYear() > b.getYear())
+			return false;
+		else {
+			if(a.getMonth() < b.getMonth())
+				return true;
+			else if(a.getMonth() > b.getMonth())
+				return false;
+			else {
+				if(a.getDate() <= b.getDate())
+					return true;
+				else
+					return false;
+			}		
+		}
+	}
+	
+	private boolean isDateAndTimeBefore(Date a, Date b) {
+		return (a.getTime() <= b.getTime());
 	}
 
-	private boolean isDateAfterGivenDateAndTime(Date afterDate, Task task) {
-		return (isDateAfter(task.getDeadline(), afterDate) || isDateAfter(task.getEndDateTime(), afterDate) || isDateAfter(task.getStartDateTime(), afterDate));
+	private boolean isDateAfterGivenDateAndTime(Date afterDate, Long duration, Task task) {
+		
+		if((task.getDuration() == null) || (duration == null)) {
+			return (isDateAfter(task.getDeadline(), afterDate) || isDateAfter(task.getEndDateTime(), afterDate) || isDateAfter(task.getStartDateTime(), afterDate));
+		}
+		
+		else {
+			return (isDateAndTimeAfter(task.getDeadline(), afterDate) || isDateAndTimeAfter(task.getEndDateTime(), afterDate) || isDateAndTimeAfter(task.getStartDateTime(), afterDate));
+		}
 	}
 
 	private boolean isDateAfter(Date a, Date b) {
+		if (a.getYear() > b.getYear())
+			return true;
+		else if (a.getYear() < b.getYear())
+			return false;
+		else {
+			if(a.getMonth() > b.getMonth())
+				return true;
+			else if(a.getMonth() < b.getMonth())
+				return false;
+			else {
+				if(a.getDate() >= b.getDate())
+					return true;
+				else
+					return false;
+			}		
+		}
+	}
+
+	private boolean isDateAndTimeAfter(Date a, Date b) {
 		return (a.getTime() >= b.getTime());
 	}
 
 	private boolean isPrioritySame(Priority priority, Task task) {
-		return (priority == task.getPriority());
+		
+		if(priority == null)
+			return true;
+		
+		else if (task.getPriority() == null)
+			return false;
+		
+		else
+			return (priority == task.getPriority());
 	}
 
 	private boolean isPlaceSame(String place, Task task) {
-		return place.equals(task.getPlace());
+		
+		if(place == null)
+			return true;
+		
+		else if(task.getPlace() == null)
+			return false;
+			
+		else
+			return place.equals(task.getPlace());
 	}
 
 	private boolean isDeadlineDateSame(Date deadlineDate, Task task) {
-		return (deadlineDate.getTime() == task.getDeadline().getTime());
+		/*TODO For now, this only compares the dates without paying attention to
+		time. This is because we set the default time to 0 if no time is mentioned.
+		Need to change this in Version 0.2*/
+		if(deadlineDate.getYear() != task.getDeadline().getYear())
+			return false;
+		else {
+			if(deadlineDate.getMonth() != task.getDeadline().getMonth())
+				return false;
+			else {
+				if (deadlineDate.getDate() != task.getDeadline().getDate())
+					return false;
+				else
+					return true;
+			}
+		}
 	}
 
 	private boolean isEndDateSame(Date endDateTime, Task task) {
-		return (endDateTime.getTime() == task.getEndDateTime().getTime());
+		/*TODO Make date and time separate in Version 0.2*/
+		
+		if(endDateTime.getYear() != task.getEndDateTime().getYear())
+			return false;
+		else {
+			if(endDateTime.getMonth() != task.getEndDateTime().getMonth())
+				return false;
+			else {
+				if (endDateTime.getDate() != task.getEndDateTime().getDate())
+					return false;
+				else
+					return true;
+			}
+		}
 	}
 
 	private boolean isStartDateSame(Date startDateTime, Task task) {
-		return (startDateTime.getTime() == task.getStartDateTime().getTime());
+		
+		/*TODO Make date and time separate in Version 0.2*/
+		
+		if(startDateTime.getYear() != task.getStartDateTime().getYear())
+			return false;
+		else {
+			if(startDateTime.getMonth() != task.getStartDateTime().getMonth())
+				return false;
+			else {
+				if (startDateTime.getDate() != task.getStartDateTime().getDate())
+					return false;
+				else
+					return true;
+			}
+		}
+		
 	}
 
 	private boolean isNameSame(String name, Task task) {
@@ -350,10 +477,12 @@ class Control {
 		return null;
 	}
 	
-	public String save() {
+	public String saveAndExit() {
 		FileHandler.saveAll(lists);
 		
 		String SAVE_COMPLETED = "Saved";
+		
+		shouldExit = true;
 		
 		return SAVE_COMPLETED;
 	}

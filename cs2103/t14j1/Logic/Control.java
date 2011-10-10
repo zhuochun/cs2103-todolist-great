@@ -1,6 +1,5 @@
 package cs2103.t14j1.logic;
 
-import java.sql.Time;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.Map.Entry;
@@ -100,14 +99,8 @@ class Control {
 	public String executeCommand(Commands command) {
 		switch (command) {
 		case ADD_TASK:
-			// Nullify the search result if exist
 			searchResult = null;
 			return addTask();
-//		case ADD_LIST:
-//			return addList();
-//			-- as noted in the Commands.java, you don't need to put it here
-//			-- songyy
-			
 		case SEARCH:
 			return search();
 		case DELETE_TASK:
@@ -457,16 +450,9 @@ class Control {
 		return task.getName().contains(searchStr);
 	}
 
-	// Zhuochun's Note
-	//
-	// As I have told you, if the secondsFromStartOfDay is null (a condition you didn't take care of here)
-	// you can set the hour, minute, seconds to 0.
-	//
 	private void convertLongTimeToDate (Date d, Long secondsFromStartOfDay) {
-		
 		if(d == null)
 			return;
-		
 		else if(secondsFromStartOfDay == null) {
 			/*A value of null indicates that the user did not specify any time and
 			so, we assume the time to be 00:00:00*/

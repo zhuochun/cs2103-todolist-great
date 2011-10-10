@@ -503,7 +503,9 @@ public class TaskMeter extends Shell {
         btnOverdue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
         btnOverdue.setText(getResourceString("filter.overdue"));
         
-        new Label(this, SWT.NONE);
+        Label lblSps = new Label(this, SWT.NONE);
+        lblSps.setText("        ");
+        lblSps.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 
         Button btnToday = new Button(this, SWT.NONE);
         btnToday.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));

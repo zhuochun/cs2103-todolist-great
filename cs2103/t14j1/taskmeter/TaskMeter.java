@@ -89,7 +89,7 @@ public class TaskMeter extends Shell {
      * @param display
      */
     public TaskMeter(Display display) {
-        super(display, SWT.CLOSE | SWT.MIN | SWT.TITLE);
+        super(display, SWT.DIALOG_TRIM | SWT.MIN | SWT.APPLICATION_MODAL);
         
         // global hotkey to focus on smartBar
         display.addFilter(SWT.KeyDown, new Listener() {
@@ -142,6 +142,8 @@ public class TaskMeter extends Shell {
         
         displayCurrentList(TaskLists.INBOX);
         displayLists();
+        
+        smartBar.setFocus();
     }
 
     /**
@@ -169,6 +171,7 @@ public class TaskMeter extends Shell {
                     } else if (txt.matches("^.*!\\w+$")) {
                         
                     }
+                    
                     smartBar.setSelection(txt.length(), smartBar.getText().length());
                     smartBar.setFocus();
                 }
@@ -392,7 +395,7 @@ public class TaskMeter extends Shell {
      * create the task list viewer that shows all the lists
      */
     private void createTaskList() {
-        taskList = new Table(this, SWT.BORDER | SWT.FULL_SELECTION);
+        taskList = new Table(this, SWT.BORDER | SWT.FULL_SELECTION | SWT.HIDE_SELECTION);
         taskList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseDoubleClick(MouseEvent e) { // switch lists

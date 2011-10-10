@@ -87,6 +87,7 @@ public class TaskList implements Iterable<Task> {
 
     public String delete(int index) {
         if (index < 1 || index > tasks.size()) {
+        	System.err.println("Index: " + index);
             return INVALID_INDEX;
         }
         Task task = tasks.remove(index - 1);
@@ -101,10 +102,21 @@ public class TaskList implements Iterable<Task> {
         return iterateTasks;
     }
 
+    /**
+     * Notes by Songyy:
+     *  To TMD whoever wrote this part of the code... if the parson is careful 
+     *  	enough, he should have noticed the issue of the index -- 
+     *  		it's starting from 1!
+     *  this kind of index is wired; but that person should at least have a 
+     *  look at the former code...
+     *  
+     *  Initially, the return value is simply wrong. added i+1 manually by Songyy,
+     *   after 0.5 hours of debugging.
+     */
     public int findIndexOfTask(Task task) {
         for (int i = 0; i < tasks.size(); i++) {
             if (tasks.get(i).equals(task)) {
-                return i;
+                return i + 1;
             }
         }
         return -1;

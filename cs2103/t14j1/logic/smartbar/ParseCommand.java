@@ -263,6 +263,10 @@ public class ParseCommand {
 			String disParams[] = commandStr.split("\\ ");
 			taskNum = Integer.parseInt(disParams[1]);
 			return;
+		} else if(commandStr.compareToIgnoreCase("dis") == 0 || 
+				commandStr.compareToIgnoreCase("display") == 0){	// display list -- it's 
+			commandType = Commands.DISPLAY_LISTS;
+			return;
 		} else if((commandStr.length() > 3) && commandStr.substring(0, 4).compareToIgnoreCase("add ") == 0){
 			commandStr = commandStr.substring(4);
 			commandType = Commands.ADD_TASK;

@@ -1,7 +1,9 @@
 package cs2103.t14j1.storage;
 
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map.Entry;
+import java.util.Set;
 import java.util.TreeMap;
 
 /**
@@ -32,7 +34,21 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
         add(INBOX);
         add(TRASH);
     }
-
+    
+    
+    /**
+     * Songyy notes on 2011-10-10 23:22:02
+     *  add in this method to get all the lists current have
+     * @return
+     */
+    public String[] getListNames(){
+    	Set<String> listSet = lists.keySet();
+    	String arr[] = {};
+    	return listSet.toArray(arr);
+    	
+		//return (String[]) lists.keySet().toArray();
+    }
+    
     /**
      * add a new list
      * 
@@ -64,11 +80,35 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
     /**
      * delete a existing list
      * 
+     * add by Songyy at 2011-10-10 23:32:50
+     * 	before removing the list, one should move all the elements to Inbox -- the default list
+     * 	the Inbox cannot be removed
      * @param name
      *            the list name
      * @return result of removal
      */
     public String remove(String name) {
+    	if(name == INBOX){
+    		return "Inbox cannot be removed";
+    	} else if(name == TRASH){
+    		return "Trash cannot be removed";
+    	} else if(name == null){
+    		return "No list name given";
+    	} else if(!lists.containsKey(name)){
+    		return "List doesn't exist";
+    	}
+    	
+    	// before remove the list, move all the list into the inbox
+    	TaskList listToRemove = lists.get(name);
+    	List<Task> taskList =  listToRemove.getTasks();
+    	
+    	TaskList inbox = lists.get(INBOX);
+    	
+    	for(Task task:taskList){
+    		task.setList(INBOX);
+    		inbox.addTask(task);
+    	}
+    	
         TaskList list = lists.remove(name);
         return String.format(REMOVE_SUCCESS, list.getName());
     }

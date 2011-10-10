@@ -118,6 +118,8 @@ class Control {
 			return switchList();
 		case DISPLAY_TASK:
 			return displayTask();
+		case DISPLAY_LISTS:
+			return displayLists();
 		case EXIT:
 			return saveAndExit();
 		default:
@@ -126,6 +128,25 @@ class Control {
 	}
 
 	
+	/**
+	 * Display the all the lists
+	 * @return
+	 */
+	private String displayLists() {
+		String[] listNames = lists.getListNames();
+		String output = "Current lists: ";
+		boolean first = true;
+		for(String listName:listNames){
+			if(first){
+				first = false;
+			} else{
+				output += " | ";
+			}
+			output += listName;
+		}
+		return output;
+	}
+
 	/**
 	 * Adds the task
 	 * @return the feedback

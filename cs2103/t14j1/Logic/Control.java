@@ -159,7 +159,7 @@ class Control {
 		// notes on 2011-10-10 3:15:34 by Songyy:
 		//	the returning of String should definitely be changed, because by 
 		//	returning the String, one cannot tell if it succeeds
-		String result = lists.addTask(list, newTask);
+		String result = lists.addTask(newTask.getList(), newTask);
 		
 		// want to show the task details added; so assume it succeeds
 		result += ("\n  Task details:\n" + newTask.getDisplayTaskStr());
@@ -266,7 +266,9 @@ class Control {
 	}
 	
 	private boolean isListNameSame(String listName, Task task) {
-	    
+	    if(listName == null){
+	    	return true;
+	    }
 		return (listName.equals(task.getList()));
 	}
 

@@ -843,7 +843,7 @@ public class ParseCommand {
 		// test match here
 		String taskStr = "Get up tomorrow";	// test time
 		
-		String testStr = "/add Do homework on next Sat for 2 hours";
+		String testStr = "add 10th oct 8am ~ 20th oct 8 pm";
 		
 		// for testing
 		BufferedReader in;
@@ -947,11 +947,15 @@ public class ParseCommand {
 	 */
 	public String extractListName() {
 		// if list name is not specified, use inbox list
-		return (list!=null)?list:cs2103.t14j1.storage.TaskLists.INBOX;
+		return list;
 	}
 
+	/**
+	 * @return
+	 * 	the priority; if not specified, then it should be null
+	 */
 	public Priority extractPriority() {
-		return (priority != null)?priority:Priority.NORMAL; // if priority is not specified, use normal
+		return priority;
 	}
 	
 	public String extractPlace(){

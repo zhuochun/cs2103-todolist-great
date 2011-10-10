@@ -33,8 +33,8 @@ public class Task {
             Date deadline, Long duration, boolean status) {
         this.name = name;
         this.place = place;
-        this.list = list;
-        this.priority = priority;
+        this.list = (list==null)?TaskLists.INBOX:list;
+        this.priority = (priority==null)?Priority.NORMAL:priority;
         this.startDateTime = startDateTime;
         this.endDateTime = endDateTime;
         this.deadline = deadline;
@@ -330,10 +330,15 @@ public class Task {
 
         str.append("Task: " + name); // name cannot be null
         addOutput(str, "Place: " + place, place);
-        addOutput(str, "Place: " + place, place);
         addOutput(str, "Priority: " + getPriorityStr(), priority);
         addOutput(str, "Start Date: " + getStartDate(), startDateTime);
+        if(duration != null && startDateTime != null){
+        	str.append("\nStart Time:" + getStartTime());
+        }
         addOutput(str, "End Date: " + getEndDate(), endDateTime);
+        if(duration != null && endDateTime != null){
+        	str.append("\nEnd Time: " + getEndTime());
+        }
         addOutput(str, "Duration: " + getDurationStr(), duration);
 
         return str.toString();

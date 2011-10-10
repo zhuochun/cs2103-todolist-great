@@ -21,7 +21,7 @@ public class Task {
     private Date                endDateTime;       // end date and time
     private Date                deadline;          // deadline date and time
     private Long                duration;          // duration of task
-    private boolean            status;            // completed or not
+    private boolean             status;            // completed or not
 
     public static final boolean COMPLETED  = true;
     public static final boolean INCOMPLETE = false;
@@ -31,30 +31,30 @@ public class Task {
      */
     public Task(String name, String place, String list, Priority priority, Date startDateTime, Date endDateTime,
             Date deadline, Long duration, boolean status) {
-        this.name = name;
-        this.place = place;
-        this.list = (list==null)?TaskLists.INBOX:list;
-        this.priority = (priority==null)?Priority.NORMAL:priority;
+        this.name          = name;
+        this.place         = place;
+        this.list          = (list == null) ? TaskLists.INBOX : list;
+        this.priority      = (priority == null) ? Priority.NORMAL : priority;
         this.startDateTime = startDateTime;
-        this.endDateTime = endDateTime;
-        this.deadline = deadline;
-        this.duration = duration;
-        this.status = status;
+        this.endDateTime   = endDateTime;
+        this.deadline      = deadline;
+        this.duration      = duration;
+        this.status        = status;
     }
 
     /**
      * A Constructor with name and list provided only
      */
     public Task() {
-        this.name = null;
-        this.place = null;
-        this.list = TaskLists.INBOX;
-        this.priority = Priority.NORMAL;
+        this.name          = null;
+        this.place         = null;
+        this.list          = TaskLists.INBOX;
+        this.priority      = Priority.NORMAL;
         this.startDateTime = null;
-        this.endDateTime = null;
-        this.deadline = null;
-        this.duration = null;
-        this.status = INCOMPLETE;
+        this.endDateTime   = null;
+        this.deadline      = null;
+        this.duration      = null;
+        this.status        = INCOMPLETE;
     }
 
     public String getName() {
@@ -97,9 +97,17 @@ public class Task {
         if (startDateTime != null & endDateTime != null) {
             StringBuffer fullstr = new StringBuffer();
 
-            fullstr.append(getStartShort());
+            fullstr.append(getStartDate());
+            if (duration != null) {
+                fullstr.append(" ");
+                fullstr.append(getStartTime());
+            }
             fullstr.append(" - ");
-            fullstr.append(getEndShort());
+            fullstr.append(getEndDate());
+            if (duration != null) {
+                fullstr.append(" ");
+                fullstr.append(getEndTime());
+            }
 
             return fullstr.toString();
         }
@@ -265,11 +273,21 @@ public class Task {
     }
 
     public String getDurationStr() {
-        if (duration == null) {
+        int d;
+        
+        if (duration != null) {
+            d = duration.intValue();
+        } else if (startDateTime != null && endDateTime != null) {
+            if (startDateTime.before(endDateTime)) {
+                Long dtemp = (endDateTime.getTime() - startDateTime.getTime()) / 1000;
+                d = dtemp.intValue();
+            } else {
+                return "All Day";
+            }
+        } else {
             return null;
         }
 
-        int d = duration.intValue();
         int days = d / 86400;
         d = d - days * 86400;
         int hours = d / 3600;

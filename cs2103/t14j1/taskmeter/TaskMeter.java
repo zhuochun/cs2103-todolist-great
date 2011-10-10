@@ -18,7 +18,9 @@ import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Image;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
+import org.eclipse.swt.layout.GridLayout;
 import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Control;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Event;
 import org.eclipse.swt.widgets.Label;
@@ -89,7 +91,12 @@ public class TaskMeter extends Shell {
      * @param display
      */
     public TaskMeter(Display display) {
-        super(display, SWT.DIALOG_TRIM | SWT.MIN | SWT.APPLICATION_MODAL);
+        super(display, SWT.SHELL_TRIM | SWT.BORDER | SWT.APPLICATION_MODAL);
+        
+        // set grid layout
+        GridLayout gridLayout = new GridLayout(11, false);
+        gridLayout.horizontalSpacing = 3;
+        setLayout(gridLayout);
         
         // global hotkey to focus on smartBar
         display.addFilter(SWT.KeyDown, new Listener() {
@@ -107,17 +114,17 @@ public class TaskMeter extends Shell {
             }
         });
 
+        // set application logo
         setImage(new Image(display, "taskMeter.png"));
         setMinimumSize(new Point(750, 500));
-        setLayout(null);
 
+        // create each components
         createMenuBar();
         createSmartBar();
         createTaskList();
         createTaskTable();
-        createFilterButtons();
+        createBottomButtons();
         createStatusBar();
-
         createContents();
     }
 
@@ -151,6 +158,7 @@ public class TaskMeter extends Shell {
 	 */
     private void createSmartBar() {
         smartBar = new Text(this, SWT.BORDER);
+        smartBar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 11, 1));
         smartBar.addTraverseListener(new TraverseListener() {
             public void keyTraversed(TraverseEvent e) { // Enter to execute Command
                 if (e.keyCode == SWT.CR) {
@@ -178,7 +186,6 @@ public class TaskMeter extends Shell {
             }
         });
         smartBar.setFont(SWTResourceManager.getFont("Segoe UI", 12, SWT.NORMAL));
-        smartBar.setBounds(5, 5, 735, 30);
     }
 
     /**
@@ -395,7 +402,8 @@ public class TaskMeter extends Shell {
      * create the task list viewer that shows all the lists
      */
     private void createTaskList() {
-        taskList = new Table(this, SWT.BORDER | SWT.FULL_SELECTION | SWT.HIDE_SELECTION);
+        taskList = new Table(this, SWT.BORDER | SWT.FULL_SELECTION | SWT.HIDE_SELECTION | SWT.VIRTUAL);
+        taskList.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
         taskList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseDoubleClick(MouseEvent e) { // switch lists
@@ -404,24 +412,15 @@ public class TaskMeter extends Shell {
                 switchList(listname);
             }
         });
-        taskList.setBounds(5, 40, 150, 350);
-        taskList.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true));
+        GridData gd_taskList = new GridData(SWT.FILL, SWT.FILL, true, true);
+        gd_taskList.widthHint = 150;
+        gd_taskList.horizontalSpan = 2;
+        taskList.setLayoutData(gd_taskList);
         taskList.setHeaderVisible(true);
         taskList.setLinesVisible(true);
     
-        TableColumn tblclmnLists = new TableColumn(taskList, SWT.CENTER);
-        tblclmnLists.setResizable(false); tblclmnLists.setWidth(146);
+        TableColumn tblclmnLists = new TableColumn(taskList, SWT.CENTER);tblclmnLists.setWidth(300);
         tblclmnLists.setText(getResourceString("list"));
-    
-        Button btnAddANew = new Button(this, SWT.NONE);
-        btnAddANew.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                addList();
-            }
-        });
-        btnAddANew.setBounds(4, 395, 151, 25);
-        btnAddANew.setText(getResourceString("list.add"));
     }
 
     /**
@@ -429,86 +428,109 @@ public class TaskMeter extends Shell {
      */
     private void createTaskTable() {
         taskTable = new Table(this, SWT.BORDER | SWT.FULL_SELECTION);
+        taskTable.setSelection(0);
+        taskTable.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
+        taskTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 9, 1));
         taskTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseDoubleClick(MouseEvent e) {
                 editTask();
             }
         });
-        taskTable.setBounds(160, 40, 579, 350);
         taskTable.setHeaderVisible(true);
         taskTable.setLinesVisible(true);
-    
+
         TableColumn tblclmnId = new TableColumn(taskTable, SWT.CENTER);
+        tblclmnId.setMoveable(true);
         tblclmnId.setWidth(28);
         tblclmnId.setText(getResourceString("table.id"));
-    
+
         TableColumn tblclmnName = new TableColumn(taskTable, SWT.CENTER);
+        tblclmnName.setMoveable(true);
         tblclmnName.setWidth(200);
         tblclmnName.setText(getResourceString("table.name"));
-    
+
         TableColumn tblclmnPriority = new TableColumn(taskTable, SWT.CENTER);
         tblclmnPriority.setMoveable(true);
         tblclmnPriority.setWidth(68);
         tblclmnPriority.setText(getResourceString("table.priority"));
-    
+
         TableColumn tblclmnDate = new TableColumn(taskTable, SWT.CENTER);
         tblclmnDate.setMoveable(true);
         tblclmnDate.setWidth(105);
         tblclmnDate.setText(getResourceString("table.date"));
-    
+
         TableColumn tblclmnDuration = new TableColumn(taskTable, SWT.CENTER);
         tblclmnDuration.setMoveable(true);
-        tblclmnDuration.setWidth(100);
+        tblclmnDuration.setWidth(70);
         tblclmnDuration.setText(getResourceString("table.duration"));
-    
+
         TableColumn tblclmnCompleted = new TableColumn(taskTable, SWT.CENTER);
         tblclmnCompleted.setMoveable(true);
-        tblclmnCompleted.setWidth(73);
+        tblclmnCompleted.setWidth(75);
         tblclmnCompleted.setText(getResourceString("table.completed"));
     }
 
-    private void createFilterButtons() {
+    private void createBottomButtons() {
+        Button btnAddANew = new Button(this, SWT.NONE);
+        btnAddANew.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+        btnAddANew.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                addList();
+            }
+        });
+        btnAddANew.setText(getResourceString("list.add"));
+
         Button btnAll = new Button(this, SWT.NONE);
-        btnAll.setBounds(160, 395, 35, 25);
+        btnAll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
         btnAll.setText(getResourceString("filter.all"));
-    
+
         Button btnImportant = new Button(this, SWT.NONE);
-        btnImportant.setBounds(200, 395, 65, 25);
+        btnImportant.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
         btnImportant.setText(getResourceString("filter.important"));
-    
+
         Button btnCompleted = new Button(this, SWT.NONE);
-        btnCompleted.setBounds(270, 395, 75, 25);
+        btnCompleted.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+            }
+        });
+        btnCompleted.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
         btnCompleted.setText(getResourceString("filter.completed"));
-    
+
         Button btnOverdue = new Button(this, SWT.NONE);
-        btnOverdue.setBounds(350, 395, 65, 25);
+        btnOverdue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
         btnOverdue.setText(getResourceString("filter.overdue"));
-    
+        
+        new Label(this, SWT.NONE);
+
         Button btnToday = new Button(this, SWT.NONE);
-        btnToday.setBounds(440, 395, 45, 25);
+        btnToday.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
         btnToday.setText(getResourceString("filter.today"));
-    
+
         Button btnTomorrow = new Button(this, SWT.NONE);
-        btnTomorrow.setBounds(490, 395, 75, 25);
+        btnTomorrow.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
         btnTomorrow.setText(getResourceString("filter.tomorrow"));
-    
+
         Button btnNextDays = new Button(this, SWT.NONE);
-        btnNextDays.setBounds(570, 395, 75, 25);
+        btnNextDays.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
         btnNextDays.setText(getResourceString("filter.custom"));
-    
+
         Button btnWithoutDate = new Button(this, SWT.NONE);
-        btnWithoutDate.setBounds(650, 395, 90, 25);
+        btnWithoutDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
         btnWithoutDate.setText(getResourceString("filter.nodate"));
+
+        setTabList(new Control[]{smartBar, taskList, btnAddANew, taskTable, btnAll, btnImportant, btnCompleted, btnOverdue, btnToday, btnTomorrow, btnNextDays, btnWithoutDate});
     }
 
     private void createStatusBar() {
         Label statusBarSeperator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
-        statusBarSeperator.setBounds(0, 425, 750, 2);
+        statusBarSeperator.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 11, 1));
     
         statusBar = new Label(this, SWT.NONE);
+        statusBar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 11, 1));
         statusBar.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
-        statusBar.setBounds(10, 430, 730, 20);
     
         setStatusBar(getResourceString("msg.welcome"));
     }

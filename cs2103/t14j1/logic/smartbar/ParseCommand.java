@@ -235,7 +235,11 @@ public class ParseCommand {
 		
 		// start parsing
 		
-		if(commandStr.charAt(0) == '/'){
+		if(commandStr == null || commandStr.length() < 1){
+			commandType = Commands.INVALID;
+			return;
+		}
+		else if(commandStr.charAt(0) == '/'){
 			commandType = Commands.SEARCH;
 			command = command.substring(1);
 			commandStr = command;

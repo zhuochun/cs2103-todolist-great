@@ -338,7 +338,7 @@ public class Task {
         str.append(" | ");
         str.append(getPriorityStr());
         str.append(" | ");
-        str.append(getStatus());
+        str.append(getStatusStr());
 
         return str.toString();
     }

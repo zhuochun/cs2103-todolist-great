@@ -16,7 +16,7 @@ import cs2103.t14j1.storage.Priority;
  * Creating this wrapper for internal use now; it can be move to the task
  *  package if others found it useful
  */
-class Time{
+class Time implements Comparable<Time>{
 	private Long time = null;
 	Time(Long time){
 		this.time = time;
@@ -1099,7 +1099,6 @@ public class ParseCommand {
 		if(deadlineTime.getTime() == null){
 			
 			deadlineTime.setTime((long)3600 * 24 -1);
-			System.out.println(deadlineTime.getTime());
 		}
 		
 		return _extractDateHelper(deadlineDate, deadlineTime);

@@ -114,6 +114,7 @@ class Control {
 		case SORT:
 			return sortBy();
 		case SWITCH_LIST:
+			searchResult = null;
 			return switchList();
 		case DISPLAY_TASK:
 			return displayTask();
@@ -495,7 +496,9 @@ class Control {
 		}
 		
 		int numberOfTask = parseCommand.extractTaskNum();
-		Task taskToBeDeleted = searchResult.getTask(numberOfTask - 1);
+		Task taskToBeDeleted = searchResult.getTask(numberOfTask);
+		
+			// remove from the list
 		TaskList listToWhichTaskBelongs = getListToWhichTaskBelongs(taskToBeDeleted);
 		int indexOfTaskInTaskList = listToWhichTaskBelongs.findIndexOfTask(taskToBeDeleted);
 		String postDeletionMessage = listToWhichTaskBelongs.delete(indexOfTaskInTaskList);

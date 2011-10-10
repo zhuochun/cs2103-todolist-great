@@ -30,7 +30,7 @@ import cs2103.t14j1.logic.DateFormat;
 /**
  * the file handler to load from and save to files
  * 
- * @author Zhuochun, Yangyu
+ * @author Zhuochun
  *
  */
 public class FileHandler {

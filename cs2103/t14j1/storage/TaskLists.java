@@ -88,9 +88,9 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
      * @return result of removal
      */
     public String remove(String name) {
-    	if(name == INBOX){
+    	if(name.compareTo(INBOX) == 0){
     		return "Inbox cannot be removed";
-    	} else if(name == TRASH){
+    	} else if(name.compareTo(TRASH) == 0){
     		return "Trash cannot be removed";
     	} else if(name == null){
     		return "No list name given";

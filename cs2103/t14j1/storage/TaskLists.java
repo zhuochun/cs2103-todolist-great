@@ -209,8 +209,6 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
      * @return the result shown to the user
      */
     public TaskList getList(String name) {
-    	
-    	// on name is null, default it to INBOX
     	if(name == null){
     		name = INBOX;
     	}

@@ -81,15 +81,16 @@ public class ParseCommand {
 
 			// date format
 	private static final String regDateFormat_dd_$mm$_$yy$yy$$ = 
-			"([12][0-9]|3[01]|(0)?[1-9])" + regDateSpacer + "(0[1-9]|1[012])(" + 
-			regDateSpacer + "(19|20)?\\d\\d)?";
+			"(([12][0-9]|3[01]|(0)?[1-9])" + regDateSpacer + "(0[1-9]|1[012])(" + 
+			regDateSpacer + "(19|20)?\\d\\d)?)";
 	private static final String regDateFormat_dd_$M$_$yy$yy$$ = // When month is text, year should be a full string if exist
-			"([12][0-9]|3[01]|(0)?[1-9])(st|nd|rd|th)?" + regDateSpacer + "(\\ )?" + regMonthText + "(" + regDateSpacer + "(19|20)\\d\\d)?";
+			"(([12][0-9]|3[01]|(0)?[1-9])(st|nd|rd|th)?" + regDateSpacer + "(\\ )?" +
+			regMonthText + "(" + regDateSpacer + "(19|20)\\d\\d)?)";
 	private static final String regDateFormat_dd_$mm$M$_$yy$yy$$ = 
-			"(" + regDateFormat_dd_$M$_$yy$yy$$+ ")|(" + regDateFormat_dd_$mm$_$yy$yy$$ + ")";
+			"((on\\ )?(" + regDateFormat_dd_$M$_$yy$yy$$+ "|" + regDateFormat_dd_$mm$_$yy$yy$$ + "))";
 	
 	private static final String regDateFormat_order_weekD = 
-			"((on" + regWordSpacer + ")?(" + regDayOrder + regWordSpacer + ")?" + regWeekText + ")";
+			"((on\\ )?(" + regDayOrder + regWordSpacer + ")?" + regWeekText + ")";
 	
 	private static final String regDateFormat_today_tomorrow = 
 			"(today|tomorrow|tmr)";
@@ -100,7 +101,7 @@ public class ParseCommand {
 	private static final String regTimeUnit = 
 			"((hour(s)?|h)|(minute(s)?|min)|(second(s)?|sec)|(day(s)?))";
 	
-	private static final String regDateOverallFormat = 
+	private static final String regDateOverallFormat =
 			"(" + regDateFormat_dd_$mm$M$_$yy$yy$$ + "|" + regDateFormat_order_weekD + 
 			"|" + regDateFormat_today_tomorrow + ")";
 	
@@ -428,6 +429,9 @@ public class ParseCommand {
 		 *  3) Mon ~ Sun, or Monday ~ Sunday --> indicates the next day.
 		 *  4) next Mon ~ Sun, or Monday ~ Sunday --> indicates the day of next week 
 		 */
+		
+//		System.err.println("Time Str: " + timeDateStr);
+		
 		Pattern regDateFormat_dd_mm_$yy$yy$$_Pattern = Pattern.compile(
 				regWordSpacer + regDateFormat_dd_$mm$M$_$yy$yy$$ + regWordSpacer,Pattern.CASE_INSENSITIVE);
 		Matcher regDateFormat_dd_mm_$yy$yy$$_Matcher = regDateFormat_dd_mm_$yy$yy$$_Pattern.matcher(timeDateStr);
@@ -797,17 +801,23 @@ public class ParseCommand {
 		try{
 			// if can parse successful, just return the parse value
 			monthNum = Integer.parseInt(month);
+			monthNum--;	// cuz the month in Calendar is starting with 0
 		} catch (NumberFormatException e) {
 			// if it's not integer, then it's text format --> need to translate
 			return dateParseGetMonthFromText(month);
 		}
 		
-		return (monthNum<=12)?monthNum:-1;	// return -1 on false
+		return (monthNum<12)?monthNum:-1;	// return -1 on false
 	}
 	
 	private Calendar dateFormat_dd_mm_$yy$yy$$_Process(String dateStr) {
 		Calendar date = Calendar.getInstance();
 		date.clear();
+		
+		// remove the leading "on " if it exist
+		if(dateStr.length() > 3 && dateStr.substring(0, 3).compareToIgnoreCase("on ") == 0){
+			dateStr = dateStr.substring(3);
+		}
 		
 		String[] dateInfoArr = dateStr.split(regDateSpacer);
 		
@@ -851,7 +861,7 @@ public class ParseCommand {
 		// test match here
 		String taskStr = "Get up tomorrow";	// test time
 		
-		String testStr = "add 10th oct 8am ~ 20th oct 8 pm";
+		String testStr = "add !1 Do homework #(What The Fuck) on Sun @(My place) 10am-12pm by tmr";
 		
 		// for testing
 		BufferedReader in;

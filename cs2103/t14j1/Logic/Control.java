@@ -20,7 +20,7 @@ import cs2103.t14j1.storage.TaskLists;
  * @author Shubham
  * 
  */
-class Control {
+public class Control {
 	
 	private TaskLists lists;        // stores all the lists
 	private TaskList  searchResult; // stores the tasks which were short listed after user's last search query
@@ -498,7 +498,7 @@ class Control {
 		
 		// delete when there's no search done
 		if(searchResult == null){
-			System.out.println("Deleting from list " + currentListName);
+			System.out.println("Deleting from list " + (currentListName == null?TaskLists.INBOX:currentListName));
 			
 			// assumption: the currentListName is always valid
 			TaskList currentList = lists.getList(currentListName);
@@ -520,6 +520,9 @@ class Control {
 		Task taskToBeDeleted = searchResult.getTask(numberOfTask);
 		
 			// remove from the list
+		if(taskToBeDeleted == null){
+			return "Invalid task number in search result.";
+		}
 		TaskList listToWhichTaskBelongs = getListToWhichTaskBelongs(taskToBeDeleted);
 		int indexOfTaskInTaskList = listToWhichTaskBelongs.findIndexOfTask(taskToBeDeleted);
 		String postDeletionMessage = listToWhichTaskBelongs.delete(indexOfTaskInTaskList);
@@ -528,7 +531,14 @@ class Control {
 		
 	}
 
-	private boolean confirmWithUser(String msg) {
+	/**
+	 * Output the msg and ask user for confirm
+	 * 	visibl within the package
+	 * @param msg
+	 * @return
+	 * 	true on yes, false on no.
+	 */
+	public static boolean confirmWithUser(String msg) {
 		Scanner in = new Scanner(System.in);
 		
 		while(true){

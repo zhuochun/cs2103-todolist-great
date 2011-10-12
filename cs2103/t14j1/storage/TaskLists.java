@@ -6,6 +6,8 @@ import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
 
+import cs2103.t14j1.logic.Control;
+
 /**
  * Stores all the list, need this extra abstraction for GUI
  * 
@@ -98,15 +100,22 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
     		return "List doesn't exist";
     	}
     	
-    	// before remove the list, move all the list into the inbox
+    	// before remove the list, move all the list into the Inbox, or the Trash
     	TaskList listToRemove = lists.get(name);
     	List<Task> taskList =  listToRemove.getTasks();
     	
-    	TaskList inbox = lists.get(INBOX);
+    	String toListName = null;
+    	if(Control.confirmWithUser("Do you want to delete the task in this list? ")){
+    		toListName = TRASH;
+    	} else{
+    		toListName = INBOX;
+    	}
+    	
+    	TaskList toList = lists.get(toListName);
     	
     	for(Task task:taskList){
     		task.setList(INBOX);
-    		inbox.addTask(task);
+    		toList.addTask(task);
     	}
     	
         TaskList list = lists.remove(name);

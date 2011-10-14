@@ -117,7 +117,7 @@ public class FileHandler {
     		
     		if (listElement.getNodeType() == Node.ELEMENT_NODE) {
     		    String listName = listElement.getTextContent();
-    		    lists.add(listName);
+    		    lists.addList(listName);
     		}
     	}
     }

@@ -15,10 +15,6 @@ public class TaskList implements Iterable<Task> {
     private String listname;  // name of the list
     private final List<Task> tasks;
 
-    private static final String ADD_SUCCESS    = "Task \"%1$s\" is Successfully Added";
-    private static final String DELETE_SUCCESS = "Task \"%1$s\" is Successfully Deleted";
-    private static final String INVALID_INDEX  = "Invalid Index";
-
     /**
      * constructor with list name
      */
@@ -68,7 +64,7 @@ public class TaskList implements Iterable<Task> {
     public boolean addTask(Task task) {
         return tasks.add(task);
     }
-
+    
     public boolean removeTask(Task task) {
         return tasks.remove(task);
     }
@@ -79,19 +75,17 @@ public class TaskList implements Iterable<Task> {
         }
         return tasks.remove(index - 1);
     }
-
-    public String add(Task task) {
-        tasks.add(task);
-        return String.format(ADD_SUCCESS, task.getName());
-    }
-
-    public String delete(int index) {
-        if (index < 1 || index > tasks.size()) {
-        	System.err.println("Index: " + index);
-            return INVALID_INDEX;
+    
+    public int getIndexOfTask(Task task) {
+        int i = 1;
+        for (Task t : tasks) {
+            if (t.equals(task)) {
+                return i;
+            }
+            
+            i++;
         }
-        Task task = tasks.remove(index - 1);
-        return String.format(DELETE_SUCCESS, task.getName());
+        return -1;
     }
 
     /**
@@ -100,25 +94,5 @@ public class TaskList implements Iterable<Task> {
     public Iterator<Task> iterator() {
         Iterator<Task> iterateTasks = tasks.iterator();
         return iterateTasks;
-    }
-
-    /**
-     * Notes by Songyy:
-     *  To TMD whoever wrote this part of the code... if the parson is careful 
-     *  	enough, he should have noticed the issue of the index -- 
-     *  		it's starting from 1!
-     *  this kind of index is wired; but that person should at least have a 
-     *  look at the former code...
-     *  
-     *  Initially, the return value is simply wrong. added i+1 manually by Songyy,
-     *   after 0.5 hours of debugging.
-     */
-    public int findIndexOfTask(Task task) {
-        for (int i = 0; i < tasks.size(); i++) {
-            if (tasks.get(i).equals(task)) {
-                return i + 1;
-            }
-        }
-        return -1;
     }
 }

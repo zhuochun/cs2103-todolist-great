@@ -1,12 +1,9 @@
 package cs2103.t14j1.storage;
 
 import java.util.Iterator;
-import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
 import java.util.TreeMap;
-
-import cs2103.t14j1.logic.Control;
 
 /**
  * Stores all the list, need this extra abstraction for GUI
@@ -18,13 +15,6 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
 
     private TreeMap<String, TaskList> lists;
 
-    /* Messages */
-    private static final String ADD_SUCCESS    = "List \"%1$s\" is Successfully Added";
-    private static final String ADD_FAIL       = "List \"%1$s\" already exists";
-    private static final String REMOVE_SUCCESS = "List \"%1$s\" is Successfully Removed";
-    private static final String MOVE_SUCCESS   = "Task \"%1$s\" is Successfully Moved from List \"%2$s\" to List \"%3$s\"";
-    private static final String MOVE_FAIL      = "Task is not found in List \"%1$s\"";
-
     /* Default Lists */
     public static final String INBOX = "Inbox";
     public static final String TRASH = "Trash";
@@ -33,22 +23,8 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
     public TaskLists() {
         lists = new TreeMap<String, TaskList>();
         // add default lists
-        add(INBOX);
-        add(TRASH);
-    }
-    
-    
-    /**
-     * Songyy notes on 2011-10-10 23:22:02
-     *  add in this method to get all the lists current have
-     * @return
-     */
-    public String[] getListNames(){
-    	Set<String> listSet = lists.keySet();
-    	String arr[] = {};
-    	return listSet.toArray(arr);
-    	
-		//return (String[]) lists.keySet().toArray();
+        addList(INBOX);
+        addList(TRASH);
     }
     
     /**
@@ -58,12 +34,12 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
      *            new list name
      * @return the result of adding a list
      */
-    public String add(String name) {
+    public boolean addList(String name) {
         if (lists.containsKey(name)) {
-            return String.format(ADD_FAIL, name);
+            return false;
         }
 
-        return add(new TaskList(name));
+        return addList(new TaskList(name));
     }
 
     /**
@@ -73,53 +49,22 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
      *            the list object
      * @return the result of adding a list
      */
-    public String add(TaskList list) {
-        lists.put(list.getName(), list);
-
-        return String.format(ADD_SUCCESS, list.getName());
+    public boolean addList(TaskList list) {
+        return lists.put(list.getName(), list) != null;
     }
 
     /**
-     * delete a existing list
      * 
-     * add by Songyy at 2011-10-10 23:32:50
-     * 	before removing the list, one should move all the elements to Inbox -- the default list
-     * 	the Inbox cannot be removed
      * @param name
      *            the list name
      * @return result of removal
      */
-    public String remove(String name) {
-    	if(name.compareTo(INBOX) == 0){
-    		return "Inbox cannot be removed";
-    	} else if(name.compareTo(TRASH) == 0){
-    		return "Trash cannot be removed";
-    	} else if(name == null){
-    		return "No list name given";
-    	} else if(!lists.containsKey(name)){
-    		return "List doesn't exist";
-    	}
-    	
-    	// before remove the list, move all the list into the Inbox, or the Trash
-    	TaskList listToRemove = lists.get(name);
-    	List<Task> taskList =  listToRemove.getTasks();
-    	
-    	String toListName = null;
-    	if(Control.confirmWithUser("Do you want to delete the task in this list? ")){
-    		toListName = TRASH;
-    	} else{
-    		toListName = INBOX;
-    	}
-    	
-    	TaskList toList = lists.get(toListName);
-    	
-    	for(Task task:taskList){
-    		task.setList(INBOX);
-    		toList.addTask(task);
-    	}
-    	
-        TaskList list = lists.remove(name);
-        return String.format(REMOVE_SUCCESS, list.getName());
+    public TaskList removeList(String name) {
+        if (name.equals(INBOX) || name.equals(TRASH)) {
+            return null;
+        }
+        
+        return lists.remove(name);
     }
 
     /**
@@ -127,11 +72,14 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
      * 
      * @param list
      *            the list object
-     * @return result of removal
+     * @return the TaskList deleted
      */
-    public String remove(TaskList list) {
-        lists.remove(list.getName());
-        return String.format(REMOVE_SUCCESS, list.getName());
+    public TaskList removeList(TaskList list) {
+        if (list.getName().equals(INBOX) || list.getName().equals(TRASH)) {
+            return null;
+        }
+        
+        return lists.remove(list.getName());
     }
 
     /**
@@ -143,17 +91,13 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
      *            the task object
      * @return the result of adding a list
      */
-    public String addTask(String listName, Task task) {
-        String result;
-
+    public boolean addTask(String listName, Task task) {
         if (lists.containsKey(listName)) {
-            result = lists.get(listName).add(task);
+            return lists.get(listName).addTask(task);
         } else { // if the list does not exist, create it
-            add(listName);
-            result = lists.get(listName).add(task);
+            addList(listName);
+            return lists.get(listName).addTask(task);
         }
-
-        return result;
     }
 
     /**
@@ -163,10 +107,10 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
      *            the list which the task stays
      * @param index
      *            index of the task in list
-     * @return the result of adding a list
+     * @return the task removed
      */
-    public String deleteTask(String listName, int index) {
-        return lists.get(listName).delete(index);
+    public Task removeTask(String listName, int index) {
+        return lists.get(listName).removeTask(index);
     }
 
     /**
@@ -191,38 +135,42 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
      *            the new list name
      * @param index
      *            index of the task in old list
-     * @return the result shown to the user
+     * @return the result of moving task
      */
-    public String moveTask(String oldList, String newList, int index) {
+    public boolean moveTask(String oldList, String newList, int index) {
         TaskList oldlist = getList(oldList);
-
         Task task = oldlist.getTask(index);
 
         if (task != null) {
             task.setList(newList);
-
             addTask(newList, task);
-
-            oldlist.delete(index);
+            oldlist.removeTask(index);
         } else {
-            return String.format(MOVE_FAIL, oldList);
+            return false;
         }
 
-        return String.format(MOVE_SUCCESS, task.getName(), oldList, newList);
+        return true;
     }
 
     /**
      * get the specific list with name passed
      * 
      * @param name
-     * @return the result shown to the user
+     * @return the TaskList with the name provided
      */
     public TaskList getList(String name) {
-    	if(name == null){
-    		name = INBOX;
-    	}
         return lists.get(name);
     }
+
+    /**
+     * @return an array of all the list names
+     */
+    public String[] getListNames(){
+    	Set<String> listSet = lists.keySet();
+    	String arr[] = {};
+    	return listSet.toArray(arr);
+    }
+
 
     /**
      * check whether the list name already exists

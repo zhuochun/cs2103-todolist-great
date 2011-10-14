@@ -36,6 +36,7 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 import cs2103.t14j1.storage.FileHandler;
+import cs2103.t14j1.storage.Priority;
 import cs2103.t14j1.storage.Task;
 import cs2103.t14j1.storage.TaskList;
 import cs2103.t14j1.storage.TaskLists;
@@ -297,17 +298,6 @@ public class TaskMeter extends Shell {
         });
         mntmEditTask.setText(getResourceString("edit"));
         
-        final MenuItem mntmMarkCompleted = new MenuItem(menuEdit, SWT.NONE);
-        mntmMarkCompleted.setAccelerator(SWT.MOD1 + 'D');
-        mntmMarkCompleted.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                if (taskTable.isFocusControl() && taskTable.getSelectionCount() != 0)
-                    toggleTaskStatus();
-            }
-        });
-        mntmMarkCompleted.setText(getResourceString("toggleStatus"));
-    
         final MenuItem mntmDeleteTask = new MenuItem(menuEdit, SWT.NONE);
         mntmDeleteTask.setAccelerator(SWT.DEL);
         mntmDeleteTask.addSelectionListener(new SelectionAdapter() {
@@ -319,6 +309,52 @@ public class TaskMeter extends Shell {
         });
         mntmDeleteTask.setText(getResourceString("delete"));
     
+        final MenuItem mntmMarkCompleted = new MenuItem(menuEdit, SWT.NONE);
+        mntmMarkCompleted.setAccelerator(SWT.MOD1 + 'D');
+        mntmMarkCompleted.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                if (taskTable.isFocusControl() && taskTable.getSelectionCount() != 0)
+                    toggleTaskStatus();
+            }
+        });
+        mntmMarkCompleted.setText(getResourceString("toggleStatus"));
+    
+        new MenuItem(menuEdit, SWT.SEPARATOR);
+        
+        final MenuItem mntmMarkPriority1 = new MenuItem(menuEdit, SWT.NONE);
+        mntmMarkPriority1.setAccelerator(SWT.MOD1 + '1');
+        mntmMarkPriority1.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                if (taskTable.isFocusControl() && taskTable.getSelectionCount() != 0)
+                    togglePriority(Priority.IMPORTANT);
+            }
+        });
+        mntmMarkPriority1.setText(getResourceString("togglePriority1"));
+        
+        final MenuItem mntmMarkPriority2 = new MenuItem(menuEdit, SWT.NONE);
+        mntmMarkPriority2.setAccelerator(SWT.MOD1 + '2');
+        mntmMarkPriority2.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                if (taskTable.isFocusControl() && taskTable.getSelectionCount() != 0)
+                    togglePriority(Priority.NORMAL);
+            }
+        });
+        mntmMarkPriority2.setText(getResourceString("togglePriority2"));
+        
+        final MenuItem mntmMarkPriority3 = new MenuItem(menuEdit, SWT.NONE);
+        mntmMarkPriority3.setAccelerator(SWT.MOD1 + '3');
+        mntmMarkPriority3.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                if (taskTable.isFocusControl() && taskTable.getSelectionCount() != 0)
+                    togglePriority(Priority.LOW);
+            }
+        });
+        mntmMarkPriority3.setText(getResourceString("togglePriority3"));
+        
         new MenuItem(menuEdit, SWT.SEPARATOR);
     
         final MenuItem mntmSearch = new MenuItem(menuEdit, SWT.NONE);
@@ -327,8 +363,11 @@ public class TaskMeter extends Shell {
         menuEdit.addMenuListener(new MenuAdapter() {
             public void menuShown(MenuEvent e) {
                 mntmEditTask.setEnabled(taskTable.getSelectionCount() != 0);
-                mntmMarkCompleted.setEnabled(taskTable.getSelectionCount() != 0);
                 mntmDeleteTask.setEnabled(taskTable.getSelectionCount() != 0);
+                mntmMarkCompleted.setEnabled(taskTable.getSelectionCount() != 0);
+                mntmMarkPriority1.setEnabled(taskTable.getSelectionCount() != 0);
+                mntmMarkPriority2.setEnabled(taskTable.getSelectionCount() != 0);
+                mntmMarkPriority3.setEnabled(taskTable.getSelectionCount() != 0);
             }
         });
     }
@@ -712,11 +751,28 @@ public class TaskMeter extends Shell {
             
             if (task.isCompleted()) {
                 task.setStatus(Task.INCOMPLETE);
-                feedback = "marked incomplete";
+                feedback = String.format(TOGGLE, task.getName(), task.getStatusStr());
             } else {
                 task.setStatus(Task.COMPLETED);
-                feedback = "marked completed";
+                feedback = String.format(TOGGLE, task.getName(), task.getStatusStr());
             }
+            
+            isModified = true;
+            refreshTask(index, task);
+            setStatusBar(feedback);
+        } else if (mode == MODE_SEARCH) {
+            
+        }
+    }
+    
+    private void togglePriority(Priority newPriority) {
+        int index = getSelectedIdx();
+        
+        if (mode == MODE_LIST) {
+            Task task = currentList.getTask(index);
+            
+            task.setPriority(newPriority);
+            String feedback = String.format(TOGGLE, task.getName(), task.getPriorityStr());
             
             isModified = true;
             refreshTask(index, task);
@@ -826,10 +882,11 @@ public class TaskMeter extends Shell {
     /* messages */
     private static final String LIST           = "List";
     private static final String TASK           = "Task";
+    private static final String TOGGLE         = "Task \"%1$s\" is marked as %2$s";
     private static final String LIST_EXIST     = "List \"%1$s\" already exists";
     private static final String ADD_SUCCESS    = "%1$s \"%2$s\" is successfully added";
     private static final String ADD_FAIL       = "%1$s \"%2$s\" fail to add";
     private static final String DELETE_SUCCESS = "%1$s \"%2$s\" is successfully deleted";
     private static final String DELETE_FAIL    = "%1$s fail to delete";
-    
+   
 }

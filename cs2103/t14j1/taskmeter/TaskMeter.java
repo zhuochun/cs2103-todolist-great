@@ -625,14 +625,17 @@ public class TaskMeter extends Shell {
         
         if (newList != null && newList.length() > 1) {
             if (!lists.hasList(newList)) {
-                isModified = true;
-
-                String feedback = lists.add(newList);
-
-                displayNewList(newList);
+                String feedback = String.format(ADD_FAIL, LIST, newList);
+                
+                if (lists.addList(newList)) {
+                    feedback = String.format(ADD_SUCCESS, LIST, newList);
+                    displayNewList(newList);
+                    isModified = true;
+                }
+                
                 setStatusBar(feedback);
             } else {
-                setStatusBar("list exists already");
+                setStatusBar(String.format(LIST_EXIST, newList));
             }
         }
     }
@@ -647,11 +650,16 @@ public class TaskMeter extends Shell {
         
         String feedback = dialog.open();
         if (feedback != null) {
-            feedback = currentList.add(newTask);
+            if (currentList.addTask(newTask)) {
+                feedback = String.format(ADD_SUCCESS, TASK, newTask.getName());
+                
+                displayNewTask(taskTable.getItemCount()+1, newTask);
+                isModified = true;
+            } else {
+                feedback = String.format(ADD_FAIL, TASK, newTask.getName());
+            }
             
-            displayNewTask(taskTable.getItemCount()+1, newTask);
             setStatusBar(feedback);
-            isModified = true;
         }
     }
 
@@ -670,8 +678,8 @@ public class TaskMeter extends Shell {
         String feedback = dialog.open();
         if (feedback != null) {
             refreshTask(index, task);
-            setStatusBar(feedback);
             isModified = true;
+            setStatusBar(feedback);
         }
     }
     
@@ -679,9 +687,14 @@ public class TaskMeter extends Shell {
         int index = getSelectedIdx();
         
         if (mode == MODE_LIST) {
-            String feedback = currentList.delete(index);
+            //String feedback = String.format(DELETE_FAIL, TASK, )
+            Task delTask = currentList.removeTask(index);
             
-            isModified = true;
+            String feedback = String.format(DELETE_FAIL, TASK);
+            if (delTask != null) {
+                feedback = String.format(DELETE_SUCCESS, TASK, delTask.getName());
+                isModified = true;
+            }
             
             displayTasks(currentList);
             setStatusBar(feedback);
@@ -809,4 +822,14 @@ public class TaskMeter extends Shell {
     protected void checkSubclass() {
         // Disable the check that prevents subclassing of SWT components
     }
+    
+    /* messages */
+    private static final String LIST           = "List";
+    private static final String TASK           = "Task";
+    private static final String LIST_EXIST     = "List \"%1$s\" already exists";
+    private static final String ADD_SUCCESS    = "%1$s \"%2$s\" is successfully added";
+    private static final String ADD_FAIL       = "%1$s \"%2$s\" fail to add";
+    private static final String DELETE_SUCCESS = "%1$s \"%2$s\" is successfully deleted";
+    private static final String DELETE_FAIL    = "%1$s fail to delete";
+    
 }

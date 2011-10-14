@@ -23,8 +23,8 @@ public class TaskListsTest {
     public void setUp() throws Exception {
         lists = new TaskLists();
         
-        lists.add("list1");
-        lists.add("list2");
+        lists.addList("list1");
+        lists.addList("list2");
         
         // add one task
         String name = "new task";

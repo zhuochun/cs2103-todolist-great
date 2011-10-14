@@ -26,7 +26,7 @@ public class TaskListTest {
         
         Task newTask = new Task(name, place, list, priority, startDateTime, endDateTime, deadline, duration, status);
         
-        tlist.add(newTask);
+        tlist.addTask(newTask);
     }
 
     @After
@@ -52,7 +52,7 @@ public class TaskListTest {
         System.out.println("\t" + task.getStatusStr());
         System.out.println("\t--------------");
         
-        tlist.delete(1);
+        tlist.removeTask(1);
         
         System.out.println(tlist.getSize());
     }

@@ -38,8 +38,8 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
         if (lists.containsKey(name)) {
             return false;
         }
-
-        return addList(new TaskList(name));
+        lists.put(name, new TaskList(name));
+        return true;
     }
 
     /**
@@ -50,7 +50,11 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
      * @return the result of adding a list
      */
     public boolean addList(TaskList list) {
-        return lists.put(list.getName(), list) != null;
+        if (lists.containsKey(list.getName())) {
+            return false;
+        }
+        lists.put(list.getName(), list);
+        return true;
     }
 
     /**

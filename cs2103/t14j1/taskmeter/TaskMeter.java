@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import cs2103.t14j1.logic.DateFormat;
 import cs2103.t14j1.storage.FileHandler;
 import cs2103.t14j1.storage.Priority;
 import cs2103.t14j1.storage.Task;
@@ -227,7 +228,7 @@ public class TaskMeter extends Shell {
         mntmAddList.setText(getResourceString("newList"));
     
         MenuItem mntmAddTask = new MenuItem(menuUser, SWT.NONE);
-        mntmAddTask.setAccelerator(SWT.MOD1 + 'N');
+        mntmAddTask.setAccelerator(SWT.MOD1 + 'T');
         mntmAddTask.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
@@ -452,13 +453,15 @@ public class TaskMeter extends Shell {
             }
         });
         GridData gd_taskList = new GridData(SWT.FILL, SWT.FILL, true, true);
+        gd_taskList.verticalSpan = 3;
         gd_taskList.widthHint = 150;
         gd_taskList.horizontalSpan = 2;
         taskList.setLayoutData(gd_taskList);
         taskList.setHeaderVisible(true);
         taskList.setLinesVisible(true);
-    
-        TableColumn tblclmnLists = new TableColumn(taskList, SWT.CENTER);tblclmnLists.setWidth(300);
+
+        TableColumn tblclmnLists = new TableColumn(taskList, SWT.CENTER);
+        tblclmnLists.setWidth(300);
         tblclmnLists.setText(getResourceString("list"));
     }
 
@@ -469,7 +472,9 @@ public class TaskMeter extends Shell {
         taskTable = new Table(this, SWT.BORDER | SWT.FULL_SELECTION);
         taskTable.setSelection(0);
         taskTable.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
-        taskTable.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, true, 9, 1));
+        GridData gd_taskTable = new GridData(SWT.FILL, SWT.FILL, true, true, 9, 4);
+        gd_taskTable.heightHint = 289;
+        taskTable.setLayoutData(gd_taskTable);
         taskTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseDoubleClick(MouseEvent e) {
@@ -498,6 +503,11 @@ public class TaskMeter extends Shell {
         tblclmnDate.setMoveable(true);
         tblclmnDate.setWidth(105);
         tblclmnDate.setText(getResourceString("table.date"));
+        
+        TableColumn tblclmnDeadline = new TableColumn(taskTable, SWT.CENTER);
+        tblclmnDeadline.setMoveable(true);
+        tblclmnDeadline.setWidth(105);
+        tblclmnDeadline.setText(getResourceString("table.deadline"));
 
         TableColumn tblclmnDuration = new TableColumn(taskTable, SWT.CENTER);
         tblclmnDuration.setMoveable(true);
@@ -507,21 +517,31 @@ public class TaskMeter extends Shell {
         TableColumn tblclmnCompleted = new TableColumn(taskTable, SWT.CENTER);
         tblclmnCompleted.setMoveable(true);
         tblclmnCompleted.setWidth(75);
-        tblclmnCompleted.setText(getResourceString("table.completed"));
+        tblclmnCompleted.setText(getResourceString("table.status"));
     }
 
     private void createBottomButtons() {
-        Button btnAddANew = new Button(this, SWT.NONE);
-        btnAddANew.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-        btnAddANew.addSelectionListener(new SelectionAdapter() {
+        Button btnViewAllTasks = new Button(this, SWT.NONE);
+        btnViewAllTasks.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+        btnViewAllTasks.setText(getResourceString("button.viewalltasks"));
+        
+        Button btnTrashBox = new Button(this, SWT.NONE);
+        btnTrashBox.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                addList();
+                switchList(TaskLists.TRASH);
             }
         });
-        btnAddANew.setText(getResourceString("list.add"));
+        btnTrashBox.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
+        btnTrashBox.setText(getResourceString("button.trashbox"));
 
         Button btnAll = new Button(this, SWT.NONE);
+        btnAll.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                displayCurrentList(null);
+            }
+        });
         btnAll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
         btnAll.setText(getResourceString("filter.all"));
 
@@ -561,8 +581,8 @@ public class TaskMeter extends Shell {
         Button btnWithoutDate = new Button(this, SWT.NONE);
         btnWithoutDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
         btnWithoutDate.setText(getResourceString("filter.nodate"));
-
-        setTabList(new Control[]{smartBar, taskList, btnAddANew, taskTable, btnAll, btnImportant, btnCompleted, btnOverdue, btnToday, btnTomorrow, btnNextDays, btnWithoutDate});
+        
+        setTabList(new Control[]{smartBar, taskList, taskTable, btnAll, btnImportant, btnCompleted, btnOverdue, btnToday, btnTomorrow, btnNextDays, btnWithoutDate});
     }
 
     private void createStatusBar() {
@@ -579,8 +599,7 @@ public class TaskMeter extends Shell {
     private void displayLists() {
         taskList.removeAll();
         
-        TableItem item = displayNewList(TaskLists.INBOX);
-        highlightList(item);
+        displayNewList(TaskLists.INBOX);
     
         for (Entry<String, TaskList> list : lists) {
             if (list.getKey().equalsIgnoreCase(TaskLists.INBOX)
@@ -589,11 +608,7 @@ public class TaskMeter extends Shell {
             }
     
             displayNewList(list.getKey());
-            highlightList(item);
         }
-    
-        displayNewList(TaskLists.TRASH);
-        highlightList(item);
     }
 
     /**
@@ -603,13 +618,18 @@ public class TaskMeter extends Shell {
      * @return
      */
     private TableItem displayNewList(String name) {
-        TableItem table = new TableItem(taskList, SWT.NONE);
-        table.setText(name);
-        return table;
+        TableItem item = new TableItem(taskList, SWT.NONE);
+        item.setText(name);
+        
+        highlightList(item);
+        return item;
     }
 
     private void displayCurrentList(String name) {
-        currentList = lists.getList(name);
+        if (name != null) {
+            currentList = lists.getList(name);
+        }
+        
         displayTasks(currentList);
     }
 
@@ -635,9 +655,11 @@ public class TaskMeter extends Shell {
                 task.getName(),
                 task.getPriority().toString().toLowerCase(),
                 task.getStartEndDate() == null ? "" : task.getStartEndDate(),
+                task.getDeadlineShort() == null ? "" : task.getDeadlineShort(),
                 task.getDurationStr() == null ? "" : task.getDurationStr(),
                 task.getStatusStr()
                 });
+        highlightTask(tableItem, task);
         return idx + 1;
     }
 
@@ -648,9 +670,11 @@ public class TaskMeter extends Shell {
                 task.getName(),
                 task.getPriority().toString().toLowerCase(),
                 task.getStartEndDate() == null ? "" : task.getStartEndDate(),
+                task.getDeadlineShort() == null ? "" : task.getDeadlineShort(),
                 task.getDurationStr() == null ? "" : task.getDurationStr(),
                 task.getStatusStr()
                 });
+        highlightTask(item, task);
         return idx;
     }
 
@@ -726,7 +750,6 @@ public class TaskMeter extends Shell {
         int index = getSelectedIdx();
         
         if (mode == MODE_LIST) {
-            //String feedback = String.format(DELETE_FAIL, TASK, )
             Task delTask = currentList.removeTask(index);
             
             String feedback = String.format(DELETE_FAIL, TASK);
@@ -857,6 +880,28 @@ public class TaskMeter extends Shell {
             l.setBackground(SWTResourceManager.getColor(SWT.COLOR_INFO_BACKGROUND));
         } else {
             l.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
+        }
+    }
+
+    /**
+     * highlight task which is completed, important, or missed deadline
+     * 
+     * @param item
+     * @param task
+     */
+    private void highlightTask(TableItem item, Task task) {
+        if (task.isCompleted()) {
+            item.setForeground(SWTResourceManager.getColor(SWT.COLOR_GRAY));
+            item.setBackground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_BACKGROUND));
+        } else if (task.getDeadline() != null && task.getDeadline().before(DateFormat.getNow())) {
+            item.setBackground(SWTResourceManager.getColor(221, 160, 221));
+        } else if (task.getEndDateTime() != null && task.getEndDateTime().before(DateFormat.getNow())) {
+            item.setBackground(SWTResourceManager.getColor(221, 160, 221));
+        } else if (task.getPriority() == Priority.IMPORTANT) {
+            item.setBackground(SWTResourceManager.getColor(255, 218, 185));
+        } else {
+            item.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLACK));
+            item.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
         }
     }
 

@@ -243,6 +243,17 @@ public class Task {
     }
 
     /**
+     * @return yyyy-MM-dd HH:mm
+     */
+    public String getDeadlineShort() {
+        if (deadline == null) {
+            return null;
+        }
+
+        return DateFormat.dateToStrShort(deadline);
+    }
+
+    /**
      * @return yyyy-MM-dd
      */
     public String getDeadlineDate() {

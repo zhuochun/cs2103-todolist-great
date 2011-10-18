@@ -12,12 +12,34 @@ public enum Commands {
      */
     DELETE_TASK,
 
+    /**
+     * Syntax: move [num] [#list]
+     */
     MOVE_TASK,
-
+    
+    /**
+     * Syntax: edit + [num]
+     */
     EDIT_TASK,
+    
+    /**
+     * Syntax: [num] + done
+     */
+    MARK_COMPLETE,
+    
+    /**
+     * Syntax: [num] + [!1~3]
+     */
+    MARK_PRIORITY,
 
+    /**
+     * Syntax: add [#list]
+     */
     ADD_LIST,
 
+    /**
+     * Syntax: edit [#list]
+     */
     EDIT_LIST,
 
     /**
@@ -29,8 +51,6 @@ public enum Commands {
      * Syntax: #(list name)
      */
     SWITCH_LIST,
-
-    SORT,
 
     /**
      * Syntax: / + string to search

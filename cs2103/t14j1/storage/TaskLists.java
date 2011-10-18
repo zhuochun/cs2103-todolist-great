@@ -37,10 +37,6 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
     public boolean addList(String name) {
         if (lists.containsKey(name)) {
             return false;
-        } else if (name.equals(INBOX)) {
-            return false;
-        } else if (name.equals(TRASH)) {
-            return false;
         }
         
         lists.put(name, new TaskList(name));
@@ -56,10 +52,6 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
      */
     public boolean addList(TaskList list) {
         if (lists.containsKey(list.getName())) {
-            return false;
-        } else if (list.getName().equals(INBOX)) {
-            return false;
-        } else if (list.getName().equals(TRASH)) {
             return false;
         }
         

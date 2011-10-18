@@ -77,11 +77,13 @@ public class TaskMeter extends Shell {
             TaskMeter application = new TaskMeter(display);
             application.open();
             application.layout();
+            Process p = Runtime.getRuntime().exec("TaskMeterHotKeys.exe");
             while (!application.isDisposed()) {
                 if (!display.readAndDispatch()) {
                     display.sleep();
                 }
             }
+            p.destroy();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -601,13 +603,17 @@ public class TaskMeter extends Shell {
         
         displayNewList(TaskLists.INBOX);
     
-        for (Entry<String, TaskList> list : lists) {
-            if (list.getKey().equalsIgnoreCase(TaskLists.INBOX)
-                    || list.getKey().equalsIgnoreCase(TaskLists.TRASH)) {
-                continue;
+        try {
+            for (Entry<String, TaskList> list : lists) {
+                if (list.getKey().equalsIgnoreCase(TaskLists.INBOX)
+                        || list.getKey().equalsIgnoreCase(TaskLists.TRASH)) {
+                    continue;
+                }
+
+                displayNewList(list.getKey());
             }
-    
-            displayNewList(list.getKey());
+        } catch (NullPointerException e) {
+            // do nothing
         }
     }
 
@@ -636,9 +642,13 @@ public class TaskMeter extends Shell {
     private void displayTasks(TaskList tlist) {
         taskTable.removeAll(); // remove all items for redraw
         
-        int idx = 1;
-        for (Task task : tlist) {
-            idx = displayNewTask(idx, task);
+        try {
+            int idx = 1;
+            for (Task task : tlist) {
+                idx = displayNewTask(idx, task);
+            }
+        } catch (NullPointerException e) {
+            // do nothing
         }
     }
 

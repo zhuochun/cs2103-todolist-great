@@ -52,7 +52,7 @@ public class Task {
      * A Constructor with name and list provided only
      */
     public Task() {
-        this.name          = null;
+        this.name          = "";
         this.place         = null;
         this.list          = TaskLists.INBOX;
         this.priority      = Priority.NORMAL;
@@ -82,6 +82,14 @@ public class Task {
 
     public void setList(String newList) {
         list = newList;
+    }
+    
+    public When getWhen() {
+        return when;
+    }
+    
+    public void setWhen(When newWhen) {
+        when = newWhen;
     }
 
     public Priority getPriority() {

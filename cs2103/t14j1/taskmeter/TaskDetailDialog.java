@@ -311,7 +311,7 @@ public class TaskDetailDialog extends Dialog {
     }
 
     private int getTaskStatus() {
-        return task.getStatus() ? 1 : 0;
+        return task.isCompleted() ? 1 : 0;
     }
 
     private void setStartEndDateTime() {

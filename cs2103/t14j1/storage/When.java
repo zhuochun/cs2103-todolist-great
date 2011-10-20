@@ -114,7 +114,7 @@ public class When {
         startDateTime.setTime(date);
         clear(startDateTime, CLEAR_BELOW_SECOND);
     }
-
+    
     /**
      * set all date, time for startDateTime
      * 
@@ -167,6 +167,7 @@ public class When {
         }
         
         startDateTime = date;
+        isAllDay      = true;
     }
     
     /**
@@ -228,7 +229,7 @@ public class When {
         endDateTime.setTime(date);
         clear(endDateTime, CLEAR_BELOW_SECOND);
     }
-
+    
     /**
      * set all date, time for endDateTime
      * 
@@ -279,6 +280,7 @@ public class When {
         }
         
         endDateTime = date;
+        isAllDay    = true;
     }
     
     /**
@@ -323,7 +325,10 @@ public class When {
      * @param date
      */
     public void setDeadline(Date date) {
-        if (deadline == null) {
+        if (date == null) {
+            deadline = null;
+            return ;
+        } else if (deadline == null) {
             deadline = Calendar.getInstance();
         }
         
@@ -388,7 +393,8 @@ public class When {
     }
     
     /**
-     * duration will be ignored if this is an All-Day task, no startDateTime is set
+     * Must have <code>setType(DATE_TIME_TASK)<code> set, otherwise duration may be ignored
+     * if this is an all-day task
      * 
      * setDuration will overwrite endDateTime if the duration is different from old duration
      * 
@@ -397,7 +403,10 @@ public class When {
     public void setDuration(Long duration) {
         if (isAllDay) {
             return ;
-        } else if (getDuration() == null) {
+        } else if (duration == null) {
+            isAllDay = true;
+            return ;
+        } else if (getStartDateTime() == null) {
             return ;
         } else if (getDuration() == duration) {
             return ;

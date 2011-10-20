@@ -22,6 +22,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 
 import cs2103.t14j1.storage.Priority;
 import cs2103.t14j1.storage.Task;
+import cs2103.t14j1.storage.When;
 
 /**
  * a task detail dialog for editing task details
@@ -384,34 +385,25 @@ public class TaskDetailDialog extends Dialog {
         // String newList = getText(txtWhere);
         Priority newPriority = Priority.valueOf(cboPriority.getText().trim().toUpperCase());
 
-        Calendar newStartDT = null;
-        Calendar newEndDT = null;
-        Long newDuration = null;
+        When newWhen = new When();
         if (!btnNoDate.getSelection()) { // if no date is not selected
-            newStartDT = Calendar.getInstance();
-            newEndDT = Calendar.getInstance();
-            getDateSet(dateStart, newStartDT);
-            getDateSet(dateEnd, newEndDT);
+            try {
+                newWhen.setStartDate(dateStart.getYear(), dateStart.getMonth(), dateStart.getDay());
+                newWhen.setEndDate(dateEnd.getYear(), dateEnd.getMonth(), dateEnd.getDay());
 
-            if (!btnAllDay.getSelection()) { // if all day is not selected
-                getTimeSet(timeStart, newStartDT);
-                getTimeSet(timeEnd, newEndDT);
-
-                newDuration = (newEndDT.getTimeInMillis() - newStartDT.getTimeInMillis()) / 1000;
-            }
-
-            if (newEndDT.compareTo(newStartDT) < 0) {
-                displayError("End Date and Time should come after Start Date and Time");
+                if (!btnAllDay.getSelection()) { // if all day is not selected
+                    newWhen.setStartTime(timeStart.getHours(), timeStart.getMinutes());
+                    newWhen.setEndTime(timeEnd.getHours(), timeEnd.getMinutes());
+                }
+            } catch (IllegalArgumentException e) {
+                displayError(e.getMessage());
                 return false;
             }
         }
-
-        Calendar newDeadlineDT = null;
+        
         if (!btnNoDeadline.getSelection()) { // if no deadline is not selected
-            newDeadlineDT = Calendar.getInstance();
-
-            getDateSet(dateDeadline, newDeadlineDT);
-            getTimeSet(timeDeadline, newDeadlineDT);
+            newWhen.setDeadline(dateDeadline.getYear(), dateDeadline.getMonth(), dateDeadline.getDay(),
+                    timeDeadline.getHours(), timeDeadline.getMinutes());
         }
 
         Boolean newStatus = Task.INCOMPLETE;
@@ -421,23 +413,10 @@ public class TaskDetailDialog extends Dialog {
         task.setName(newName);
         task.setPlace(newPlace);
         task.setPriority(newPriority);
-        task.setStartDateTime(newStartDT == null ? null : newStartDT.getTime());
-        task.setEndDateTime(newEndDT == null ? null : newEndDT.getTime());
-        task.setDuration(newDuration);
-        task.setDeadline(newDeadlineDT == null ? null : newDeadlineDT.getTime());
+        task.setWhen(newWhen);
         task.setStatus(newStatus);
 
         return true;
-    }
-
-    private void getDateSet(DateTime date, Calendar ndate) {
-        ndate.set(date.getYear(), date.getMonth(), date.getDay(), 0, 0, 0);
-    }
-
-    private void getTimeSet(DateTime time, Calendar ndate) {
-        ndate.set(Calendar.HOUR_OF_DAY, time.getHours());
-        ndate.set(Calendar.MINUTE, time.getMinutes());
-        ndate.set(Calendar.SECOND, 0);
     }
 
     private String getText(Text s) {

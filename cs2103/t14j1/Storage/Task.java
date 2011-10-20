@@ -10,7 +10,7 @@ import cs2103.t14j1.logic.DateFormat;
  * @author Zhuochun
  * 
  */
-public class Task {
+public class Task implements Comparable<Object> {
 
     // private members
     private String              name;              // define the task action
@@ -356,4 +356,65 @@ public class Task {
     public static final String DEADLINE   = "deadline";
     public static final String STATUS     = "status";
     public static final String DURATION   = "duration";
+
+    @Override
+    public int compareTo(Object o) {
+        if (o == null) {
+            throw new NullPointerException();
+        }
+        
+        Task other = (Task) o;
+        int result = 0;
+        
+        // early deadline fist
+        if (result == 0) {
+            result = compareDeadline(other.getDeadline());
+        }
+        
+        // early startDate first
+        if (result == 0) {
+            result = compareStartDateTime(other.getStartDateTime());
+        }
+        
+        // higher priority first
+        if (result == 0) {
+            result = comparePriority(other.getPriority());
+        }
+        
+        return result;
+    }
+    
+    public int compareDeadline(Date other) {
+        if (getDeadline() != null && other != null) {
+            return getDeadline().compareTo(other);
+        }
+        
+        if (getDeadline() != null) {
+            return -1;
+        }
+        if (other != null) {
+            return 1;
+        }
+        
+        return 0;
+    }
+    
+    public int compareStartDateTime(Date other) {
+        if (getStartDateTime() != null && other != null) {
+            return getStartDateTime().compareTo(other);
+        }
+        
+        if (getStartDateTime() != null) {
+            return -1;
+        }
+        if (other != null) {
+            return 1;
+        }
+        
+        return 0;
+    }
+    
+    public int comparePriority(Priority other) {
+        return priority.compareTo(other);
+    }
 }

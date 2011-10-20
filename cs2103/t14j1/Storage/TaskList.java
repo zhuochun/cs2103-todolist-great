@@ -1,6 +1,7 @@
 package cs2103.t14j1.storage;
 
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.List;
 
@@ -86,6 +87,10 @@ public class TaskList implements Iterable<Task> {
             i++;
         }
         return -1;
+    }
+    
+    public void sort() {
+        Collections.sort(tasks);
     }
 
     /**

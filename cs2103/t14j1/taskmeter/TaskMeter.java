@@ -167,7 +167,7 @@ public class TaskMeter extends Shell {
             public void keyTraversed(TraverseEvent e) { // Enter to execute Command
                 if (e.keyCode == SWT.CR) {
                     setStatusBar(smartBar.getText());
-                    smartBar.setText("");
+                    smartBar.setSelection(0, smartBar.getText().length());
                     smartBar.setFocus();
                 } else if (e.keyCode == SWT.TAB) { // Tab to complete words
                     e.doit = false;
@@ -641,6 +641,8 @@ public class TaskMeter extends Shell {
 
     private void displayTasks(TaskList tlist) {
         taskTable.removeAll(); // remove all items for redraw
+        
+        tlist.sort();
         
         try {
             int idx = 1;

@@ -12,7 +12,7 @@ public class When {
     public static final boolean ALL_DAY_TASK   = true;
     public static final boolean DATE_TIME_TASK = false;
     
-    public static final String DATETIME_EXCEPTION = "StartDateTime must be earlier than EndDateTime";
+    public static final String DATETIME_EXCEPTION = "Start date and time must be earlier than end date time";
      
     /**
      * constructor

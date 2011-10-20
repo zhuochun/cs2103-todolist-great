@@ -25,6 +25,8 @@ import org.w3c.dom.Text;
 import org.xml.sax.SAXException;
 
 import cs2103.t14j1.logic.DateFormat;
+import cs2103.t14j1.storage.user.Beginner;
+import cs2103.t14j1.storage.user.User;
 
 
 /**
@@ -35,7 +37,7 @@ import cs2103.t14j1.logic.DateFormat;
  */
 public class FileHandler {
     
-	private static final String fileFolder   = "user/";
+	private static final String fileFolder   = User.getUserFolder();
 	private static final String taskFileName = "tasks.xml";
 	private static final String listFileName = "lists.xml";
 	
@@ -107,6 +109,8 @@ public class FileHandler {
     	Document doc = openXmlDocument(fileFolder, listFileName);
     	
     	if (doc == null) { // if doc failed to load
+    	    User.setFirstTimeUser();
+    	    Beginner.createTasks(lists);
     	    saveLists(lists);
     	    return ;
     	}
@@ -227,7 +231,7 @@ public class FileHandler {
     	File fileDirectory = new File(directory);
     	
     	if(!fileDirectory.exists()){
-    		fileDirectory.mkdir();
+    		fileDirectory.mkdirs();
     	}
     	
         try {
@@ -251,7 +255,7 @@ public class FileHandler {
     	File directory = new File(folder);
     	
     	if(!directory.exists()){
-    		directory.mkdir();
+    		directory.mkdirs();
     	}
     	
     	File fXmlFile = new File(folder + fileName);

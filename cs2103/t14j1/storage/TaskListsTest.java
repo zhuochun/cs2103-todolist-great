@@ -55,7 +55,6 @@ public class TaskListsTest {
         
         // add an empty task and set properties one by one
         newTask = new Task();
-        lists.addTask("Inbox", newTask);
         
         newTask.setName("task 3");
         newTask.setPlace("hell");
@@ -65,6 +64,8 @@ public class TaskListsTest {
         newTask.setDeadline(DateFormat.strToDate("2011-10-10"));
         newTask.setDuration(new Long(20));
         newTask.setStatus(Task.COMPLETED);
+        
+        lists.addTask("Inbox", newTask);
         
         // add a new task with when class
         name = "task 1 with When class";
@@ -133,6 +134,11 @@ Expected result is
             
             System.out.println("--------------");
         }
+    }
+    
+    @Test
+    public void testGetList() {
+        lists.getList("");
     }
 
 }

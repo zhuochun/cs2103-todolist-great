@@ -3,6 +3,13 @@ package cs2103.t14j1.storage;
 import java.util.Calendar;
 import java.util.Date;
 
+/**
+ * class deal with date and time properties in Task
+ * 
+ * It makes sure that the date/time follows the instructions on adding a Task
+ * 
+ * @author Zhuochun
+ */
 public class When {
     public Calendar startDateTime;
     public Calendar endDateTime;
@@ -12,7 +19,8 @@ public class When {
     public static final boolean ALL_DAY_TASK   = true;
     public static final boolean DATE_TIME_TASK = false;
     
-    public static final String DATETIME_EXCEPTION = "Start date and time must be earlier than end date time";
+    // Exception Strings
+    private static final String EXCEPTION_DATETIME = "Start date and time must be earlier than end date time";
      
     /**
      * constructor
@@ -60,7 +68,7 @@ public class When {
     public void setAll(Date start, Date end, Date dl, Long duration) {
         // check start/end time invalid case
         if (start != null && end != null && end.before(start)) {
-            throw new IllegalArgumentException(DATETIME_EXCEPTION);
+            throw new IllegalArgumentException(EXCEPTION_DATETIME);
         }
         
         // set isAllDay task
@@ -215,7 +223,7 @@ public class When {
             endDateTime   = null;
             return ;
         } else if (startDateTime != null && date.before(startDateTime.getTime())) {
-            throw new IllegalArgumentException(DATETIME_EXCEPTION);
+            throw new IllegalArgumentException(EXCEPTION_DATETIME);
         } else if (startDateTime == null) {
             startDateTime = Calendar.getInstance();
             startDateTime.setTime(date);
@@ -274,7 +282,7 @@ public class When {
         clear(date, CLEAR_BELOW_HOUR);
         
         if (startDateTime != null && date.getTime().before(startDateTime.getTime())) {
-            throw new IllegalArgumentException(DATETIME_EXCEPTION);
+            throw new IllegalArgumentException(EXCEPTION_DATETIME);
         } else if (startDateTime == null) {
             startDateTime = (Calendar) date.clone();
         }
@@ -310,7 +318,7 @@ public class When {
         clear(date, CLEAR_BELOW_SECOND);
         
         if (startDateTime != null && date.getTime().before(startDateTime.getTime())) {
-            throw new IllegalArgumentException(DATETIME_EXCEPTION);
+            throw new IllegalArgumentException(EXCEPTION_DATETIME);
         } else if (startDateTime == null) {
             startDateTime = (Calendar) date.clone();
         }

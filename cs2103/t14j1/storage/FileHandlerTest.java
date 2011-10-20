@@ -58,7 +58,6 @@ public class FileHandlerTest {
         
         // add an empty task and set properties one by one
         newTask = new Task();
-        lists.addTask("Inbox", newTask);
         
         newTask.setName("task 3");
         newTask.setPlace("hell");
@@ -69,6 +68,7 @@ public class FileHandlerTest {
         newTask.setDuration(new Long(20));
         newTask.setStatus(Task.COMPLETED);
 
+        lists.addTask("Inbox", newTask);
         FileHandler.saveAll(lists);
     }
 

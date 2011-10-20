@@ -13,39 +13,44 @@ import cs2103.t14j1.logic.DateFormat;
 public class Task implements Comparable<Object> {
 
     // private members
-    private String              name;              // define the task action
-    private String              place;             // define the place of task
-    private String              list;              // belong to which list
-    private Priority            priority;          // priority of the task
-    private When                 when;             // stores start/end, duration, deadline
-    private boolean             status;            // completed or not
+    private String      name;              // define the task action
+    private String      place;             // define the place of task
+    private String      list;              // belong to which list
+    private Priority    priority;          // priority of the task
+    private When        when;              // stores start/end, duration, deadline
+    private boolean     status;            // completed or not
 
     public static final boolean COMPLETED  = true;
     public static final boolean INCOMPLETE = false;
+    
+    // Exceptions Strings
+    private static final String EXCEPTION_EMPTY_TASK_NAME = "Task name cannot be empty";
+    private static final String EXCEPTION_EMPTY_LIST_NAME = "Task must belong to a list with non-empty name";
+    private static final String EXCEPTION_NULL_WHEN = "Task's When property cannot be null";
 
     /**
      * A Constructor with all parameters provided
      */
     public Task(String name, String place, String list, Priority priority, Date startDateTime, Date endDateTime,
             Date deadline, Long duration, boolean status) {
-        this.name          = name;
-        this.place         = place;
-        this.list          = (list == null) ? TaskLists.INBOX : list;
-        this.priority      = (priority == null) ? Priority.NORMAL : priority;
-        this.when          = new When(startDateTime, endDateTime, deadline, duration);
-        this.status        = status;
+        setName(name);
+        setPlace(place);
+        setList(list);
+        setPriority(priority);
+        setWhen(new When(startDateTime, endDateTime, deadline, duration));
+        setStatus(status);
     }
     
     /**
      * new constructor with all parameters
      */
     public Task(String name, String place, String list, Priority priority, When when, boolean status) {
-        this.name          = name;
-        this.place         = place;
-        this.list          = (list == null) ? TaskLists.INBOX : list;
-        this.priority      = (priority == null) ? Priority.NORMAL : priority;
-        this.when          = (when == null) ? new When() : when;
-        this.status        = status;
+        setName(name);
+        setPlace(place);
+        setList(list);
+        setPriority(priority);
+        setWhen(new When());
+        setStatus(status);
     }
 
     /**
@@ -65,6 +70,10 @@ public class Task implements Comparable<Object> {
     }
 
     public void setName(String newName) {
+        if (newName == null || newName.trim().isEmpty()) {
+            throw new NullPointerException(EXCEPTION_EMPTY_TASK_NAME);
+        }
+
         name = newName;
     }
 
@@ -81,6 +90,12 @@ public class Task implements Comparable<Object> {
     }
 
     public void setList(String newList) {
+        if (newList == null) {
+            newList = TaskLists.INBOX;
+        } else if (newList.trim().isEmpty()) {
+            throw new NullPointerException(EXCEPTION_EMPTY_LIST_NAME);
+        }
+
         list = newList;
     }
     
@@ -89,6 +104,10 @@ public class Task implements Comparable<Object> {
     }
     
     public void setWhen(When newWhen) {
+        if (newWhen == null) {
+            throw new NullPointerException(EXCEPTION_NULL_WHEN);
+        }
+
         when = newWhen;
     }
 
@@ -101,6 +120,10 @@ public class Task implements Comparable<Object> {
     }
 
     public void setPriority(Priority newValue) {
+        if (newValue == null) {
+            newValue = Priority.NORMAL;
+        }
+
         priority = newValue;
     }
 
@@ -346,17 +369,6 @@ public class Task implements Comparable<Object> {
         str.append(info);
     }
 
-    // used as XML tag names
-    public static final String NAME       = "name";
-    public static final String LIST       = "list_name";
-    public static final String PLACE      = "place";
-    public static final String PRIORITY   = "priority";
-    public static final String START_DATE = "start_date";
-    public static final String END_DATE   = "end_date";
-    public static final String DEADLINE   = "deadline";
-    public static final String STATUS     = "status";
-    public static final String DURATION   = "duration";
-
     @Override
     public int compareTo(Object o) {
         if (o == null) {
@@ -417,4 +429,16 @@ public class Task implements Comparable<Object> {
     public int comparePriority(Priority other) {
         return priority.compareTo(other);
     }
+
+    // used as XML tag names
+    public static final String NAME       = "name";
+    public static final String LIST       = "list_name";
+    public static final String PLACE      = "place";
+    public static final String PRIORITY   = "priority";
+    public static final String START_DATE = "start_date";
+    public static final String END_DATE   = "end_date";
+    public static final String DEADLINE   = "deadline";
+    public static final String STATUS     = "status";
+    public static final String DURATION   = "duration";
+
 }

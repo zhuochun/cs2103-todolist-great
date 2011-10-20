@@ -18,8 +18,12 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
     /* Default Lists */
     public static final String INBOX = "Inbox";
     public static final String TRASH = "Trash";
+    
+    // Exception Strings
+    private static final String EXCEPTION_EMPTY_LIST_NAME = "TaskList name cannot be empty";
+    private static final String EXCEPTION_NULL_LIST = "TaskList cannot be null";
+    private static final String EXCEPTION_REMOVE_DEFAULT_LISTS = "Default lists \"Inbox\" and \"Trash\" cannot be removed";
 
-    /* constructor */
     public TaskLists() {
         lists = new TreeMap<String, TaskList>();
         // add default lists
@@ -35,7 +39,9 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
      * @return the result of adding a list
      */
     public boolean addList(String name) {
-        if (lists.containsKey(name)) {
+        if (name == null || name.trim().length() < 1) {
+            throw new NullPointerException(EXCEPTION_EMPTY_LIST_NAME);
+        } else if (lists.containsKey(name)) {
             return false;
         }
         
@@ -51,7 +57,9 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
      * @return the result of adding a list
      */
     public boolean addList(TaskList list) {
-        if (lists.containsKey(list.getName())) {
+        if (list == null) {
+            throw new NullPointerException(EXCEPTION_NULL_LIST);
+        } else if (lists.containsKey(list.getName())) {
             return false;
         }
         
@@ -67,7 +75,7 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
      */
     public TaskList removeList(String name) {
         if (name.equals(INBOX) || name.equals(TRASH)) {
-            return null;
+            throw new IllegalArgumentException(EXCEPTION_REMOVE_DEFAULT_LISTS);
         }
         
         return lists.remove(name);
@@ -82,7 +90,7 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
      */
     public TaskList removeList(TaskList list) {
         if (list.getName().equals(INBOX) || list.getName().equals(TRASH)) {
-            return null;
+            throw new IllegalArgumentException(EXCEPTION_REMOVE_DEFAULT_LISTS);
         }
         
         return lists.remove(list.getName());
@@ -146,7 +154,7 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
     public boolean moveTask(String oldList, String newList, int index) {
         TaskList oldlist = getList(oldList);
         Task task = oldlist.getTask(index);
-
+        
         if (task != null) {
             task.setList(newList);
             addTask(newList, task);

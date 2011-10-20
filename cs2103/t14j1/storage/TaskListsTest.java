@@ -65,6 +65,38 @@ public class TaskListsTest {
         newTask.setDeadline(DateFormat.strToDate("2011-10-10"));
         newTask.setDuration(new Long(20));
         newTask.setStatus(Task.COMPLETED);
+        
+        // add a new task with when class
+        name = "task 1 with When class";
+        place = "i dont have a place";
+        list = "list1";
+        priority = Priority.NORMAL;
+        When when = new When();
+        try {
+            when.setStartDate(-1, -1, 23);
+            when.setEndDate(-1, -1, 22);
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
+        when.setDeadline(2011, 10, 23);
+        status = Task.INCOMPLETE;
+        
+        newTask = new Task(name, place, list, priority, when, status);
+        lists.addTask(list, newTask);
+        
+        // add another task
+        name = "task 2 with When class";
+        place = null;
+        priority = Priority.IMPORTANT;
+        
+        when = new When();
+        when.setType(When.DATE_TIME_TASK);
+        when.setStartDate(-1, -1, 23);
+        when.setStartTime(10, 10);
+        when.setDuration(new Long(3600));
+        
+        newTask = new Task(name, place, list, priority, when, status);
+        lists.addTask(list, newTask);
     }
 
     @After
@@ -81,10 +113,7 @@ Expected result is
             System.out.println(list.getKey());
             
             for (Task task : list.getValue()) {
-                System.out.println("\t" + task.getName());
-                System.out.println("\t" + task.getPriorityStr());
-                System.out.println("\t" + task.getStatusStr());
-                System.out.println("\t--------------");
+                System.out.println(task.getDisplayTaskStr());
             }
             
             System.out.println("--------------");
@@ -99,10 +128,7 @@ Expected result is
             System.out.println(tlist.getKey());
             
             for (Task task : tlist.getValue()) {
-                System.out.println("\t" + task.getName());
-                System.out.println("\t" + task.getPriorityStr());
-                System.out.println("\t" + task.getStatusStr());
-                System.out.println("\t--------------");
+                System.out.println(task.getDisplayTaskStr());
             }
             
             System.out.println("--------------");

@@ -17,10 +17,7 @@ public class Task {
     private String              place;             // define the place of task
     private String              list;              // belong to which list
     private Priority            priority;          // priority of the task
-    private Date                startDateTime;     // start date and time
-    private Date                endDateTime;       // end date and time
-    private Date                deadline;          // deadline date and time
-    private Long                duration;          // duration of task
+    private When                 when;             // stores start/end, duration, deadline
     private boolean             status;            // completed or not
 
     public static final boolean COMPLETED  = true;
@@ -35,10 +32,19 @@ public class Task {
         this.place         = place;
         this.list          = (list == null) ? TaskLists.INBOX : list;
         this.priority      = (priority == null) ? Priority.NORMAL : priority;
-        this.startDateTime = startDateTime;
-        this.endDateTime   = endDateTime;
-        this.deadline      = deadline;
-        this.duration      = duration;
+        this.when          = new When(startDateTime, endDateTime, deadline, duration);
+        this.status        = status;
+    }
+    
+    /**
+     * new constructor with all parameters
+     */
+    public Task(String name, String place, String list, Priority priority, When when, boolean status) {
+        this.name          = name;
+        this.place         = place;
+        this.list          = (list == null) ? TaskLists.INBOX : list;
+        this.priority      = (priority == null) ? Priority.NORMAL : priority;
+        this.when          = (when == null) ? new When() : when;
         this.status        = status;
     }
 
@@ -50,10 +56,7 @@ public class Task {
         this.place         = null;
         this.list          = TaskLists.INBOX;
         this.priority      = Priority.NORMAL;
-        this.startDateTime = null;
-        this.endDateTime   = null;
-        this.deadline      = null;
-        this.duration      = null;
+        this.when          = new When();
         this.status        = INCOMPLETE;
     }
 
@@ -94,17 +97,20 @@ public class Task {
     }
 
     public String getStartEndDate() {
-        if (startDateTime != null & endDateTime != null) {
+        if (when.hasDateTime()) {
             StringBuffer fullstr = new StringBuffer();
 
             fullstr.append(getStartDate());
-            if (duration != null) {
+            
+            if (!when.isAllDay()) {
                 fullstr.append(" ");
                 fullstr.append(getStartTime());
             }
+            
             fullstr.append(" - ");
             fullstr.append(getEndDate());
-            if (duration != null) {
+            
+            if (!when.isAllDay()) {
                 fullstr.append(" ");
                 fullstr.append(getEndTime());
             }
@@ -116,214 +122,171 @@ public class Task {
     }
 
     public Date getStartDateTime() {
-        return startDateTime;
+        return when.getStartDateTime();
     }
 
     public void setStartDateTime(Date newDate) {
-        startDateTime = newDate;
+        when.setStartDateTime(newDate);
     }
 
     /**
      * @return yyyy-MM-dd HH:mm:ss
      */
     public String getStartLong() {
-        if (startDateTime == null) {
+        if (when.hasDateTime()) {
+            return DateFormat.dateToStrLong(when.getStartDateTime());
+        } else {
             return null;
         }
-
-        return DateFormat.dateToStrLong(startDateTime);
     }
 
     /**
      * @return yyyy-MM-dd HH:mm
      */
     public String getStartShort() {
-        if (startDateTime == null) {
+        if (when.hasDateTime()) {
+            return DateFormat.dateToStrShort(when.getStartDateTime());
+        } else {
             return null;
         }
-
-        return DateFormat.dateToStrShort(startDateTime);
     }
 
     /**
      * @return yyyy-MM-dd
      */
     public String getStartDate() {
-        if (startDateTime == null) {
+        if (when.hasDateTime()) {
+            return DateFormat.dateToStr(when.getStartDateTime());
+        } else {
             return null;
         }
-
-        return DateFormat.dateToStr(startDateTime);
     }
 
     /**
      * @return HH:mm
      */
     public String getStartTime() {
-        if (startDateTime == null) {
-            return null;
-        } else if (duration == null) {
+        if (when.hasDateTime() && !when.isAllDay()) {
+            return DateFormat.getTime(when.getStartDateTime());
+        } else {
             return null;
         }
-
-        return DateFormat.getTime(startDateTime);
     }
 
     public Date getEndDateTime() {
-        return endDateTime;
+        return when.getEndDateTime();
     }
 
     public void setEndDateTime(Date newDate) {
-        endDateTime = newDate;
+        when.setEndDateTime(newDate);
     }
 
     /**
      * @return yyyy-MM-dd HH:mm:ss
      */
     public String getEndLong() {
-        if (endDateTime == null) {
+        if (when.hasDateTime()) {
+            return DateFormat.dateToStrLong(when.getEndDateTime());
+        } else {
             return null;
         }
-
-        return DateFormat.dateToStrLong(endDateTime);
     }
 
     /**
      * @return yyyy-MM-dd HH:mm
      */
     public String getEndShort() {
-        if (endDateTime == null) {
+        if (when.hasDateTime()) {
+            return DateFormat.dateToStrShort(when.getEndDateTime());
+        } else {
             return null;
         }
-
-        return DateFormat.dateToStrShort(endDateTime);
     }
 
     /**
      * @return yyyy-MM-dd
      */
     public String getEndDate() {
-        if (endDateTime == null) {
+        if (when.hasDateTime()) {
+            return DateFormat.dateToStr(when.getEndDateTime());
+        } else {
             return null;
         }
-
-        return DateFormat.dateToStr(endDateTime);
     }
 
     /**
      * @return HH:mm
      */
     public String getEndTime() {
-        if (endDateTime == null) {
-            return null;
-        } else if (duration == null) {
+        if (when.hasDateTime() && !when.isAllDay()) {
+            return DateFormat.getTime(when.getEndDateTime());
+        } else {
             return null;
         }
-
-        return DateFormat.getTime(endDateTime);
     }
 
     public Date getDeadline() {
-        return deadline;
+        return when.getDeadline();
     }
 
     public void setDeadline(Date newDate) {
-        deadline = newDate;
+        when.setDeadline(newDate);
     }
 
     /**
      * @return yyyy-MM-dd HH:mm:ss
      */
     public String getDeadlineLong() {
-        if (deadline == null) {
+        if (when.hasDeadline()) {
+            return DateFormat.dateToStrLong(when.getDeadline());
+        } else {
             return null;
         }
-
-        return DateFormat.dateToStrLong(deadline);
     }
 
     /**
      * @return yyyy-MM-dd HH:mm
      */
     public String getDeadlineShort() {
-        if (deadline == null) {
+        if (when.hasDeadline()) {
+            return DateFormat.dateToStrShort(when.getDeadline());
+        } else {
             return null;
         }
-
-        return DateFormat.dateToStrShort(deadline);
     }
 
     /**
      * @return yyyy-MM-dd
      */
     public String getDeadlineDate() {
-        if (deadline == null) {
+        if (when.hasDeadline()) {
+            return DateFormat.dateToStr(when.getDeadline());
+        } else {
             return null;
         }
-
-        return DateFormat.dateToStr(deadline);
     }
 
     /**
      * @return HH:mm
      */
     public String getDeadlineTime() {
-        if (deadline == null) {
-            return null;
-        }
-
-        return DateFormat.getTime(deadline);
-    }
-
-    public Long getDuration() {
-        return duration;
-    }
-
-    public void setDuration(Long newDuration) {
-        duration = newDuration;
-    }
-
-    public String getDurationStr() {
-        int d;
-        
-        if (duration != null) {
-            d = duration.intValue();
-        } else if (startDateTime != null && endDateTime != null) {
-            if (startDateTime.before(endDateTime)) {
-                Long dtemp = (endDateTime.getTime() - startDateTime.getTime()) / 1000;
-                d = dtemp.intValue();
-            } else {
-                return "All Day";
-            }
+        if (when.hasDeadline()) {
+            return DateFormat.getTime(when.getDeadline());
         } else {
             return null;
         }
+    }
 
-        int days = d / 86400;
-        d = d - days * 86400;
-        int hours = d / 3600;
-        d = d - hours * 3600;
-        int minutes = d / 60;
+    public Long getDuration() {
+        return when.getDuration();
+    }
 
-        StringBuffer dStr = new StringBuffer();
+    public void setDuration(Long newDuration) {
+        when.setDuration(newDuration);
+    }
 
-        if (days != 0) {
-            dStr.append(days + " Days ");
-        }
-
-        if (hours != 0) {
-            dStr.append(hours + " Hours ");
-        }
-
-        if (minutes != 0) {
-            dStr.append(minutes + " Minutes ");
-        }
-
-        if (dStr.length() == 0) {
-            dStr.append("0 Minutes");
-        }
-
-        return dStr.toString();
+    public String getDurationStr() {
+        return when.getDurationStr();
     }
 
     public boolean isCompleted() {
@@ -357,18 +320,12 @@ public class Task {
     public String getDisplayTaskStr() {
         StringBuilder str = new StringBuilder();
 
-        str.append("Task: " + name); // name cannot be null
+        addOutput(str, "Task:" + name, name);
         addOutput(str, "Place: " + place, place);
         addOutput(str, "Priority: " + getPriorityStr(), priority);
-        addOutput(str, "Start Date: " + getStartDate(), startDateTime);
-        if(duration != null && startDateTime != null){
-        	str.append("\nStart Time:" + getStartTime());
-        }
-        addOutput(str, "End Date: " + getEndDate(), endDateTime);
-        if(duration != null && endDateTime != null){
-        	str.append("\nEnd Time: " + getEndTime());
-        }
-        addOutput(str, "Duration: " + getDurationStr(), duration);
+        addOutput(str, "Date: " + getStartEndDate(), when.getStartDateTime());
+        addOutput(str, "Duration: " + getDurationStr(), when.getDurationStr());
+        addOutput(str, "Deadline: " + getDeadlineShort(), when.getDeadline());
 
         return str.toString();
     }
@@ -377,7 +334,6 @@ public class Task {
         if (obj == null) {
             return;
         }
-
         str.append("\n");
         str.append(info);
     }

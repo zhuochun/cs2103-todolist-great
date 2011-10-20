@@ -230,7 +230,7 @@ public class TaskMeter extends Shell {
         mntmAddList.setText(getResourceString("newList"));
     
         MenuItem mntmAddTask = new MenuItem(menuUser, SWT.NONE);
-        mntmAddTask.setAccelerator(SWT.MOD1 + 'T');
+        mntmAddTask.setAccelerator(SWT.MOD1 + 'N');
         mntmAddTask.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {

@@ -904,10 +904,13 @@ public class TaskMeter extends Shell {
             item.setForeground(SWTResourceManager.getColor(SWT.COLOR_GRAY));
             item.setBackground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_BACKGROUND));
         } else if (task.getDeadline() != null && task.getDeadline().before(DateFormat.getNow())) {
+            item.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLACK));
             item.setBackground(SWTResourceManager.getColor(221, 160, 221));
         } else if (task.getEndDateTime() != null && task.getEndDateTime().before(DateFormat.getNow())) {
+            item.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLACK));
             item.setBackground(SWTResourceManager.getColor(221, 160, 221));
         } else if (task.getPriority() == Priority.IMPORTANT) {
+            item.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLACK));
             item.setBackground(SWTResourceManager.getColor(255, 218, 185));
         } else {
             item.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLACK));

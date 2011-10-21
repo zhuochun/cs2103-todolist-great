@@ -41,6 +41,7 @@ import cs2103.t14j1.storage.Priority;
 import cs2103.t14j1.storage.Task;
 import cs2103.t14j1.storage.TaskList;
 import cs2103.t14j1.storage.TaskLists;
+import cs2103.t14j1.taskmeter.autocomplete.AutoComplete;
 
 /**
  * TaskMeter Main Graphic User Interface
@@ -62,6 +63,7 @@ public class TaskMeter extends Shell {
     private TaskLists lists;
     private TaskList  currentList;
     private TaskList  searchResult;
+    private AutoComplete autoComplete;
     
     private String[] columnNames = {
             getResourceString("table.id"),
@@ -118,13 +120,18 @@ public class TaskMeter extends Shell {
         display.addFilter(SWT.KeyDown, new Listener() {
             @Override
             public void handleEvent(Event e) {
-                if ((e.stateMask & SWT.CTRL) == SWT.CTRL && e.keyCode == 'k') {
+                if ((e.stateMask & SWT.CTRL) == SWT.CTRL && e.keyCode == 'k') { // SmartBar focus
                     smartBar.setFocus();
                     smartBar.setSelection(0, smartBar.getText().length());
-                } else if ((e.stateMask & SWT.CTRL) == SWT.CTRL && e.keyCode == 't') {
+                } else if ((e.stateMask & SWT.CTRL) == SWT.CTRL && e.keyCode == 't') { // TaskTable focus
                     taskTable.setFocus();
                     if (taskTable.getSelectionCount() == 0) {
                         taskTable.setSelection(0);
+                    }
+                } else if ((e.stateMask & SWT.CTRL) == SWT.CTRL && e.keyCode == 'i') { // TaskList focus
+                    taskList.setFocus();
+                    if (taskList.getSelectionCount() == 0) {
+                        taskList.setSelection(0);
                     }
                 }
             }
@@ -166,6 +173,7 @@ public class TaskMeter extends Shell {
         displayCurrentList(TaskLists.INBOX);
         displayLists();
         
+        autoComplete = new AutoComplete(lists);
         smartBar.setFocus();
     }
 
@@ -176,27 +184,18 @@ public class TaskMeter extends Shell {
         smartBar = new Text(this, SWT.BORDER);
         smartBar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 11, 1));
         smartBar.addTraverseListener(new TraverseListener() {
-            public void keyTraversed(TraverseEvent e) { // Enter to execute Command
-                if (e.keyCode == SWT.CR) {
+            public void keyTraversed(TraverseEvent e) {
+                if (e.keyCode == SWT.CR) { // Enter to execute Command
                     setStatusBar(smartBar.getText());
                     smartBar.setSelection(0, smartBar.getText().length());
                     smartBar.setFocus();
                 } else if (e.keyCode == SWT.TAB) { // Tab to complete words
                     e.doit = false;
                     String txt = smartBar.getText();
-                    if (txt.matches("^#\\w+$")) {
-                        String ln = "^" + txt.substring(1) + ".*$";
-                        for (Entry<String, TaskList> list : lists) {
-                            if (list.getKey().matches(ln)) {
-                                smartBar.setText("#" + list.getKey());
-                                break;
-                            }
-                        }
-                    } else if (txt.matches("^.*!\\w+$")) {
-                        
+                    if (autoComplete.setInput(txt)) {
+                        smartBar.setText(autoComplete.getCompletedStr());
+                        smartBar.setSelection(autoComplete.getStartIdx(), autoComplete.getEndIdx());
                     }
-                    
-                    smartBar.setSelection(txt.length(), smartBar.getText().length());
                     smartBar.setFocus();
                 }
             }
@@ -467,7 +466,7 @@ public class TaskMeter extends Shell {
             }
         });
         GridData gd_taskList = new GridData(SWT.FILL, SWT.FILL, true, true);
-        gd_taskList.verticalSpan = 3;
+        gd_taskList.verticalSpan = 4;
         gd_taskList.widthHint = 150;
         gd_taskList.horizontalSpan = 2;
         taskList.setLayoutData(gd_taskList);
@@ -514,9 +513,6 @@ public class TaskMeter extends Shell {
     }
     
     private void createBottomButtons() {
-        Button btnViewAllTasks = new Button(this, SWT.NONE);
-        btnViewAllTasks.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
-        btnViewAllTasks.setText(getResourceString("button.viewalltasks"));
         
         Button btnTrashBox = new Button(this, SWT.NONE);
         btnTrashBox.addSelectionListener(new SelectionAdapter() {

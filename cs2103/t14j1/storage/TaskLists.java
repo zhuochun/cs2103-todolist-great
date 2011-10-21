@@ -31,6 +31,10 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
         addList(TRASH);
     }
     
+    public int getSize() {
+        return lists.size();
+    }
+    
     /**
      * add a new list
      * 

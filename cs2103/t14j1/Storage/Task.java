@@ -396,6 +396,10 @@ public class Task implements Comparable<Object> {
         return result;
     }
     
+    public int compareName(String other) {
+        return name.compareTo(other);
+    }
+    
     public int compareDeadline(Date other) {
         if (getDeadline() != null && other != null) {
             return getDeadline().compareTo(other);
@@ -426,8 +430,36 @@ public class Task implements Comparable<Object> {
         return 0;
     }
     
+    public int compareDuration(Long other) {
+        if (getDuration() != null && other != null) {
+            return getDuration().compareTo(other);
+        }
+        
+        if (getDuration() != null) {
+            return -1;
+        }
+        
+        if (other != null) {
+            return 1;
+        }
+        
+        return 0;
+    }
+    
     public int comparePriority(Priority other) {
         return priority.compareTo(other);
+    }
+    
+    public int compareStatus(Boolean other) {
+        if (status == other) {
+            return 0;
+        }
+        
+        if (status == Task.INCOMPLETE) {
+            return -1;
+        }
+        
+        return 1;
     }
 
     // used as XML tag names

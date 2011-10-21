@@ -2,6 +2,7 @@ package cs2103.t14j1.storage;
 
 import java.util.ArrayList;
 import java.util.Collections;
+import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
@@ -123,9 +124,73 @@ public class TaskList implements Iterable<Task> {
         return -1;
     }
     
+    /**
+     * sort according to default sort
+     */
     public void sort() {
         Collections.sort(tasks);
     }
+    
+    public void sort(int col) {
+        switch (col) {
+            case SORT_ID:
+                sort();
+                break;
+            case SORT_NAME:
+                Collections.sort(tasks, new Comparator<Task>() {
+                    public int compare(Task a, Task b) {
+                        return a.compareName(b.getName());
+                    }
+                });
+                break;
+            case SORT_PRIORITY:
+                Collections.sort(tasks, new Comparator<Task>() {
+                    public int compare(Task a, Task b) {
+                        return a.comparePriority(b.getPriority());
+                    }
+                });
+                break;
+            case SORT_DATE:
+                Collections.sort(tasks, new Comparator<Task>() {
+                    public int compare(Task a, Task b) {
+                        return a.compareStartDateTime(b.getStartDateTime());
+                    }
+                });
+                break;
+            case SORT_DEADLINE:
+                Collections.sort(tasks, new Comparator<Task>() {
+                    public int compare(Task a, Task b) {
+                        return a.compareDeadline(b.getDeadline());
+                    }
+                });
+                break;
+            case SORT_DURATION:
+                Collections.sort(tasks, new Comparator<Task>() {
+                    public int compare(Task a, Task b) {
+                        return a.compareDuration(b.getDuration());
+                    }
+                });
+                break;
+            case SORT_STATUS:
+                Collections.sort(tasks, new Comparator<Task>() {
+                    public int compare(Task a, Task b) {
+                        return a.compareStatus(b.getStatus());
+                    }
+                });
+                break;
+            default:
+                sort();
+                break;
+        }
+    }
+    
+    public static final int SORT_ID       = 0;
+    public static final int SORT_NAME     = 1;
+    public static final int SORT_PRIORITY = 2;
+    public static final int SORT_DATE     = 3;
+    public static final int SORT_DEADLINE = 4;
+    public static final int SORT_DURATION = 5;
+    public static final int SORT_STATUS   = 6;
 
     /**
      * iteration of tasks in a TaskList

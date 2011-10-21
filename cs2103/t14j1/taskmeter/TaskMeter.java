@@ -58,9 +58,21 @@ public class TaskMeter extends Shell {
 
     private boolean   isModified;
     private int       mode;
+    private int       lastSortColumn;
     private TaskLists lists;
     private TaskList  currentList;
     private TaskList  searchResult;
+    
+    private String[] columnNames = {
+            getResourceString("table.id"),
+            getResourceString("table.name"),
+            getResourceString("table.priority"),
+            getResourceString("table.date"),
+            getResourceString("table.deadline"),
+            getResourceString("table.duration"),
+            getResourceString("table.status")
+    };
+    private int[] columnWidths = { 25, 200, 70, 120, 70, 70, 75 };
     
     private static final int MODE_LIST   = 0;
     private static final int MODE_SEARCH = 1;
@@ -485,43 +497,22 @@ public class TaskMeter extends Shell {
         });
         taskTable.setHeaderVisible(true);
         taskTable.setLinesVisible(true);
-
-        TableColumn tblclmnId = new TableColumn(taskTable, SWT.CENTER);
-        tblclmnId.setMoveable(true);
-        tblclmnId.setWidth(28);
-        tblclmnId.setText(getResourceString("table.id"));
-
-        TableColumn tblclmnName = new TableColumn(taskTable, SWT.CENTER);
-        tblclmnName.setMoveable(true);
-        tblclmnName.setWidth(200);
-        tblclmnName.setText(getResourceString("table.name"));
-
-        TableColumn tblclmnPriority = new TableColumn(taskTable, SWT.CENTER);
-        tblclmnPriority.setMoveable(true);
-        tblclmnPriority.setWidth(68);
-        tblclmnPriority.setText(getResourceString("table.priority"));
-
-        TableColumn tblclmnDate = new TableColumn(taskTable, SWT.CENTER);
-        tblclmnDate.setMoveable(true);
-        tblclmnDate.setWidth(105);
-        tblclmnDate.setText(getResourceString("table.date"));
         
-        TableColumn tblclmnDeadline = new TableColumn(taskTable, SWT.CENTER);
-        tblclmnDeadline.setMoveable(true);
-        tblclmnDeadline.setWidth(105);
-        tblclmnDeadline.setText(getResourceString("table.deadline"));
-
-        TableColumn tblclmnDuration = new TableColumn(taskTable, SWT.CENTER);
-        tblclmnDuration.setMoveable(true);
-        tblclmnDuration.setWidth(70);
-        tblclmnDuration.setText(getResourceString("table.duration"));
-
-        TableColumn tblclmnCompleted = new TableColumn(taskTable, SWT.CENTER);
-        tblclmnCompleted.setMoveable(true);
-        tblclmnCompleted.setWidth(75);
-        tblclmnCompleted.setText(getResourceString("table.status"));
+        for (int i = 0; i < columnNames.length; i++) {
+            TableColumn column = new TableColumn(taskTable, SWT.CENTER);
+            final int columnIndex = i;
+            column.addSelectionListener(new SelectionAdapter() {
+                @Override
+                public void widgetSelected(SelectionEvent e) {
+                    sortList(columnIndex);
+                }
+            });
+            //column.setMoveable(true);
+            column.setWidth(columnWidths[i]);
+            column.setText(columnNames[i]);
+        }
     }
-
+    
     private void createBottomButtons() {
         Button btnViewAllTasks = new Button(this, SWT.NONE);
         btnViewAllTasks.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 2, 1));
@@ -642,8 +633,6 @@ public class TaskMeter extends Shell {
     private void displayTasks(TaskList tlist) {
         taskTable.removeAll(); // remove all items for redraw
         
-        tlist.sort();
-        
         try {
             int idx = 1;
             for (Task task : tlist) {
@@ -651,6 +640,14 @@ public class TaskMeter extends Shell {
             }
         } catch (NullPointerException e) {
             // do nothing
+        }
+    }
+    
+    private void displayTasksUp(TaskList tlist) {
+        taskTable.removeAll(); // remove all items for redraw
+        
+        for (int i = tlist.getSize(); i > 0; i--) {
+            displayNewTask(i, tlist.getTask(i));
         }
     }
 
@@ -688,6 +685,32 @@ public class TaskMeter extends Shell {
                 });
         highlightTask(item, task);
         return idx;
+    }
+    
+    private void sortList(int columnIdx) {
+        if (mode == MODE_LIST) {
+            
+            currentList.sort(columnIdx);
+            
+            if (lastSortColumn != columnIdx) {
+                taskTable.setSortColumn(taskTable.getColumn(columnIdx));
+                taskTable.setSortDirection(SWT.DOWN);
+                
+                displayTasks(currentList);
+                
+                lastSortColumn = columnIdx;
+            } else {
+                taskTable.setSortDirection(SWT.UP);
+                
+                displayTasksUp(currentList);
+                
+                lastSortColumn = -1;
+            }
+            
+        } else if (mode == MODE_SEARCH) {
+            
+        }
+        
     }
 
     /**

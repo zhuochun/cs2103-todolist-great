@@ -56,7 +56,7 @@ public class TaskMeter extends Shell {
     private Table taskList;
     private Text  smartBar;
 
-    private boolean  isModified;
+    private boolean   isModified;
     private int       mode;
     private TaskLists lists;
     private TaskList  currentList;

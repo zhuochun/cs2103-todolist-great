@@ -11,6 +11,7 @@ import cs2103.t14j1.storage.TaskLists;
 public class ControlGUI {
     
     private TaskLists    lists;         // stores a copy of all the lists
+    private String       lastError;     // stores the last exception error
     private Commands     userCommand;   // stores the last user command
     private ParseCommand parseCommand;  // smartBar parseCommand
     private SearchEngine searchEngine;  // search engine
@@ -31,15 +32,22 @@ public class ControlGUI {
      * in the new user input to controlGUI
      * 
      * @param input
+     * @return Commands
      */
-    public void setUserInput(String input) {
-        parseCommand  = new ParseCommand(input);
-        userCommand   = parseCommand.extractCommand();
+    public Commands setUserInput(String input) {
+        try {
+            parseCommand  = new ParseCommand(input);
+            userCommand   = parseCommand.extractCommand();
+        } catch (Exception e) {
+            userCommand   = Commands.INVALID;
+        }
+        
+        return userCommand;
     }
     
     /**
      * after the taskMeter GUI has passed in the user input, it will call this method to get the
-     * command the user just entered. The original executeCommand() method, the switches will be
+     * command the user just entered. The original executeCommand() method, the switch will be
      * done in GUI.
      * 
      */
@@ -48,8 +56,7 @@ public class ControlGUI {
     }
     
     /**
-     * after each command is processed, GUI will call this method to clear last command to prevent
-     * any crashes in controlGUI
+     * GUI call this method to clear last command to prevent any crashes in controlGUI
      */
     public void resetCommand() {
         userCommand = null;
@@ -65,13 +72,8 @@ public class ControlGUI {
         
         // TODO: code for addTask
         
-        Task newTask = new Task();
-        
-        // This method will still perform the actual adding of newTask
-        lists.addTask(newTask.getList(), newTask);
-        
         // it will return the newTask to GUI, so GUI can display it to the user
-        return newTask;
+        return null;
     }
     
     /**
@@ -91,7 +93,7 @@ public class ControlGUI {
                 return 0;
         }
         
-        return 0;
+        return -1;
     }
 
     /**
@@ -101,6 +103,9 @@ public class ControlGUI {
      * @return the new priority user entered
      */
     public Priority getNewTaskPriority() {
+        
+        // TODO: for command MARK_PRIORITY
+        
         return Priority.IMPORTANT;
     }
 
@@ -112,7 +117,12 @@ public class ControlGUI {
     public TaskList addList() {
         String name = parseCommand.extractListName();
         
-        lists.addList(name);
+        try {
+            lists.addList(name);
+        } catch (NullPointerException e) {
+            lastError = e.getMessage();
+            return null;
+        }
         
         return lists.getList(name);
     }
@@ -134,13 +144,13 @@ public class ControlGUI {
                 return "";
         }
         
-        return "";
+        return null;
     }
     
     /**
      * GUI will call this method to get the search result
      * 
-     * 1. The search properties can be set through GUI search
+     * 1. The search properties can be set through GUI search dialog
      * 2. The search properties can be set through user command SEARCH
      * 
      * @return the list of search result, empty list if nothing is found

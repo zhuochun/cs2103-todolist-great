@@ -464,13 +464,31 @@ public class TaskMeter extends Shell {
         Menu menuHelp = new Menu(mntmHelps);
         mntmHelps.setMenu(menuHelp);
     
+        /*
         MenuItem mntmStatistics = new MenuItem(menuHelp, SWT.NONE);
-        mntmStatistics.setText(getResourceString("statistics"));
+        mntmStatistics.setText(getResourceString("help.statistics"));
     
         new MenuItem(menuHelp, SWT.SEPARATOR);
+        */
+        
+        MenuItem mntmTip = new MenuItem(menuHelp, SWT.NONE);
+        mntmTip.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                System.out.println("Tips");
+            }
+        });
+        mntmTip.setText(getResourceString("help.tip"));
     
         MenuItem mntmHelp = new MenuItem(menuHelp, SWT.NONE);
-        mntmHelp.setText(getResourceString("help"));
+        mntmHelp.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                System.out.println("Help");
+            }
+        });
+        mntmHelp.setAccelerator(SWT.F1);
+        mntmHelp.setText(getResourceString("help.help"));
     
         new MenuItem(menuHelp, SWT.SEPARATOR);
     
@@ -484,7 +502,7 @@ public class TaskMeter extends Shell {
                 box.open();
             }
         });
-        mntmAbout.setText(getResourceString("about"));
+        mntmAbout.setText(getResourceString("help.about"));
     }
 
     /**

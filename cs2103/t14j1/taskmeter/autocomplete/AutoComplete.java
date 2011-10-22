@@ -3,7 +3,7 @@ package cs2103.t14j1.taskmeter.autocomplete;
 import cs2103.t14j1.storage.TaskLists;
 
 /**
- * Auto Complete in SmartBar, support complete commands, list names
+ * Auto Complete in SmartBar, support complete commands, list names, time units, special words
  * 
  * @author Zhuochun
  * 

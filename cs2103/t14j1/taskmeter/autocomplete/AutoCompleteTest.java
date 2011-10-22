@@ -33,7 +33,6 @@ public class AutoCompleteTest {
         
         autoComplete = new AutoComplete(lists);
         
-        /*
         // test empty case
         assertEquals(true, autoComplete.setInput(""));
         assertEquals("add", autoComplete.getCompletedStr());
@@ -83,7 +82,6 @@ public class AutoCompleteTest {
         System.out.println(autoComplete.getEndIdx());
         
         System.out.println("==========");
-        */
         
         // test list case 00
         assertEquals(true, autoComplete.setInput("#(In"));
@@ -125,12 +123,50 @@ public class AutoCompleteTest {
         System.out.println(autoComplete.getStartIdx());
         System.out.println(autoComplete.getEndIdx());
         
+        System.out.println("==========");
+        
         // test list case 01
-        assertEquals(true, autoComplete.setInput("add something #h"));
+        assertEquals(true, autoComplete.setInput("add something #he"));
         
         System.out.println("# ==> " + autoComplete.getCompletedStr());
         System.out.println(autoComplete.getStartIdx());
         System.out.println(autoComplete.getEndIdx());
+        
+        System.out.println("==========");
+        
+        // test priority
+        assertEquals(true, autoComplete.setInput("add something !"));
+        
+        System.out.println("! ==> " + autoComplete.getCompletedStr());
+        System.out.println(autoComplete.getStartIdx());
+        System.out.println(autoComplete.getEndIdx());
+        
+        System.out.println("==========");
+        
+        assertEquals(true, autoComplete.setInput("add something !12"));
+        
+        System.out.println("! ==> " + autoComplete.getCompletedStr());
+        System.out.println(autoComplete.getStartIdx());
+        System.out.println(autoComplete.getEndIdx());
+        
+        System.out.println("==========");
+        
+        // test TimeUnit
+        assertEquals(true, autoComplete.setInput("add something for 12mi"));
+        
+        System.out.println("! ==> " + autoComplete.getCompletedStr());
+        System.out.println(autoComplete.getStartIdx());
+        System.out.println(autoComplete.getEndIdx());
+        
+        System.out.println("==========");
+        
+        assertEquals(true, autoComplete.setInput("add something for 12 h"));
+        
+        System.out.println("! ==> " + autoComplete.getCompletedStr());
+        System.out.println(autoComplete.getStartIdx());
+        System.out.println(autoComplete.getEndIdx());
+        
+        System.out.println("==========");
     }
 
 }

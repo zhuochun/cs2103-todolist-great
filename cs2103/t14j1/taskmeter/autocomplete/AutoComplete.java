@@ -20,20 +20,40 @@ public class AutoComplete {
     private int endIdx;
     
     private int commandIdx;
+    private int dictionaryIdx;
+    private int timeUnitIdx;
+    private int priorityIdx;
     private int listIdx;
     
     private final String[] Commands = {
-            "add",
-            "del",
-            "move",
-            "edit",
-            "done"
+            "add", "del", "move", "edit", "done"
     };
     
+    private final String[] Dictionary = {
+            "this", "next", "today", "tomorrow",
+            "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
+            "January", "Feburary", "March", "April", "May", "June", "July", "August",
+            "September", "October", "November", "December"
+    };
+    
+    private final String[] TimeUnits = {
+             "seconds", "minutes", "hours", "days", "weeks"
+    };
+    
+    private final int[] PriorityNums = { 1, 2, 3 };
+    
+    /**
+     * constructor, need to pass a copy of the TaskLists
+     * 
+     * @param l
+     */
     public AutoComplete(TaskLists l) {
         lists = l;
     }
     
+    /**
+     * reset all the AutoComplete Indexes to default
+     */
     public void reset() {
         lastInput          = null;
         lastInputLowerCase = null;
@@ -41,7 +61,10 @@ public class AutoComplete {
         startIdx           = 0;
         endIdx             = 0;
         commandIdx         = 0;
+        dictionaryIdx      = 0;
         listIdx            = 0;
+        timeUnitIdx        = 0;
+        priorityIdx        = 0;
     }
     
     private void initial(String str) {
@@ -49,25 +72,40 @@ public class AutoComplete {
         lastInputLowerCase = str.toLowerCase();
         completedInput     = null;
 
-        commandIdx = listIdx = 0;
+        commandIdx = listIdx = priorityIdx = 0;
+        timeUnitIdx = dictionaryIdx = 0;
         startIdx   = endIdx  = lastInput.length();
     }
     
+    /**
+     * set the input for completion
+     * 
+     * @param str           the input
+     * @return true         if a valid completion is generated
+     */
     public boolean setInput(String str) {
         str = str.trim();
-        
-        //System.out.println("INPUT : '" + str + "'");
         
         try {
             if (str.equals(completedInput) || str.equals(lastInput)) {
                 completedInput = null;
                 startIdx = endIdx = lastInput.length();
                 
+                // clear indexes
                 if (commandIdx >= Commands.length) {
                     commandIdx = 0;
                 }
                 if (listIdx+1 >= lists.getSize()) {
                     listIdx = 0;
+                }
+                if (priorityIdx >= PriorityNums.length) {
+                    priorityIdx = 0;
+                }
+                if (timeUnitIdx >= TimeUnits.length) {
+                    timeUnitIdx = 0;
+                }
+                if (dictionaryIdx >= Dictionary.length) {
+                    dictionaryIdx = 0;
                 }
             } else {
                 initial(str);
@@ -76,38 +114,58 @@ public class AutoComplete {
             initial(str);
         }
         
-        /*
-        System.out.println("Last Input = " + lastInput);
-        System.out.println("Last Input LC = " + lastInputLowerCase);
-        System.out.println("Last Completed = " + completedInput);
-        System.out.println("Command Idx = " + commandIdx);
-        */
-        
         boolean result = false;
         
-        if (result == false) {
+        if (result == false) { // Complete Commands
             result = completeCommand();
         }
         
-        if (result == false) {
+        if (result == false) { // Complete List Names
             result = completeList();
         }
         
-        if (result == true) {
+        if (result == false) { // Complete Priority
+            result = completePriority();
+        }
+        
+        if (result == false) { // Complete Time Units
+            result = completeTimeUnit();
+        }
+        
+        if (result == false) { // Complete Dictionary
+            result = completeDictionary();
+        }
+        
+        if (result == true && completedInput != null) { // update endIdx
             endIdx = completedInput.length();
         }
         
         return result;
     }
     
+    /**
+     * get the completed new input String
+     * 
+     * @return String
+     */
     public String getCompletedStr() {
         return completedInput;
     }
     
+    /**
+     * get the last index of the input string before completion
+     * 
+     * @return int
+     */
     public int getStartIdx() {
         return startIdx;
     }
     
+    /**
+     * get the last index of the completed input string
+     * 
+     * @return int
+     */
     public int getEndIdx() {
         return endIdx;
     }
@@ -166,6 +224,95 @@ public class AutoComplete {
                     
                     listIdx++;
                     
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    private boolean completePriority() {
+        if (lastInputLowerCase.matches("^.*!(\\d)*$")) {
+            int expIdx = lastInput.lastIndexOf("!");
+            
+            startIdx = expIdx; // update startIdx
+            
+            // check if there is priority set already
+            if (expIdx != lastInput.length()-1) {
+                int pr = Integer.parseInt(lastInput.substring(expIdx+1));
+                if (pr <= PriorityNums[0] || pr >= PriorityNums[PriorityNums.length-1]) {
+                    priorityIdx = 0;
+                } else {
+                    priorityIdx = pr;
+                }
+                
+                lastInput = lastInput.substring(0, expIdx+1);
+            }
+            
+            StringBuilder result = new StringBuilder();
+            
+            result.append(lastInput.substring(0, expIdx+1));
+            result.append(PriorityNums[priorityIdx++]);
+            
+            completedInput = result.toString();
+            
+            return true;
+        }
+        
+        return false;
+    }
+
+    private boolean completeTimeUnit() {
+        if (lastInputLowerCase.matches("^.*\\sfor\\s(\\d+\\s?[a-z]+\\s?)*\\d+$")) {
+            startIdx++;
+            
+            StringBuilder result = new StringBuilder();
+
+            result.append(lastInput);
+            result.append(" ");
+            result.append(TimeUnits[timeUnitIdx]);
+
+            completedInput = result.toString();
+
+            timeUnitIdx++;
+
+            return true;
+        } else if (lastInputLowerCase.matches("^.*\\sfor\\s(\\d+\\s?[a-z]+\\s?)*\\d+\\s?[a-z]{1,3}$")) {
+            String[] tokens = lastInputLowerCase.split("\\d+\\s?");
+            
+            String keyword = tokens[tokens.length-1];
+            
+            for (; timeUnitIdx < TimeUnits.length; timeUnitIdx++) {
+                if (TimeUnits[timeUnitIdx].startsWith(keyword)) {
+                    StringBuilder result = new StringBuilder();
+                    
+                    result.append(lastInput.substring(0, lastInput.length() - keyword.length()));
+                    result.append(TimeUnits[timeUnitIdx++]);
+                    
+                    completedInput = result.toString();
+                    return true;
+                }
+            }
+        }
+        
+        return false;
+    }
+    
+    private boolean completeDictionary() {
+        if (lastInputLowerCase.matches("^.*\\s[a-z]+$")) {
+            String[] tokens = lastInputLowerCase.split("\\s");
+            
+            String keyword = tokens[tokens.length-1];
+            
+            for (; dictionaryIdx < Dictionary.length; dictionaryIdx++) {
+                if (Dictionary[dictionaryIdx].toLowerCase().startsWith(keyword)) {
+                    StringBuilder result = new StringBuilder();
+                    
+                    result.append(lastInput.substring(0, lastInput.length() - keyword.length()));
+                    result.append(Dictionary[dictionaryIdx++]);
+                    
+                    completedInput = result.toString();
                     return true;
                 }
             }

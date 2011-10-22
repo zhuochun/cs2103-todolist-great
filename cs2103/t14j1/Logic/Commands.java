@@ -23,7 +23,8 @@ public enum Commands {
     EDIT_TASK,
     
     /**
-     * Syntax: [num] + done
+     * Syntax 1: [num] + done
+     * Syntax 2: done + [num]
      */
     MARK_COMPLETE,
     

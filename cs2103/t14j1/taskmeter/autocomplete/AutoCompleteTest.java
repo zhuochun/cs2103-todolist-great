@@ -8,6 +8,12 @@ import org.junit.Test;
 
 import cs2103.t14j1.storage.TaskLists;
 
+/**
+ * test AutoComplete
+ * 
+ * @author Zhuochun
+ *
+ */
 public class AutoCompleteTest {
 
     private AutoComplete autoComplete;

@@ -60,10 +60,14 @@ public class TaskMeter extends Shell {
     private boolean   isModified;
     private int       mode;
     private int       lastSortColumn;
+    
     private TaskLists lists;
     private TaskList  currentList;
     private TaskList  searchResult;
     private AutoComplete autoComplete;
+    
+    
+    private QuickAddDialog quickAddView; 
     
     private String[] columnNames = {
             getResourceString("table.id"),
@@ -78,7 +82,7 @@ public class TaskMeter extends Shell {
     
     private static final int MODE_LIST   = 0;
     private static final int MODE_SEARCH = 1;
-
+    
     /**
      * Launch the application.
      * 
@@ -121,8 +125,12 @@ public class TaskMeter extends Shell {
             @Override
             public void handleEvent(Event e) {
                 if ((e.stateMask & SWT.CTRL) == SWT.CTRL && e.keyCode == 'k') { // SmartBar focus
-                    smartBar.setFocus();
-                    smartBar.setSelection(0, smartBar.getText().length());
+                    if (quickAddView.isActive()) {
+                        quickAddView.focusQuickAdd();
+                    } else {
+                        smartBar.setFocus();
+                        smartBar.setSelection(0, smartBar.getText().length());
+                    }
                 } else if ((e.stateMask & SWT.CTRL) == SWT.CTRL && e.keyCode == 't') { // TaskTable focus
                     taskTable.setFocus();
                     if (taskTable.getSelectionCount() == 0) {
@@ -132,6 +140,12 @@ public class TaskMeter extends Shell {
                     taskList.setFocus();
                     if (taskList.getSelectionCount() == 0) {
                         taskList.setSelection(0);
+                    }
+                } else if ((e.stateMask & SWT.CTRL) == SWT.CTRL && e.keyCode == 'm') { // TaskTable focus
+                    if (quickAddView.isActive()) {
+                        quickAddView.close();
+                    } else {
+                        openQuickAddView();
                     }
                 }
             }
@@ -149,6 +163,9 @@ public class TaskMeter extends Shell {
         createBottomButtons();
         createStatusBar();
         createContents();
+        
+        // initial quick Add View
+        quickAddView = new QuickAddDialog(this, autoComplete);
     }
 
     /**
@@ -197,6 +214,12 @@ public class TaskMeter extends Shell {
                         smartBar.setSelection(autoComplete.getStartIdx(), autoComplete.getEndIdx());
                     }
                     smartBar.setFocus();
+                } else if (e.keyCode == SWT.ESC) { // ESC to confirm complete selection
+                    if (smartBar.getSelectionCount() != 0) {
+                        e.doit = false;
+                        smartBar.setSelection(smartBar.getText().length());
+                        smartBar.setFocus();
+                    }
                 }
             }
         });
@@ -395,13 +418,26 @@ public class TaskMeter extends Shell {
     
         Menu menuWindow = new Menu(mntmWindow);
         mntmWindow.setMenu(menuWindow);
-    
-        MenuItem mntmListView = new MenuItem(menuWindow, SWT.RADIO);
+        
+        final MenuItem mntmListView = new MenuItem(menuWindow, SWT.RADIO);
         mntmListView.setSelection(true);
-        mntmListView.setText(getResourceString("list"));
+        mntmListView.setText(getResourceString("window.list"));
     
-        MenuItem mntmCalendarView = new MenuItem(menuWindow, SWT.RADIO);
+        final MenuItem mntmQuickAddView = new MenuItem(menuWindow, SWT.RADIO);
+        mntmQuickAddView.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                mntmQuickAddView.setSelection(false);
+                mntmListView.setSelection(true);
+                openQuickAddView();
+            }
+        });
+        mntmQuickAddView.setText(getResourceString("window.quickAdd"));
+    
+        /*
+        final MenuItem mntmCalendarView = new MenuItem(menuWindow, SWT.RADIO);
         mntmCalendarView.setText(getResourceString("calendar"));
+        */
     }
 
     /**
@@ -935,6 +971,18 @@ public class TaskMeter extends Shell {
             item.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
         }
     }
+    
+    /**
+     * change to and open quick add view
+     */
+    private void openQuickAddView() {
+        this.setVisible(false);
+        String text = quickAddView.open();
+        this.setVisible(true);
+        this.setActive();
+        
+        setStatusBar(text);
+    }
 
     /**
      * Returns a string from the resource bundle. We don't want to crash because
@@ -949,7 +997,7 @@ public class TaskMeter extends Shell {
             return "!" + key + "!";
         }
     }
-
+    
     @Override
     protected void checkSubclass() {
         // Disable the check that prevents subclassing of SWT components
@@ -964,5 +1012,4 @@ public class TaskMeter extends Shell {
     private static final String ADD_FAIL       = "%1$s \"%2$s\" fail to add";
     private static final String DELETE_SUCCESS = "%1$s \"%2$s\" is successfully deleted";
     private static final String DELETE_FAIL    = "%1$s fail to delete";
-   
 }

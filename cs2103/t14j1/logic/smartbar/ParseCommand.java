@@ -1247,6 +1247,10 @@ public class ParseCommand {
 		return taskNum;
 	}
 	
+	/** called when it's "rename list"
+	 * @return
+	 * 	the new list name to be saved.
+	 */
 	public String extractNewListName(){
 		return this.newListName;
 	}

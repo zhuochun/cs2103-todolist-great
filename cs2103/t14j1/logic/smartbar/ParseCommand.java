@@ -9,6 +9,7 @@ import java.util.regex.Pattern;
 
 import cs2103.t14j1.logic.Commands;
 import cs2103.t14j1.storage.Priority;
+import cs2103.t14j1.storage.TaskLists;
 
 /**
  * @author Song Yangyu
@@ -122,6 +123,12 @@ public class ParseCommand {
 	private static final String regDeleteListCmd = "^(delete|del)\\ "+ regListFormat + "$";
 	private static final String regDisplayTaskCmd = "^(display|dis)\\ [\\d]+";
 	
+	private static final String regMoveTaskToListCmd = "^(move|mv)\\ [\\d]+\\ (" + regListFormat + "|#)$";
+	private static final String regEditTaskCmd = "^(edit)\\ [\\d]+$";	// simply signal an edit
+	private static final String regMarkAsCompleteCmd = "(^(done)\\ [\\d]+$)|(^[\\d]+\\ (done)$)";	// Syntax 1: [num] + done;  Syntax 2: done + [num]
+	private static final String regSetPriorityCmd = "^[\\d]+\\ " + regPriorityFormat + "$";	// priority
+	private static final String regAddListCmd = "^(add)+\\ " + regListFormat + "$";	// priority
+	private static final String regRenameListCmd = "^(rename)+\\ " + regListFormat + "\\ " + regListFormat + "$";	// priority
 	// @endgroup regex
 	
 	// basic properities 
@@ -135,6 +142,9 @@ public class ParseCommand {
 	private Commands commandType = null;
 	
 	private String taskTitle = null;
+	
+	// for rename list
+	private String newListName = null;
 	
 	// fields of this class
 	private String commandStr;
@@ -156,6 +166,20 @@ public class ParseCommand {
 		}catch(Exception e){
 			e.printStackTrace();
 		}
+	}
+	
+	/**
+	 * @param reg
+	 * 	-- the regular expression used to match
+	 * @return
+	 * 	-- the matched string; null on no match
+	 */
+	private String matcherMatched(String reg,String matchStr,boolean ignoreCase){
+		Pattern regPattern = Pattern.compile(
+				reg,
+				ignoreCase?Pattern.CASE_INSENSITIVE:0);
+		Matcher regMatcher = regPattern.matcher(matchStr);
+		return regMatcher.find()?regMatcher.group():null;
 	}
 	
 	
@@ -236,39 +260,93 @@ public class ParseCommand {
 		
 		// start parsing
 		
+		String matchedStr = null;
+		
 		if(commandStr == null || commandStr.length() < 1){
 			commandType = Commands.INVALID;
 			return;
 		}
-		else if(commandStr.charAt(0) == '/'){
+		else if(commandStr.charAt(0) == '/'){	// search
 			commandType = Commands.SEARCH;
 			command = command.substring(1);
 			commandStr = command;
-		} else if(commandStr.charAt(0) == '#'){
+		} else if((		// switch list
+				matcherMatched("^" + regListFormat + "$", commandStr, true)) != null){
 			commandType = Commands.SWITCH_LIST;	// this would be used for parsing later
-		} else if(commandStr.trim().compareToIgnoreCase("exit") == 0){
+			this.list = regListFormatProcess(commandStr);
+			return;
+		} else if(commandStr.trim().length() == 1 && commandStr.charAt(0) == '#'){
+			commandType = Commands.SWITCH_LIST;
+			this.list = TaskLists.INBOX;	// default to inbox
+			return;
+		} else if(commandStr.trim().compareToIgnoreCase("exit") == 0){	// exit
 			//return Commands.
 			commandType = Commands.EXIT;
 			return;
-		} else if(regDeleteTaskCmdMatcher.find()){
+		} else if(matcherMatched(regDeleteTaskCmd, commandStr, true) != null){		// delete task
 			commandType = Commands.DELETE_TASK;
 			String delParams[] = commandStr.split("\\ ");
 			taskNum = Integer.parseInt(delParams[1]);
 			return;
 		} 
 		// when it's to delete a list; list would be handled by the task
-		else if(regDeleteListCmdMatcher.find()){
+		else if(regDeleteListCmdMatcher.find()){	// delete list
 			commandType = Commands.DELETE_LIST;
-		} else if(regDisplayTaskCmdMatcher.find()){
+		} else if((matcherMatched(regDisplayTaskCmd, commandStr, true))!=null){	// display task
 			commandType = Commands.DISPLAY_TASK;
 			String disParams[] = commandStr.split("\\ ");
 			taskNum = Integer.parseInt(disParams[1]);
 			return;
 		} else if(commandStr.compareToIgnoreCase("dis") == 0 || 
-				commandStr.compareToIgnoreCase("display") == 0){	// display list -- it's 
+				commandStr.compareToIgnoreCase("display") == 0){	// display list 
 			commandType = Commands.DISPLAY_LISTS;
 			return;
-		} else if((commandStr.length() > 3) && commandStr.substring(0, 4).compareToIgnoreCase("add ") == 0){
+		} else if((	// move task
+				matcherMatched(regMoveTaskToListCmd, commandStr, true))!=null){
+			commandType = Commands.MOVE_TASK;
+			String params[] = commandStr.split("\\ ");
+			taskNum = Integer.parseInt(params[1]);	// task num
+			this.list = regListFormatProcess(params[2]);		// list name
+			return;
+		} else if((	// mark as complete
+				matcherMatched(regMarkAsCompleteCmd, commandStr, true))!=null){
+			this.commandType = Commands.MARK_COMPLETE;
+			String params[] = commandStr.split("\\ ");
+			if(params[0].compareToIgnoreCase("done") == 0){	// done [num]
+				taskNum = Integer.parseInt(params[1]);
+			} else{	// [number] done
+				taskNum = Integer.parseInt(params[0]);
+			}
+			return;
+		} else if((	// edit task : edit + [taskNum]
+				matcherMatched(regEditTaskCmd, commandStr, true))!= null){
+			this.commandType = Commands.EDIT_TASK;
+			String params[] = commandStr.split("\\ ");
+			taskNum = Integer.parseInt(params[1]);
+			return;
+		} else if(	// mark pariority
+				matcherMatched(regSetPriorityCmd, commandStr, true)!=null){
+			this.commandType = Commands.MARK_PRIORITY;
+			String params[] = commandStr.split("\\ ");
+			this.taskNum = Integer.parseInt(params[0]);
+			this.priority = regPriorityFormatProcess(params[1]);
+			return;
+		} else if(	// regAddListCmd
+				matcherMatched(regAddListCmd, commandStr, true)!=null){
+			this.commandType = Commands.ADD_LIST;
+			String params[] = commandStr.split("\\ ");
+			this.list = regListFormatProcess(params[1]);
+			return;
+		} else if(	// rename list
+				matcherMatched(regRenameListCmd, commandStr, true)!=null){
+			this.commandType = commandType.EDIT_LIST;
+			String params[] = commandStr.split("\\ ");
+			this.list = regListFormatProcess(params[1]);
+			this.newListName = regListFormatProcess(params[2]);
+			return;
+		} else if( // add task
+				(commandStr.length() > 3)
+				&& commandStr.substring(0, 4).compareToIgnoreCase("add ") == 0){
 			commandStr = commandStr.substring(4);
 			commandType = Commands.ADD_TASK;
 		} 
@@ -278,8 +356,6 @@ public class ParseCommand {
 		}
 		
 		command = commandStr;
-		
-		String matchedStr = null;
 		
 		// extra parameter for search: before/after time
 		if(this.commandType == Commands.SEARCH){
@@ -539,6 +615,9 @@ public class ParseCommand {
 		String list = null;
 		if(listStr.charAt(0) == '#'){
 			listStr = listStr.substring(1);	// simply leave out the first character (#)
+		}
+		if(listStr.length() == 0){
+			listStr = TaskLists.INBOX;	// by default return inbox (listStr == '#')
 		}
 		if(listStr.charAt(0)=='('){
 			listStr = listStr.substring(1);
@@ -861,7 +940,7 @@ public class ParseCommand {
 		// test match here
 		String taskStr = "Get up tomorrow";	// test time
 		
-		String testStr = "add !1 Do homework #(What The Fuck) on Sun @(My place) 10am-12pm by tmr";
+		String testStr = "rename #luala #lulu";
 		
 		// for testing
 		BufferedReader in;
@@ -889,6 +968,7 @@ public class ParseCommand {
 				ParseCommand test = new ParseCommand(strLine);
 				System.out.println("Command Type: " + test.extractCommand());
 				System.out.println("Task Title: " + test.extractTaskName());
+				System.out.println("Task Num: " + test.extractTaskNum());
 				System.out.println("List: " + test.extractListName());
 				System.out.println("Place: " + test.extractPlace());
 				System.out.println("Priority: " + test.extractPriority());
@@ -1165,6 +1245,10 @@ public class ParseCommand {
 	 */
 	public Integer extractTaskNum(){
 		return taskNum;
+	}
+	
+	public String extractNewListName(){
+		return this.newListName;
 	}
 	/* END: These methods are for other commands, not add task */
 }

@@ -198,7 +198,7 @@ public class TaskMeter extends Shell {
         smartBar.setFocus();
         
         // initial quick Add View
-        quickAddView = new QuickAddDialog(this, autoComplete);
+        quickAddView = new QuickAddDialog(this, logic, autoComplete);
     }
 
     /**
@@ -459,6 +459,13 @@ public class TaskMeter extends Shell {
         new MenuItem(menuEdit, SWT.SEPARATOR);
     
         final MenuItem mntmSearch = new MenuItem(menuEdit, SWT.NONE);
+        mntmSearch.setAccelerator(SWT.MOD1 + 'F');
+        mntmSearch.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                doSearch();
+            }
+        });
         mntmSearch.setText(getResourceString("find"));
         
         menuEdit.addMenuListener(new MenuAdapter() {
@@ -539,7 +546,7 @@ public class TaskMeter extends Shell {
         mntmTip.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                System.out.println("Tips");
+                showTips();
             }
         });
         mntmTip.setText(getResourceString("help.tip"));
@@ -548,7 +555,7 @@ public class TaskMeter extends Shell {
         mntmHelp.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                System.out.println("Help");
+                showTips();
             }
         });
         mntmHelp.setAccelerator(SWT.F1);
@@ -1078,20 +1085,22 @@ public class TaskMeter extends Shell {
             }
         }
     }
-
+    
     /**
-     * open searchDialog to perform a search
+     * open searchDialog that get user's search
      */
     private void doSearch() {
-        // TODO
+        smartBar.setText("/type to search");
+        smartBar.setSelection(1, smartBar.getText().length());
+        smartBar.setFocus();
     }
-    
-    private void showHelp() {
-        // TODO
-    }
-    
+
+    /**
+     * open tipsDialog that show helps
+     */
     private void showTips() {
-        // TODO
+        TipsDialog dialog = new TipsDialog(this);
+        dialog.open();
     }
 
     private int getSelectedIdx() {
@@ -1194,11 +1203,17 @@ public class TaskMeter extends Shell {
      */
     private void openQuickAddView() {
         this.setVisible(false);
+        
         String text = quickAddView.open();
+        
         this.setVisible(true);
         this.setActive();
+        smartBar.setText(text);
         
-        setStatusBar(text);
+        if (quickAddView.isModified()) {
+            isModified = true;
+            refreshDisplay();
+        }
     }
 
     /**

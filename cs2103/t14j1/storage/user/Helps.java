@@ -2,7 +2,7 @@ package cs2103.t14j1.storage.user;
 
 public class Helps {
     
-    public static int index = 0;
+    private static int index = 0;
     
     // TODO: try to write as many as tips, and tips can formed into paragraphs (change the getHelp() into a better format if you want)
     private static final String[] tips = {
@@ -16,7 +16,16 @@ public class Helps {
      * @return a tip
      */
     public static String getRandomTip() {
-        return tips[(int) (Math.random() % tips.length)];
+        return tips[(int) Math.random() % tips.length];
+    }
+    
+    /**
+     * get current tip
+     * 
+     * @return the tip under current index
+     */
+    public static String getTip() {
+        return tips[index];
     }
     
     /**
@@ -26,7 +35,7 @@ public class Helps {
      */
     public static String getNextTip() {
         if (hasNext()) {
-            return tips[index++];
+            return tips[++index];
         } else {
             return null;
         }
@@ -39,7 +48,7 @@ public class Helps {
      */
     public static String getPrevTip() {
         if (hasPrev()) {
-            return tips[index--];
+            return tips[--index];
         } else {
             return null;
         }
@@ -67,7 +76,7 @@ public class Helps {
      * @return true if yes
      */
     public static boolean hasNext() {
-        return index < tips.length;
+        return index < tips.length - 1;
     }
     
     /**
@@ -76,7 +85,7 @@ public class Helps {
      * @return true if yes
      */
     public static boolean hasPrev() {
-        return index >= 0;
+        return index > 0;
     }
     
 }

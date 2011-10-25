@@ -221,7 +221,8 @@ public class TaskMeter extends Shell {
                         smartBar.setSelection(autoComplete.getStartIdx(), autoComplete.getEndIdx());
                     }
                     smartBar.setFocus();
-                } else if (e.keyCode == SWT.ESC) {      // ESC to confirm complete selection
+                } else if (e.keyCode == SWT.ESC
+                        || e.keyCode == SWT.TRAVERSE_TAB_NEXT) { // ESC, S-Tab to confirm completion
                     if (smartBar.getSelectionCount() != 0) {
                         e.doit = false;
                         smartBar.setSelection(smartBar.getText().length());
@@ -616,8 +617,7 @@ public class TaskMeter extends Shell {
         taskTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseDoubleClick(MouseEvent e) {
-                int index = getSelectedIdx();
-                editTask(index);
+                editTask(getSelectedIdx());
             }
         });
         taskTable.setHeaderVisible(true);
@@ -639,7 +639,6 @@ public class TaskMeter extends Shell {
     }
     
     private void createBottomButtons() {
-        
         Button btnTrashBox = new Button(this, SWT.NONE);
         btnTrashBox.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -678,7 +677,7 @@ public class TaskMeter extends Shell {
         btnOverdue.setText(getResourceString("filter.overdue"));
         
         Label lblSps = new Label(this, SWT.NONE);
-        lblSps.setText("        ");
+        lblSps.setText("          ");
         lblSps.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 
         Button btnToday = new Button(this, SWT.NONE);
@@ -737,6 +736,10 @@ public class TaskMeter extends Shell {
             }
         } catch (NullPointerException e) {
             // do nothing
+        }
+        
+        if (mode == MODE_SEARCH) {
+            displayNewList(searchResult.getName());
         }
     }
 
@@ -811,7 +814,11 @@ public class TaskMeter extends Shell {
             displayCurrentList(null);
         } else {
             mode = MODE_SEARCH;
+            
+            displayLists();
             displayTasks(searchResult);
+            
+            setStatusBar(String.format(SEARCH_RESULT, searchResult.getSize()));
         }
     }
     
@@ -981,6 +988,8 @@ public class TaskMeter extends Shell {
                 refreshTask(index, task);
                 isModified = true;
                 feedback = String.format(EDIT_SUCCESS, TASK, task.getName());
+            } else {
+                feedback = String.format(VIEW_TASK, task.getName());
             }
         } catch (IndexOutOfBoundsException e) {
             feedback = e.getMessage();
@@ -1059,6 +1068,8 @@ public class TaskMeter extends Shell {
     private void switchList(String listname) {
         if (listname == null || listname.trim().isEmpty()) {
             displayError(getResourceString("list.null"));
+        } else if (mode == MODE_SEARCH && listname.equals(searchResult.getName())) {
+            return ;
         } else if (!lists.hasList(listname)) {
             // if the list does not exists, ask whether to add it
             MessageBox box = new MessageBox(this, SWT.ICON_WARNING | SWT.YES | SWT.NO);
@@ -1074,16 +1085,10 @@ public class TaskMeter extends Shell {
             }
         }
         
-        if (!currentList.getName().equals(listname)) {
-            // the switched list name is not current list, do the switch
-            displayCurrentList(listname);
-            
-            // re-highlight the lists
-            TableItem[] lists = taskList.getItems();
-            for (TableItem list : lists) {
-                highlightList(list);
-            }
-        }
+        displayCurrentList(listname);
+        displayLists();
+        
+        setStatusBar(String.format(SWITCH_LIST, listname));
     }
     
     /**
@@ -1169,7 +1174,9 @@ public class TaskMeter extends Shell {
     }
 
     private void highlightList(TableItem l) {
-        if (currentList.getName().equals(l.getText())) {
+        if (mode == MODE_LIST && currentList.getName().equals(l.getText())) {
+            l.setBackground(SWTResourceManager.getColor(SWT.COLOR_INFO_BACKGROUND));
+        } else if (mode == MODE_SEARCH && searchResult.getName().equals(l.getText())) {
             l.setBackground(SWTResourceManager.getColor(SWT.COLOR_INFO_BACKGROUND));
         } else {
             l.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
@@ -1245,4 +1252,7 @@ public class TaskMeter extends Shell {
     private static final String EDIT_SUCCESS    = "%1$s \"%2$s\" is successfully edited";
     private static final String DELETE_SUCCESS  = "%1$s \"%2$s\" is successfully deleted";
     private static final String DELETE_FAIL     = "%1$s fail to delete";
+    private static final String SEARCH_RESULT   = "%1$d task(s) have been found";
+    private static final String SWITCH_LIST     = "Current list : %1$s";
+    private static final String VIEW_TASK       = "View task : %1$s";
 }

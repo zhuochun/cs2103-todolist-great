@@ -30,7 +30,7 @@ public class AutoComplete {
     };
     
     private final String[] Dictionary = {
-            "this", "next", "today", "tomorrow", "done",
+            "this", "next", "today", "tomorrow", "done", "before", "after",
             "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
             "January", "Feburary", "March", "April", "May", "June", "July", "August",
             "September", "October", "November", "December"

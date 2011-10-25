@@ -128,6 +128,26 @@ public class ControlGUI {
     }
     
     /**
+     * if the user's command is EDIT_LIST, GUI will call this method to perform the actual editList
+     * 
+     * @return true is editing is successful
+     */
+    public boolean editList() {
+        
+        return false;
+    }
+    
+    /**
+     * if the user's command is DELETE_LIST, GUI will call this method to perform the actual deleteList
+     * 
+     * @return true is deleting is successful
+     */
+    public boolean deleteList() {
+        
+        return false;
+    }
+    
+    /**
      * if the user's command is ADD_LIST/EDIT_LIST/DELETE_LIST/SWTICH_LIST
      * GUI will call this method to get the list name the user entered
      * 

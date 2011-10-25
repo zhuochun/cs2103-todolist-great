@@ -10,14 +10,14 @@ import cs2103.t14j1.storage.TaskLists;
  */
 public class AutoComplete {
     
-    private final TaskLists lists;
+    private final TaskLists lists;      // a copy of the TaskLists
     
-    private String lastInput;
-    private String lastInputLowerCase;
-    private String completedInput;
+    private String lastInput;           // stores the last input from user
+    private String lastInputLowerCase;  // stores the last input in lower case
+    private String completedInput;      // stores the last input with completed terms
     
-    private int startIdx;
-    private int endIdx;
+    private int startIdx;               // stores the last index of initial string user passed in
+    private int endIdx;                 // stores the new last index of completed input string
     
     private int commandIdx;
     private int dictionaryIdx;
@@ -26,18 +26,18 @@ public class AutoComplete {
     private int listIdx;
     
     private final String[] Commands = {
-            "add", "del", "move", "edit", "done"
+            "add", "del", "move", "edit", "done", "rename"
     };
     
     private final String[] Dictionary = {
-            "this", "next", "today", "tomorrow",
+            "this", "next", "today", "tomorrow", "done",
             "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
             "January", "Feburary", "March", "April", "May", "June", "July", "August",
             "September", "October", "November", "December"
     };
     
     private final String[] TimeUnits = {
-             "seconds", "minutes", "hours", "days", "weeks"
+             "seconds", "minutes", "hours", "days", "weeks", "months"
     };
     
     private final int[] PriorityNums = { 1, 2, 3 };
@@ -45,10 +45,10 @@ public class AutoComplete {
     /**
      * constructor, need to pass a copy of the TaskLists
      * 
-     * @param l
+     * @param ls        pass a copy of the taskLists
      */
-    public AutoComplete(TaskLists l) {
-        lists = l;
+    public AutoComplete(TaskLists ls) {
+        lists = ls;
     }
     
     /**
@@ -67,6 +67,11 @@ public class AutoComplete {
         priorityIdx        = 0;
     }
     
+    /**
+     * initial all the indexes according to passed string
+     * 
+     * @param str       user input string
+     */
     private void initial(String str) {
         lastInput          = str;
         lastInputLowerCase = str.toLowerCase();
@@ -80,18 +85,22 @@ public class AutoComplete {
     /**
      * set the input for completion
      * 
-     * @param str           the input
+     * @param str           the user input
      * @return true         if a valid completion is generated
      */
     public boolean setInput(String str) {
-        str = str.trim();
+        if (str == null) { // in case str is null
+            str = "";
+        } else {
+            str = str.trim();
+        }
         
         try {
             if (str.equals(completedInput) || str.equals(lastInput)) {
                 completedInput = null;
                 startIdx = endIdx = lastInput.length();
                 
-                // clear indexes
+                // clear indexes if they are out of range already
                 if (commandIdx >= Commands.length) {
                     commandIdx = 0;
                 }

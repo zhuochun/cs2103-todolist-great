@@ -36,7 +36,7 @@ public class TaskDetailDialog extends Dialog {
     protected Shell    shell;
     private Task       task;
     private int        mode;
-    private String     result;
+    private boolean    result;
     private Text       txtName;
     private Text       txtList;
     private Text       txtWhere;
@@ -74,7 +74,7 @@ public class TaskDetailDialog extends Dialog {
         }
 
         task = new Task();
-        result = null;
+        result = false;
     }
 
     public void setTask(Task task) {
@@ -86,7 +86,7 @@ public class TaskDetailDialog extends Dialog {
      * 
      * @return the result
      */
-    public String open() {
+    public boolean open() {
         createContents();
 
         center();
@@ -149,7 +149,7 @@ public class TaskDetailDialog extends Dialog {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 if (saveTaskDetail()) {
-                    result = "saved";
+                    result = true;
                     shell.close();
                 }
             }
@@ -162,7 +162,7 @@ public class TaskDetailDialog extends Dialog {
         btnClose.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                result = null;
+                result = false;
                 shell.close();
             }
         });

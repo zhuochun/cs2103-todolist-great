@@ -35,6 +35,7 @@ import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import cs2103.t14j1.logic.ControlGUI;
 import cs2103.t14j1.logic.DateFormat;
 import cs2103.t14j1.storage.FileHandler;
 import cs2103.t14j1.storage.Priority;
@@ -51,23 +52,23 @@ import cs2103.t14j1.taskmeter.autocomplete.AutoComplete;
  */
 public class TaskMeter extends Shell {
 
-    private static ResourceBundle resourceBundle = ResourceBundle.getBundle("taskmeter_res");
-    private Label statusBar;
-    private Table taskTable;
-    private Table taskList;
-    private Text  smartBar;
+    private static final ResourceBundle resourceBundle = ResourceBundle.getBundle("taskmeter_res");
+    private Label statusBar;        // status bar
+    private Table taskTable;        // task table lists all the tasks
+    private Table taskList;         // task list lists all the lists of tasks
+    private Text  smartBar;         // smart bar
 
     private boolean   isModified;
-    private int       mode;
+    private int       mode;         // MODE_LIST and MODE_SEARCH for different events
     private int       lastSortColumn;
     
-    private TaskLists lists;
-    private TaskList  currentList;
-    private TaskList  searchResult;
-    private AutoComplete autoComplete;
+    private ControlGUI logic;        // the logic part center
+    private TaskLists  lists;        // the lists of all lists and tasks
+    private TaskList   currentList;  // stores the current list in display
+    private TaskList   searchResult; // stores the search result in display
     
-    
-    private QuickAddDialog quickAddView; 
+    private AutoComplete   autoComplete; // auto complete module for smartBar
+    private QuickAddDialog quickAddView; // quick Add view, Ctrl + M to toggle between two views
     
     private String[] columnNames = {
             getResourceString("table.id"),
@@ -120,28 +121,28 @@ public class TaskMeter extends Shell {
         gridLayout.horizontalSpacing = 3;
         setLayout(gridLayout);
         
-        // global hotkey to focus on smartBar
+        // global hotkey in whole application
         display.addFilter(SWT.KeyDown, new Listener() {
             @Override
             public void handleEvent(Event e) {
-                if ((e.stateMask & SWT.CTRL) == SWT.CTRL && e.keyCode == 'k') { // SmartBar focus
+                if ((e.stateMask & SWT.CTRL) == SWT.CTRL && e.keyCode == 'k') { // SmartBar focus : Ctrl + k
                     if (quickAddView.isActive()) {
                         quickAddView.focusQuickAdd();
                     } else {
                         smartBar.setFocus();
                         smartBar.setSelection(0, smartBar.getText().length());
                     }
-                } else if ((e.stateMask & SWT.CTRL) == SWT.CTRL && e.keyCode == 't') { // TaskTable focus
+                } else if ((e.stateMask & SWT.CTRL) == SWT.CTRL && e.keyCode == 't') { // TaskTable focus : Ctrl + t
                     taskTable.setFocus();
                     if (taskTable.getSelectionCount() == 0) {
                         taskTable.setSelection(0);
                     }
-                } else if ((e.stateMask & SWT.CTRL) == SWT.CTRL && e.keyCode == 'i') { // TaskList focus
+                } else if ((e.stateMask & SWT.CTRL) == SWT.CTRL && e.keyCode == 'i') { // TaskList focus : Ctrl + i
                     taskList.setFocus();
                     if (taskList.getSelectionCount() == 0) {
                         taskList.setSelection(0);
                     }
-                } else if ((e.stateMask & SWT.CTRL) == SWT.CTRL && e.keyCode == 'm') { // TaskTable focus
+                } else if ((e.stateMask & SWT.CTRL) == SWT.CTRL && e.keyCode == 'm') { // Toggle Views : Ctrl + m
                     if (quickAddView.isActive()) {
                         quickAddView.close();
                     } else {
@@ -163,35 +164,41 @@ public class TaskMeter extends Shell {
         createBottomButtons();
         createStatusBar();
         createContents();
-        
-        // initial quick Add View
-        quickAddView = new QuickAddDialog(this, autoComplete);
     }
 
     /**
      * Create contents of the shell.
      */
     protected void createContents() {
-        addShellListener(new ShellAdapter() {
+        addShellListener(new ShellAdapter() { // close taskMeter check
             public void shellClosed(ShellEvent e) {
                 e.doit = closeTaskMeter();
             }
         });
         
+        // set application title and size
         setText(getResourceString("app.title.full"));
         setSize(750, 500);
 
+        // initial variables
         isModified = false;
         mode       = MODE_LIST;
-
+        
+        // initial lists from files
         lists = new TaskLists();
         FileHandler.loadAll(lists);
         
+        // display tasks and lists
         displayCurrentList(TaskLists.INBOX);
         displayLists();
         
+        // initial modules
+        logic        = new ControlGUI(lists);
         autoComplete = new AutoComplete(lists);
         smartBar.setFocus();
+        
+        // initial quick Add View
+        quickAddView = new QuickAddDialog(this, logic, autoComplete);
     }
 
     /**
@@ -202,11 +209,11 @@ public class TaskMeter extends Shell {
         smartBar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 11, 1));
         smartBar.addTraverseListener(new TraverseListener() {
             public void keyTraversed(TraverseEvent e) {
-                if (e.keyCode == SWT.CR) { // Enter to execute Command
-                    setStatusBar(smartBar.getText());
+                if (e.keyCode == SWT.CR) {              // Enter to execute Command
+                    executeCommand(smartBar.getText());
                     smartBar.setSelection(0, smartBar.getText().length());
                     smartBar.setFocus();
-                } else if (e.keyCode == SWT.TAB) { // Tab to complete words
+                } else if (e.keyCode == SWT.TAB) {      // Tab to complete words
                     e.doit = false;
                     String txt = smartBar.getText();
                     if (autoComplete.setInput(txt)) {
@@ -214,7 +221,7 @@ public class TaskMeter extends Shell {
                         smartBar.setSelection(autoComplete.getStartIdx(), autoComplete.getEndIdx());
                     }
                     smartBar.setFocus();
-                } else if (e.keyCode == SWT.ESC) { // ESC to confirm complete selection
+                } else if (e.keyCode == SWT.ESC) {      // ESC to confirm complete selection
                     if (smartBar.getSelectionCount() != 0) {
                         e.doit = false;
                         smartBar.setSelection(smartBar.getText().length());
@@ -224,6 +231,60 @@ public class TaskMeter extends Shell {
             }
         });
         smartBar.setFont(SWTResourceManager.getFont("Segoe UI", 12, SWT.NORMAL));
+    }
+    
+    /**
+     * execute input command from user
+     * 
+     * @param input         user's input string
+     */
+    private void executeCommand(String input) {
+        logic.setUserInput(input.trim());
+        
+        try {
+            switch (logic.getCommand()) {
+                case ADD_TASK:
+                    addTask(logic.addTask());
+                    break;
+                case DELETE_TASK:
+                    deleteTask(logic.getTaskIdx());
+                    break;
+                case MOVE_TASK:
+                    break;
+                case EDIT_TASK:
+                    editTask(logic.getTaskIdx());
+                    break;
+                case MARK_COMPLETE:
+                    toggleTaskStatus(logic.getTaskIdx());
+                    break;
+                case MARK_PRIORITY:
+                    togglePriority(logic.getTaskIdx(), logic.getNewTaskPriority());
+                    break;
+                case ADD_LIST:
+                    addList(logic.getListName());
+                    break;
+                case EDIT_LIST:
+                    logic.editList();
+                    refreshDisplay();
+                    break;
+                case DELETE_LIST:
+                    logic.deleteList();
+                    refreshDisplay();
+                    break;
+                case SWITCH_LIST:
+                    switchList(logic.getListName());
+                    break;
+                case SEARCH:
+                    searchResult = logic.getSearchResult();
+                    displaySearchResult();
+                    break;
+                default:
+                    setStatusBar(getResourceString("msg.invalid.command"));
+                    break;
+            }
+        } catch (Exception e) {
+            setStatusBar(e.getMessage());
+        }
     }
 
     /**
@@ -329,8 +390,9 @@ public class TaskMeter extends Shell {
         mntmEditTask.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                if (taskTable.isFocusControl() && taskTable.getSelectionCount() != 0)
-                    editTask();
+                if (taskTable.isFocusControl() && taskTable.getSelectionCount() != 0) {
+                    editTask(getSelectedIdx());
+                }
             }
         });
         mntmEditTask.setText(getResourceString("edit"));
@@ -340,8 +402,9 @@ public class TaskMeter extends Shell {
         mntmDeleteTask.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                if (taskTable.isFocusControl() && taskTable.getSelectionCount() != 0)
-                    deleteTask();
+                if (taskTable.isFocusControl() && taskTable.getSelectionCount() != 0) {
+                    deleteTask(getSelectedIdx());
+                }
             }
         });
         mntmDeleteTask.setText(getResourceString("delete"));
@@ -351,8 +414,9 @@ public class TaskMeter extends Shell {
         mntmMarkCompleted.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                if (taskTable.isFocusControl() && taskTable.getSelectionCount() != 0)
-                    toggleTaskStatus();
+                if (taskTable.isFocusControl() && taskTable.getSelectionCount() != 0) {
+                    toggleTaskStatus(getSelectedIdx());
+                }
             }
         });
         mntmMarkCompleted.setText(getResourceString("toggleStatus"));
@@ -365,7 +429,7 @@ public class TaskMeter extends Shell {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 if (taskTable.isFocusControl() && taskTable.getSelectionCount() != 0)
-                    togglePriority(Priority.IMPORTANT);
+                    togglePriority(getSelectedIdx(), Priority.IMPORTANT);
             }
         });
         mntmMarkPriority1.setText(getResourceString("togglePriority1"));
@@ -376,7 +440,7 @@ public class TaskMeter extends Shell {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 if (taskTable.isFocusControl() && taskTable.getSelectionCount() != 0)
-                    togglePriority(Priority.NORMAL);
+                    togglePriority(getSelectedIdx(), Priority.NORMAL);
             }
         });
         mntmMarkPriority2.setText(getResourceString("togglePriority2"));
@@ -387,7 +451,7 @@ public class TaskMeter extends Shell {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 if (taskTable.isFocusControl() && taskTable.getSelectionCount() != 0)
-                    togglePriority(Priority.LOW);
+                    togglePriority(getSelectedIdx(), Priority.LOW);
             }
         });
         mntmMarkPriority3.setText(getResourceString("togglePriority3"));
@@ -395,6 +459,13 @@ public class TaskMeter extends Shell {
         new MenuItem(menuEdit, SWT.SEPARATOR);
     
         final MenuItem mntmSearch = new MenuItem(menuEdit, SWT.NONE);
+        mntmSearch.setAccelerator(SWT.MOD1 + 'F');
+        mntmSearch.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                doSearch();
+            }
+        });
         mntmSearch.setText(getResourceString("find"));
         
         menuEdit.addMenuListener(new MenuAdapter() {
@@ -475,7 +546,7 @@ public class TaskMeter extends Shell {
         mntmTip.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                System.out.println("Tips");
+                showTips();
             }
         });
         mntmTip.setText(getResourceString("help.tip"));
@@ -484,7 +555,7 @@ public class TaskMeter extends Shell {
         mntmHelp.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                System.out.println("Help");
+                showTips();
             }
         });
         mntmHelp.setAccelerator(SWT.F1);
@@ -545,7 +616,8 @@ public class TaskMeter extends Shell {
         taskTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseDoubleClick(MouseEvent e) {
-                editTask();
+                int index = getSelectedIdx();
+                editTask(index);
             }
         });
         taskTable.setHeaderVisible(true);
@@ -638,16 +710,26 @@ public class TaskMeter extends Shell {
     
         setStatusBar(getResourceString("msg.welcome"));
     }
+    
+    /**
+     * refresh all lists and tasks in display
+     */
+    private void refreshDisplay() {
+        displayLists();
+        displayTasks();
+    }
 
+    /**
+     * display all lists in taskList panel
+     */
     private void displayLists() {
         taskList.removeAll();
         
-        displayNewList(TaskLists.INBOX);
+        displayNewList(TaskLists.INBOX); // make sure INBOX is always the first one in list
     
         try {
             for (Entry<String, TaskList> list : lists) {
-                if (list.getKey().equalsIgnoreCase(TaskLists.INBOX)
-                        || list.getKey().equalsIgnoreCase(TaskLists.TRASH)) {
+                if (list.getKey().equals(TaskLists.INBOX) || list.getKey().equals(TaskLists.TRASH)) {
                     continue;
                 }
 
@@ -659,27 +741,40 @@ public class TaskMeter extends Shell {
     }
 
     /**
-     * display the new list name in taskList table
-     * 
-     * @param name
-     * @return
+     * display a list in taskList table
      */
     private TableItem displayNewList(String name) {
         TableItem item = new TableItem(taskList, SWT.NONE);
         item.setText(name);
-        
         highlightList(item);
         return item;
     }
-
+    
+    /**
+     * display the task in the list, set currentList to the list
+     */
     private void displayCurrentList(String name) {
-        if (name != null) {
+        if (name != null && !name.trim().isEmpty()) { // null means currentList didn't change
             currentList = lists.getList(name);
+        } else if (currentList == null) {
+            currentList = lists.getList(TaskLists.INBOX);
         }
         
+        mode = MODE_LIST;
         displayTasks(currentList);
     }
 
+    private void displayTasks() {
+        if (mode == MODE_LIST) {
+            displayCurrentList(null);
+        } else { // mode == MODE_SEARCH
+            displayTasks(searchResult);
+        }
+    }
+
+    /**
+     * display all tasks in a TaskList
+     */
     private void displayTasks(TaskList tlist) {
         taskTable.removeAll(); // remove all items for redraw
         
@@ -693,22 +788,42 @@ public class TaskMeter extends Shell {
         }
     }
     
+    /**
+     * display all tasks in a TaskList in opposite direction
+     */
     private void displayTasksUp(TaskList tlist) {
         taskTable.removeAll(); // remove all items for redraw
         
-        for (int i = tlist.getSize(); i > 0; i--) {
-            displayNewTask(i, tlist.getTask(i));
+        try {
+            for (int i = tlist.getSize(); i > 0; i--) {
+                displayNewTask(i, tlist.getTask(i));
+            }
+        } catch (NullPointerException e) {
+            // do nothing
         }
     }
 
     /**
-     * @param idx
-     * @param task
-     * @return
+     * display all tasks in the search Result
+     */
+    private void displaySearchResult() {
+        if (searchResult == null) {
+            displayCurrentList(null);
+        } else {
+            mode = MODE_SEARCH;
+            displayTasks(searchResult);
+        }
+    }
+    
+    /**
+     * display a task in TaskTable
+     * 
+     * @param idx           index of the task to be displayed
+     * @param task          the task
+     * @return the next index
      */
     private int displayNewTask(int idx, Task task) {
-        TableItem tableItem;
-        tableItem = new TableItem(taskTable, SWT.NONE);
+        TableItem tableItem = new TableItem(taskTable, SWT.NONE);
         tableItem.setText(new String[] {
                 Integer.toString(idx),
                 task.getName(),
@@ -722,6 +837,13 @@ public class TaskMeter extends Shell {
         return idx + 1;
     }
 
+    /**
+     * refresh a specific task contents
+     * 
+     * @param idx           the index of task in taskTable
+     * @param task          the task
+     * @return the index of the task
+     */
     private int refreshTask(int idx, Task task) {
         TableItem item = taskTable.getItem(idx-1);
         item.setText(new String[] {
@@ -737,57 +859,79 @@ public class TaskMeter extends Shell {
         return idx;
     }
     
+    /**
+     * sort the list according to different columns
+     * 
+     * @param columnIdx
+     */
     private void sortList(int columnIdx) {
-        if (mode == MODE_LIST) {
-            
-            currentList.sort(columnIdx);
-            
-            if (lastSortColumn != columnIdx) {
-                taskTable.setSortColumn(taskTable.getColumn(columnIdx));
-                taskTable.setSortDirection(SWT.DOWN);
-                
-                displayTasks(currentList);
-                
-                lastSortColumn = columnIdx;
-            } else {
-                taskTable.setSortDirection(SWT.UP);
-                
-                displayTasksUp(currentList);
-                
-                lastSortColumn = -1;
-            }
-            
-        } else if (mode == MODE_SEARCH) {
-            
+        // change table column display
+        if (lastSortColumn != columnIdx) {
+            taskTable.setSortColumn(taskTable.getColumn(columnIdx));
+            taskTable.setSortDirection(SWT.DOWN);
+            lastSortColumn = columnIdx;
+        } else {
+            taskTable.setSortDirection(SWT.UP);
+            lastSortColumn = -1;
         }
         
+        // perform sorting and refresh taskTable
+        if (mode == MODE_LIST) {
+            currentList.sort(columnIdx);
+            
+            if (lastSortColumn == columnIdx) {
+                displayTasks(currentList);
+            } else {
+                displayTasksUp(currentList);
+            }
+        } else if (mode == MODE_SEARCH) {
+            searchResult.sort(columnIdx);
+            
+            if (lastSortColumn == columnIdx) {
+                displayTasks(searchResult);
+            } else {
+                displayTasksUp(searchResult);
+            }
+        }
     }
 
     /**
-     * ask the user to enter new list name and add it
+     * open addListDialog to get new list name
      */
     private void addList() {
         AddListDialog dialog = new AddListDialog(this);
         
         String newList = dialog.open();
         
-        if (newList != null && newList.length() > 1) {
-            if (!lists.hasList(newList)) {
-                String feedback = String.format(ADD_FAIL, LIST, newList);
-                
-                if (lists.addList(newList)) {
-                    feedback = String.format(ADD_SUCCESS, LIST, newList);
-                    displayNewList(newList);
-                    isModified = true;
-                }
-                
-                setStatusBar(feedback);
+        addList(newList);
+    }
+    
+    /**
+     * add the newList into lists and display result
+     * 
+     * @param newList
+     */
+    private void addList(String newList) {
+        String feedback;
+        
+        try {
+            if (lists.addList(newList)) {
+                feedback = String.format(ADD_SUCCESS, LIST, newList);
+                displayNewList(newList);
+                isModified = true;
             } else {
-                setStatusBar(String.format(LIST_EXIST, newList));
+                feedback = String.format(LIST_EXIST, newList);
             }
+        } catch (NullPointerException e) {
+            feedback = e.getMessage();
         }
+        
+        setStatusBar(feedback);
     }
 
+    /**
+     * open addTaskDialog to add a task
+     */
     private void addTask() {
         TaskDetailDialog dialog = new TaskDetailDialog(this, TaskDetailDialog.ADD_TASK);
         
@@ -796,66 +940,86 @@ public class TaskMeter extends Shell {
         
         dialog.setTask(newTask);
         
-        String feedback = dialog.open();
-        if (feedback != null) {
-            if (currentList.addTask(newTask)) {
-                feedback = String.format(ADD_SUCCESS, TASK, newTask.getName());
-                
-                displayNewTask(taskTable.getItemCount()+1, newTask);
-                isModified = true;
-            } else {
-                feedback = String.format(ADD_FAIL, TASK, newTask.getName());
-            }
-            
-            setStatusBar(feedback);
-        }
-    }
-
-    /**
-     * 
-     * @param tableItem
-     */
-    private void editTask() {
-        int index = getSelectedIdx();
-
-        TaskDetailDialog dialog = new TaskDetailDialog(this, TaskDetailDialog.EDIT_TASK);
-
-        Task task = currentList.getTask(index);
-        dialog.setTask(task);
-
-        String feedback = dialog.open();
-        if (feedback != null) {
-            refreshTask(index, task);
-            isModified = true;
-            setStatusBar(feedback);
+        if (dialog.open() && currentList.addTask(newTask)) {
+            addTask(newTask);
         }
     }
     
-    private void deleteTask() {
-        int index = getSelectedIdx();
+    /**
+     * set statusBar for addTask result
+     * 
+     * @param newTask           new task just added
+     */
+    private void addTask(Task newTask) {
+        String feedback;
         
-        if (mode == MODE_LIST) {
-            Task delTask = currentList.removeTask(index);
+        if (newTask != null) {
+            feedback = String.format(ADD_SUCCESS, TASK, newTask.getName());
+            isModified = true;
+
+            if (mode == MODE_LIST && newTask.getList().equals(currentList.getName())) {
+                displayNewTask(taskTable.getItemCount()+1, newTask);
+            }
+        } else {
+            feedback = String.format(ADD_FAIL, TASK);
+        }
+
+        setStatusBar(feedback);
+    }
+
+    private void editTask(int index) {
+        String feedback = null;
+        
+        TaskDetailDialog dialog = new TaskDetailDialog(this, TaskDetailDialog.EDIT_TASK);
+
+        try {
+            Task task = getIndexedTask(index);
             
-            String feedback = String.format(DELETE_FAIL, TASK);
+            dialog.setTask(task);
+            
+            if (dialog.open()) {
+                refreshTask(index, task);
+                isModified = true;
+                feedback = String.format(EDIT_SUCCESS, TASK, task.getName());
+            }
+        } catch (IndexOutOfBoundsException e) {
+            feedback = e.getMessage();
+        }
+        
+        setStatusBar(feedback);
+    }
+    
+    private void deleteTask(int index) {
+        String feedback = null;
+        
+        try {
+            Task delTask = null;
+            
+            if (mode == MODE_LIST) {
+                delTask = currentList.removeTask(index);
+            } else { // mode == MODE_SEARCH
+                delTask = searchResult.removeTask(index);
+            }
+            
             if (delTask != null) {
                 feedback = String.format(DELETE_SUCCESS, TASK, delTask.getName());
                 isModified = true;
+                displayTasks();
+            } else {
+                feedback = String.format(DELETE_FAIL, TASK);
             }
-            
-            displayTasks(currentList);
-            setStatusBar(feedback);
-        } else if (mode == MODE_SEARCH) {
-            
+        } catch (IndexOutOfBoundsException e) {
+            feedback = e.getMessage();
         }
+        
+        setStatusBar(feedback);
     }
     
-    private void toggleTaskStatus() {
-        int index = getSelectedIdx();
+    private void toggleTaskStatus(int index) {
+        String feedback = null;
         
-        if (mode == MODE_LIST) {
-            String feedback;
-            Task task = currentList.getTask(index);
+        try {
+            Task task = getIndexedTask(index);
             
             if (task.isCompleted()) {
                 task.setStatus(Task.INCOMPLETE);
@@ -867,40 +1031,76 @@ public class TaskMeter extends Shell {
             
             isModified = true;
             refreshTask(index, task);
-            setStatusBar(feedback);
-        } else if (mode == MODE_SEARCH) {
-            
+        } catch (IndexOutOfBoundsException e) {
+            feedback = e.getMessage();
         }
+        
+        setStatusBar(feedback);
     }
     
-    private void togglePriority(Priority newPriority) {
-        int index = getSelectedIdx();
+    private void togglePriority(int index, Priority newPriority) {
+        String feedback = null;
         
-        if (mode == MODE_LIST) {
-            Task task = currentList.getTask(index);
+        try {
+            Task task = getIndexedTask(index);
             
             task.setPriority(newPriority);
-            String feedback = String.format(TOGGLE, task.getName(), task.getPriorityStr());
+            feedback = String.format(TOGGLE, task.getName(), task.getPriorityStr());
             
             isModified = true;
             refreshTask(index, task);
-            setStatusBar(feedback);
-        } else if (mode == MODE_SEARCH) {
-            
+        } catch (IndexOutOfBoundsException e) {
+            feedback = e.getMessage();
         }
+        
+        setStatusBar(feedback);
     }
 
     private void switchList(String listname) {
-        // check if the list is not shown
-        if (!currentList.getName().equals(listname)) {
-            displayCurrentList(listname);
+        if (listname == null || listname.trim().isEmpty()) {
+            displayError(getResourceString("list.null"));
+        } else if (!lists.hasList(listname)) {
+            // if the list does not exists, ask whether to add it
+            MessageBox box = new MessageBox(this, SWT.ICON_WARNING | SWT.YES | SWT.NO);
+            box.setText(getResourceString("list.add"));
+            box.setMessage(getResourceString("msg.new.list"));
+
+            int choice = box.open();
+            if (choice == SWT.YES) {
+                addList(listname);
+            } else {
+                setStatusBar(getResourceString("msg.switch.null.list"));
+                return ;
+            }
         }
         
-        // re-highlight the lists
-        TableItem[] lists = taskList.getItems();
-        for (TableItem list : lists) {
-            highlightList(list);
+        if (!currentList.getName().equals(listname)) {
+            // the switched list name is not current list, do the switch
+            displayCurrentList(listname);
+            
+            // re-highlight the lists
+            TableItem[] lists = taskList.getItems();
+            for (TableItem list : lists) {
+                highlightList(list);
+            }
         }
+    }
+    
+    /**
+     * open searchDialog that get user's search
+     */
+    private void doSearch() {
+        smartBar.setText("/type to search");
+        smartBar.setSelection(1, smartBar.getText().length());
+        smartBar.setFocus();
+    }
+
+    /**
+     * open tipsDialog that show helps
+     */
+    private void showTips() {
+        TipsDialog dialog = new TipsDialog(this);
+        dialog.open();
     }
 
     private int getSelectedIdx() {
@@ -912,6 +1112,14 @@ public class TaskMeter extends Shell {
             return index;
         } catch (Exception e) {
             return -1;
+        }
+    }
+    
+    private Task getIndexedTask(int index) {
+        if (mode == MODE_LIST) {
+            return currentList.getTask(index);
+        } else { // mode == MODE_SEARCH
+            return searchResult.getTask(index);
         }
     }
     
@@ -995,11 +1203,17 @@ public class TaskMeter extends Shell {
      */
     private void openQuickAddView() {
         this.setVisible(false);
+        
         String text = quickAddView.open();
+        
         this.setVisible(true);
         this.setActive();
+        smartBar.setText(text);
         
-        setStatusBar(text);
+        if (quickAddView.isModified()) {
+            isModified = true;
+            refreshDisplay();
+        }
     }
 
     /**
@@ -1022,12 +1236,13 @@ public class TaskMeter extends Shell {
     }
     
     /* messages */
-    private static final String LIST           = "List";
-    private static final String TASK           = "Task";
-    private static final String TOGGLE         = "Task \"%1$s\" is marked as %2$s";
-    private static final String LIST_EXIST     = "List \"%1$s\" already exists";
-    private static final String ADD_SUCCESS    = "%1$s \"%2$s\" is successfully added";
-    private static final String ADD_FAIL       = "%1$s \"%2$s\" fail to add";
-    private static final String DELETE_SUCCESS = "%1$s \"%2$s\" is successfully deleted";
-    private static final String DELETE_FAIL    = "%1$s fail to delete";
+    private static final String LIST            = "List";
+    private static final String TASK            = "Task";
+    private static final String TOGGLE          = "Task \"%1$s\" is marked as %2$s";
+    private static final String LIST_EXIST      = "List \"%1$s\" already exists";
+    private static final String ADD_SUCCESS     = "%1$s \"%2$s\" is successfully added";
+    private static final String ADD_FAIL        = "New %1$s fail to be added";
+    private static final String EDIT_SUCCESS    = "%1$s \"%2$s\" is successfully edited";
+    private static final String DELETE_SUCCESS  = "%1$s \"%2$s\" is successfully deleted";
+    private static final String DELETE_FAIL     = "%1$s fail to delete";
 }

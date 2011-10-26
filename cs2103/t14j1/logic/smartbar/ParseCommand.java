@@ -126,9 +126,10 @@ public class ParseCommand {
 	private static final String regMoveTaskToListCmd = "^(move|mv)\\ [\\d]+\\ (" + regListFormat + "|#)$";
 	private static final String regEditTaskCmd = "^(edit)\\ [\\d]+$";	// simply signal an edit
 	private static final String regMarkAsCompleteCmd = "(^(done)\\ [\\d]+$)|(^[\\d]+\\ (done)$)";	// Syntax 1: [num] + done;  Syntax 2: done + [num]
-	private static final String regSetPriorityCmd = "^[\\d]+\\ " + regPriorityFormat + "$";	// priority
-	private static final String regAddListCmd = "^(add)+\\ " + regListFormat + "$";	// priority
-	private static final String regRenameListCmd = "^(rename)+\\ " + regListFormat + "\\ " + regListFormat + "$";	// priority
+	private static final String regSetPriorityCmd = "^[\\d]+\\ " + regPriorityFormat + "$";
+	private static final String regAddListCmd = "^(add)+\\ " + regListFormat + "$";
+	private static final String regRenameListCmd = "^(rename)+\\ " + regListFormat + "\\ " + regListFormat + "$";
+	private static final String regEditListCmd = "^(edit)+\\ " + regListFormat + "$";
 	// @endgroup regex
 	
 	// basic properities 
@@ -251,12 +252,8 @@ public class ParseCommand {
 				regWordSpacer + regListFormat + regWordSpacer, Pattern.CASE_INSENSITIVE);
 		
 		// then the command matching
-		Pattern regDeleteTaskCmdPattern = Pattern.compile(regDeleteTaskCmd,Pattern.CASE_INSENSITIVE);
-		Matcher regDeleteTaskCmdMatcher = regDeleteTaskCmdPattern.matcher(commandStr);
 		Pattern regDeleteListCmdPattern = Pattern.compile(regDeleteListCmd,Pattern.CASE_INSENSITIVE);
 		Matcher regDeleteListCmdMatcher = regDeleteListCmdPattern.matcher(commandStr);
-		Pattern regDisplayTaskCmdPattern = Pattern.compile(regDisplayTaskCmd,Pattern.CASE_INSENSITIVE);
-		Matcher regDisplayTaskCmdMatcher = regDisplayTaskCmdPattern.matcher(commandStr);
 		
 		// start parsing
 		
@@ -324,7 +321,7 @@ public class ParseCommand {
 			String params[] = commandStr.split("\\ ");
 			taskNum = Integer.parseInt(params[1]);
 			return;
-		} else if(	// mark pariority
+		} else if(	// mark priority
 				matcherMatched(regSetPriorityCmd, commandStr, true)!=null){
 			this.commandType = Commands.MARK_PRIORITY;
 			String params[] = commandStr.split("\\ ");
@@ -339,12 +336,19 @@ public class ParseCommand {
 			return;
 		} else if(	// rename list
 				matcherMatched(regRenameListCmd, commandStr, true)!=null){
-			this.commandType = commandType.EDIT_LIST;
+			this.commandType = commandType.RENAME_LIST;
 			String params[] = commandStr.split("\\ ");
 			this.list = regListFormatProcess(params[1]);
 			this.newListName = regListFormatProcess(params[2]);
 			return;
-		} else if( // add task
+		} else if(	// edit list
+				matcherMatched(regEditListCmd, commandStr, true)!=null){
+			this.commandType = commandType.EDIT_LIST;
+			String params[] = commandStr.split("\\ ");
+			this.list = regListFormatProcess(params[1]);
+			return;
+		}
+		else if( // add task
 				(commandStr.length() > 3)
 				&& commandStr.substring(0, 4).compareToIgnoreCase("add ") == 0){
 			commandStr = commandStr.substring(4);
@@ -940,13 +944,15 @@ public class ParseCommand {
 		// test match here
 		String taskStr = "Get up tomorrow";	// test time
 		
-		String testStr = "rename #luala #lulu";
+		String testStr = "edit #luala";
 		
 		// for testing
 		BufferedReader in;
 		try {
-			in = new BufferedReader(new FileReader("src\\cs2103\\t14j1\\logic\\smartbar\\test.txt"));
-		
+			in = new BufferedReader(new FileReader("src/cs2103/t14j1/logic/smartbar/test.txt"));
+			// when under linux, put: src/cs2103/t14j1/logic/smartbar/test.txt
+			// when under windows, put: src\\cs2103\\t14j1\\logic\\smartbar\\test.txt
+			
 			String strLine;
 			boolean skip = false;
 			while ((strLine = in.readLine()) != null)   {

@@ -42,7 +42,6 @@ public enum Commands {
      */
     EDIT_LIST,
     
-    
     /**
      * Syntax: rename [#oldListName] [#newListName]
      */

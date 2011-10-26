@@ -11,6 +11,7 @@ import cs2103.t14j1.storage.TaskLists;
 public class AutoComplete {
     
     private final TaskLists lists;      // a copy of the TaskLists
+    private String[] listNames;         // a copy of the list names
     
     private String lastInput;           // stores the last input from user
     private String lastInputLowerCase;  // stores the last input in lower case
@@ -76,10 +77,14 @@ public class AutoComplete {
         lastInput          = str;
         lastInputLowerCase = str.toLowerCase();
         completedInput     = null;
-
-        commandIdx = listIdx = priorityIdx = 0;
-        timeUnitIdx = dictionaryIdx = 0;
-        startIdx   = endIdx  = lastInput.length();
+        listNames          = lists.getListNames();
+        commandIdx         = 0;
+        dictionaryIdx      = 0;
+        listIdx            = 0;
+        timeUnitIdx        = 0;
+        priorityIdx        = 0;
+        startIdx           = lastInput.length();
+        endIdx             = startIdx;
     }
     
     /**
@@ -206,7 +211,6 @@ public class AutoComplete {
             }
             
             String   keyword   = lastInputLowerCase.substring(hashIdx+1);
-            String[] listNames = lists.getListNames();
             
             for (; listIdx < listNames.length; listIdx++) {
                 //System.out.println(listNames[listIdx]);

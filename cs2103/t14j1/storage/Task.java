@@ -312,6 +312,32 @@ public class Task implements Comparable<Object> {
             return null;
         }
     }
+    
+    public boolean isWithinPeriod(Date start, Date end) {
+        boolean result = false;
+        
+        if (start == null && end == null) {
+            result = true;
+        } else if (when.hasDateTime()) {
+            if (start != null && end != null) {
+                result = start.before(when.getStartDateTime()) && end.after(when.getEndDateTime());
+            } else if (start == null) {
+                result = end.after(when.getEndDateTime());
+            } else if (end == null) {
+                result = start.before(when.getStartDateTime());
+            }
+        } else if (when.hasDeadline()) {
+            if (start != null && end != null) {
+                result = start.before(when.getDeadline()) && end.after(when.getDeadline());
+            } else if (start == null) {
+                result = end.after(when.getDeadline());
+            } else if (end == null) {
+                result = start.before(when.getDeadline());
+            }
+        }
+        
+        return result;
+    }
 
     public Long getDuration() {
         return when.getDuration();

@@ -562,7 +562,7 @@ public class When {
             return null;
     }
     
-    private void clear(Calendar c, int t) {
+    public static void clear(Calendar c, int t) {
         switch (t) {
             case CLEAR_BELOW_HOUR:
                 c.set(Calendar.HOUR_OF_DAY, 0);
@@ -577,6 +577,6 @@ public class When {
         }
     }
     
-    private static final int CLEAR_BELOW_SECOND = 0;
-    private static final int CLEAR_BELOW_HOUR   = 1;
+    public static final int CLEAR_BELOW_SECOND = 0;
+    public static final int CLEAR_BELOW_HOUR   = 1;
 }

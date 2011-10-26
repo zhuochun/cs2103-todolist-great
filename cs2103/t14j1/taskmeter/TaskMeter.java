@@ -1,5 +1,7 @@
 package cs2103.t14j1.taskmeter;
 
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Map.Entry;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
@@ -42,6 +44,7 @@ import cs2103.t14j1.storage.Priority;
 import cs2103.t14j1.storage.Task;
 import cs2103.t14j1.storage.TaskList;
 import cs2103.t14j1.storage.TaskLists;
+import cs2103.t14j1.storage.When;
 import cs2103.t14j1.taskmeter.autocomplete.AutoComplete;
 
 /**
@@ -60,6 +63,7 @@ public class TaskMeter extends Shell {
 
     private boolean   isModified;
     private int       mode;         // MODE_LIST and MODE_SEARCH for different events
+    private int       filter;       // Filter tasks display according to different filters
     private int       lastSortColumn;
     
     private ControlGUI logic;        // the logic part center
@@ -81,8 +85,19 @@ public class TaskMeter extends Shell {
     };
     private int[] columnWidths = { 25, 200, 70, 120, 70, 70, 75 };
     
+    // 2 different modes
     private static final int MODE_LIST   = 0;
     private static final int MODE_SEARCH = 1;
+    
+    // 8 different filters
+    private static final int FILTER_ALL          = 0;
+    private static final int FILTER_IMPORTANT    = 1;
+    private static final int FILTER_COMPLETED    = 2;
+    private static final int FILTER_OVERDUE      = 3;
+    private static final int FILTER_TODAY        = 4;
+    private static final int FILTER_TOMORROW     = 5;
+    private static final int FILTER_NEXT_DAYS    = 6;
+    private static final int FILTER_WITHOUT_DATE = 7;
     
     /**
      * Launch the application.
@@ -183,6 +198,7 @@ public class TaskMeter extends Shell {
         // initial variables
         isModified = false;
         mode       = MODE_LIST;
+        filter     = FILTER_ALL;
         
         // initial lists from files
         lists = new TaskLists();
@@ -362,7 +378,7 @@ public class TaskMeter extends Shell {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 if (taskTable.isFocusControl() && taskTable.getSelectionCount() != 0) {
-                    toggleTaskStatus(getSelectedIdx());
+                    toggleStatus(getSelectedIdx());
                 }
             }
         });
@@ -599,13 +615,23 @@ public class TaskMeter extends Shell {
         btnAll.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                displayCurrentList(null);
+                filter = FILTER_ALL;
+                displayTasks();
+                setStatusBar(String.format(FILTER, getResourceString("filter.all")));
             }
         });
         btnAll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
         btnAll.setText(getResourceString("filter.all"));
 
         Button btnImportant = new Button(this, SWT.NONE);
+        btnImportant.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                filter = FILTER_IMPORTANT;
+                displayTasks();
+                setStatusBar(String.format(FILTER, getResourceString("filter.important")));
+            }
+        });
         btnImportant.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
         btnImportant.setText(getResourceString("filter.important"));
 
@@ -613,12 +639,23 @@ public class TaskMeter extends Shell {
         btnCompleted.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
+                filter = FILTER_COMPLETED;
+                displayTasks();
+                setStatusBar(String.format(FILTER, getResourceString("filter.completed")));
             }
         });
         btnCompleted.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
         btnCompleted.setText(getResourceString("filter.completed"));
 
         Button btnOverdue = new Button(this, SWT.NONE);
+        btnOverdue.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                filter = FILTER_OVERDUE;
+                displayTasks();
+                setStatusBar(String.format(FILTER, getResourceString("filter.overdue")));
+            }
+        });
         btnOverdue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
         btnOverdue.setText(getResourceString("filter.overdue"));
         
@@ -627,24 +664,56 @@ public class TaskMeter extends Shell {
         lblSps.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
 
         Button btnToday = new Button(this, SWT.NONE);
+        btnToday.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                filter = FILTER_TODAY;
+                displayTasks();
+                setStatusBar(String.format(FILTER, getResourceString("filter.today")));
+            }
+        });
         btnToday.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
         btnToday.setText(getResourceString("filter.today"));
 
         Button btnTomorrow = new Button(this, SWT.NONE);
+        btnTomorrow.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                filter = FILTER_TOMORROW;
+                displayTasks();
+                setStatusBar(String.format(FILTER, getResourceString("filter.tomorrow")));
+            }
+        });
         btnTomorrow.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
         btnTomorrow.setText(getResourceString("filter.tomorrow"));
 
         Button btnNextDays = new Button(this, SWT.NONE);
+        btnNextDays.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                filter = FILTER_NEXT_DAYS;
+                displayTasks();
+                setStatusBar(String.format(FILTER, getResourceString("filter.custom")));
+            }
+        });
         btnNextDays.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
         btnNextDays.setText(getResourceString("filter.custom"));
 
         Button btnWithoutDate = new Button(this, SWT.NONE);
+        btnWithoutDate.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                filter = FILTER_WITHOUT_DATE;
+                displayTasks();
+                setStatusBar(String.format(FILTER, getResourceString("filter.nodate")));
+            }
+        });
         btnWithoutDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
         btnWithoutDate.setText(getResourceString("filter.nodate"));
         
         setTabList(new Control[]{smartBar, taskList, taskTable, btnAll, btnImportant, btnCompleted, btnOverdue, btnToday, btnTomorrow, btnNextDays, btnWithoutDate});
     }
-
+    
     private void createStatusBar() {
         Label statusBarSeperator = new Label(this, SWT.SEPARATOR | SWT.HORIZONTAL);
         statusBarSeperator.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 11, 1));
@@ -673,12 +742,13 @@ public class TaskMeter extends Shell {
                     deleteTask(logic.getTaskIdx());
                     break;
                 case MOVE_TASK:
+                    // TODO
                     break;
                 case EDIT_TASK:
                     editTask(logic.getTaskIdx());
                     break;
                 case MARK_COMPLETE:
-                    toggleTaskStatus(logic.getTaskIdx());
+                    toggleStatus(logic.getTaskIdx());
                     break;
                 case MARK_PRIORITY:
                     togglePriority(logic.getTaskIdx(), logic.getNewTaskPriority());
@@ -693,8 +763,7 @@ public class TaskMeter extends Shell {
                     editList(logic.extractNewListName(), logic.extractNewListName());
                     break;
                 case DELETE_LIST:
-                    logic.deleteList(logic.getListName());
-                    refreshDisplay();
+                    deleteList(logic.getListName());
                     break;
                 case SWITCH_LIST:
                     switchList(logic.getListName());
@@ -708,7 +777,7 @@ public class TaskMeter extends Shell {
                     break;
             }
         } catch (Exception e) {
-            setStatusBar(e.getMessage());
+            setStatusBar(getResourceString("error.logic.command"));
         }
     }
 
@@ -786,13 +855,14 @@ public class TaskMeter extends Shell {
         try {
             int idx = 1;
             for (Task task : tlist) {
-                idx = displayNewTask(idx, task);
+                filterTask(idx, task);
+                idx++;
             }
         } catch (NullPointerException e) {
             // do nothing
         }
     }
-    
+
     /**
      * display all tasks in a TaskList in opposite direction
      */
@@ -801,10 +871,58 @@ public class TaskMeter extends Shell {
         
         try {
             for (int i = tlist.getSize(); i > 0; i--) {
-                displayNewTask(i, tlist.getTask(i));
+                filterTask(i, tlist.getTask(i));
             }
         } catch (NullPointerException e) {
             // do nothing
+        }
+    }
+    
+    /**
+     * filter tasks according to different filters
+     */
+    private void filterTask(int idx, Task task) {
+        if (filter == FILTER_ALL) {
+            displayNewTask(idx, task);
+        } else if (filter == FILTER_IMPORTANT && task.getPriority() == Priority.IMPORTANT) {
+            displayNewTask(idx, task);
+        } else if (filter == FILTER_COMPLETED && task.isCompleted()) {
+            displayNewTask(idx, task);
+        } else if (filter == FILTER_OVERDUE && !task.isCompleted()
+                && task.compareDeadline(DateFormat.getNow()) < 0) {
+            displayNewTask(idx, task);
+        } else if (filter == FILTER_TODAY) {
+            Calendar now = Calendar.getInstance();
+            When.clear(now, When.CLEAR_BELOW_HOUR);
+            
+            Date todayStart = now.getTime();
+            Date todayEnd   = DateFormat.getDateAfter(todayStart, 1);
+            
+            if (task.isWithinPeriod(todayStart, todayEnd)) {
+                displayNewTask(idx, task);
+            }
+        } else if (filter == FILTER_TOMORROW) {
+            Calendar now = Calendar.getInstance();
+            When.clear(now, When.CLEAR_BELOW_HOUR);
+            
+            Date tmlStart = DateFormat.getDateAfter(now.getTime(), 1);
+            Date tmlEnd   = DateFormat.getDateAfter(tmlStart, 1);
+            
+            if (task.isWithinPeriod(tmlStart, tmlEnd)) {
+                displayNewTask(idx, task);
+            }
+        } else if (filter == FILTER_NEXT_DAYS) {
+            Calendar now = Calendar.getInstance();
+            When.clear(now, When.CLEAR_BELOW_HOUR);
+            
+            Date weekStart = now.getTime();
+            Date weekEnd   = DateFormat.getDateAfter(weekStart, 7);
+            
+            if (task.isWithinPeriod(weekStart, weekEnd)) {
+                displayNewTask(idx, task);
+            }
+        } else if (filter == FILTER_WITHOUT_DATE && task.getStartDateTime() == null) {
+            displayNewTask(idx, task);
         }
     }
 
@@ -969,6 +1087,54 @@ public class TaskMeter extends Shell {
         
         setStatusBar(feedback);
     }
+    
+    private void deleteList(String name) {
+        String feedback = null;
+        
+        try {
+            boolean success = logic.deleteList(name);
+            
+            if (success) {
+                isModified = true;
+                refreshDisplay();
+                feedback = String.format(DELETE_SUCCESS, LIST, name);
+            } else {
+                feedback = String.format(DELETE_FAIL, LIST);
+            }
+        } catch (Exception e) {
+            feedback = e.getMessage();
+        }
+        
+        setStatusBar(feedback);
+    }
+
+    private void switchList(String name) {
+        if (name == null || name.trim().isEmpty()) {
+            displayError(getResourceString("list.null"));
+        } else if (mode == MODE_SEARCH && name.equals(searchResult.getName())) {
+            return ;
+        } else if (!lists.hasList(name)) {
+            // if the list does not exists, ask whether to add it
+            MessageBox box = new MessageBox(this, SWT.ICON_WARNING | SWT.YES | SWT.NO);
+            box.setText(getResourceString("list.add"));
+            box.setMessage(getResourceString("msg.new.list"));
+    
+            int choice = box.open();
+            if (choice == SWT.YES) {
+                addList(name);
+            } else {
+                setStatusBar(getResourceString("msg.switch.null.list"));
+                return ;
+            }
+        }
+        
+        displayCurrentList(name);
+        displayLists();
+
+        filter = FILTER_ALL;
+
+        setStatusBar(String.format(SWITCH_LIST, name));
+    }
 
     /**
      * open addTaskDialog to add a task
@@ -1058,7 +1224,7 @@ public class TaskMeter extends Shell {
         setStatusBar(feedback);
     }
     
-    private void toggleTaskStatus(int index) {
+    private void toggleStatus(int index) {
         String feedback = null;
         
         try {
@@ -1099,32 +1265,6 @@ public class TaskMeter extends Shell {
         setStatusBar(feedback);
     }
 
-    private void switchList(String listname) {
-        if (listname == null || listname.trim().isEmpty()) {
-            displayError(getResourceString("list.null"));
-        } else if (mode == MODE_SEARCH && listname.equals(searchResult.getName())) {
-            return ;
-        } else if (!lists.hasList(listname)) {
-            // if the list does not exists, ask whether to add it
-            MessageBox box = new MessageBox(this, SWT.ICON_WARNING | SWT.YES | SWT.NO);
-            box.setText(getResourceString("list.add"));
-            box.setMessage(getResourceString("msg.new.list"));
-
-            int choice = box.open();
-            if (choice == SWT.YES) {
-                addList(listname);
-            } else {
-                setStatusBar(getResourceString("msg.switch.null.list"));
-                return ;
-            }
-        }
-        
-        displayCurrentList(listname);
-        displayLists();
-        
-        setStatusBar(String.format(SWITCH_LIST, listname));
-    }
-    
     /**
      * open searchDialog that get user's search
      */
@@ -1137,7 +1277,7 @@ public class TaskMeter extends Shell {
     /**
      * open tipsDialog that show helps
      */
-    private void showTips() {
+    public void showTips() {
         TipsDialog dialog = new TipsDialog(this);
         dialog.open();
     }
@@ -1291,4 +1431,5 @@ public class TaskMeter extends Shell {
     private static final String VIEW_TASK       = "View task : %1$s";
     private static final String RENAME_LIST     = "List \"%1$s\" is renamed to \"%2$s\"";
     private static final String RENAME_LIST_FAIL= "Rename List \"%1$s\" is failed";
+    private static final String FILTER          = "Filter tasks : %1$s";
 }

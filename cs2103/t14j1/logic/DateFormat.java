@@ -274,6 +274,29 @@ public class DateFormat {
 
         return newDate;
     }
+    
+    /**
+     * get the date after a number of days delay
+     * 
+     * eg 3 day after some day, then delay = 3
+     * 
+     * @param nowdate
+     * @param delay
+     * @return date
+     */
+    public static Date getDateAfter(Date nowdate, int delay) {
+        Date newDate = new Date();
+        
+        try {
+            long myTime = (nowdate.getTime() / 1000) + delay * 24 * 60 * 60;
+            
+            newDate.setTime(myTime * 1000);
+        } catch (Exception e) {
+            return null;
+        }
+        
+        return newDate;
+    }
 
     /**
      * check if the passed date is in a leap year

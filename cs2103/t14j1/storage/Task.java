@@ -11,14 +11,14 @@ import cs2103.t14j1.storage.gCal.GCalSyn;
  * @author Zhuochun
  * 
  */
-public class Task {
+public class Task implements Comparable<Object> {
 
     // private members
     private String              name;              // define the task action
     private String              place;             // define the place of task
     private String              list;              // belong to which list
     private Priority            priority;          // priority of the task
-    private When                 when;             // stores start/end, duration, deadline
+    private When                when;             // stores start/end, duration, deadline
     private boolean             status;            // completed or not
     
     // additional parameter to note if it's to be synced with gCalendar
@@ -29,31 +29,36 @@ public class Task {
     public static final boolean COMPLETED  = true;
     public static final boolean INCOMPLETE = false;
 
+    // Exceptions Strings
+    private static final String EXCEPTION_EMPTY_TASK_NAME = "Task name cannot be empty";
+    private static final String EXCEPTION_EMPTY_LIST_NAME = "Task must belong to a list with non-empty name";
+    private static final String EXCEPTION_NULL_WHEN       = "Task's When property cannot be null";
+
     /**
      * A Constructor with all parameters provided
      */
     public Task(String name, String place, String list, Priority priority, Date startDateTime, Date endDateTime,
             Date deadline, Long duration, boolean status) {
-    	this();
-        this.name          = name;
-        this.place         = place;
-        this.list          = (list == null) ? TaskLists.INBOX : list;
-        this.priority      = (priority == null) ? Priority.NORMAL : priority;
-        this.when          = new When(startDateTime, endDateTime, deadline, duration);
-        this.status        = status;
+        this();
+        setName(name);
+        setPlace(place);
+        setList(list);
+        setPriority(priority);
+        setWhen(new When(startDateTime, endDateTime, deadline, duration));
+        setStatus(status);
     }
     
     /**
      * new constructor with all parameters
      */
     public Task(String name, String place, String list, Priority priority, When when, boolean status) {
-    	this();
-        this.name          = name;
-        this.place         = place;
-        this.list          = (list == null) ? TaskLists.INBOX : list;
-        this.priority      = (priority == null) ? Priority.NORMAL : priority;
-        this.when          = (when == null) ? new When() : when;
-        this.status        = status;
+        this();
+        setName(name);
+        setPlace(place);
+        setList(list);
+        setPriority(priority);
+        setWhen(new When());
+        setStatus(status);
     }
 
     /**
@@ -74,6 +79,10 @@ public class Task {
     }
 
     public void setName(String newName) {
+        if (newName == null || newName.trim().isEmpty()) {
+            throw new NullPointerException(EXCEPTION_EMPTY_TASK_NAME);
+        }
+    
         name = newName;
     }
 
@@ -90,6 +99,12 @@ public class Task {
     }
 
     public void setList(String newList) {
+        if (newList == null) {
+            newList = TaskLists.INBOX;
+        } else if (newList.trim().isEmpty()) {
+            throw new NullPointerException(EXCEPTION_EMPTY_LIST_NAME);
+        }
+
         list = newList;
     }
     
@@ -98,6 +113,10 @@ public class Task {
     }
     
     public void setWhen(When newWhen) {
+        if (newWhen == null) {
+            throw new NullPointerException(EXCEPTION_NULL_WHEN);
+        }
+
         when = newWhen;
     }
 
@@ -110,6 +129,10 @@ public class Task {
     }
 
     public void setPriority(Priority newValue) {
+        if (newValue == null) {
+            newValue = Priority.NORMAL;
+        }
+
         priority = newValue;
     }
 
@@ -293,6 +316,32 @@ public class Task {
             return null;
         }
     }
+    
+    public boolean isWithinPeriod(Date start, Date end) {
+        boolean result = false;
+        
+        if (start == null && end == null) {
+            result = true;
+        } else if (when.hasDateTime()) {
+            if (start != null && end != null) {
+                result = start.before(when.getStartDateTime()) && end.after(when.getEndDateTime());
+            } else if (start == null) {
+                result = end.after(when.getEndDateTime());
+            } else if (end == null) {
+                result = start.before(when.getStartDateTime());
+            }
+        } else if (when.hasDeadline()) {
+            if (start != null && end != null) {
+                result = start.before(when.getDeadline()) && end.after(when.getDeadline());
+            } else if (start == null) {
+                result = end.after(when.getDeadline());
+            } else if (end == null) {
+                result = start.before(when.getDeadline());
+            }
+        }
+        
+        return result;
+    }
 
     public Long getDuration() {
         return when.getDuration();
@@ -354,8 +403,100 @@ public class Task {
         str.append("\n");
         str.append(info);
     }
+
+    @Override
+    public int compareTo(Object o) {
+        if (o == null) {
+            throw new NullPointerException();
+        }
+        
+        Task other = (Task) o;
+        int result = 0;
+        
+        // early deadline fist
+        if (result == 0) {
+            result = compareDeadline(other.getDeadline());
+        }
+        
+        // early startDate first
+        if (result == 0) {
+            result = compareStartDateTime(other.getStartDateTime());
+        }
+        
+        // higher priority first
+        if (result == 0) {
+            result = comparePriority(other.getPriority());
+        }
+        
+        return result;
+    }
     
+    public int compareName(String other) {
+        return name.compareTo(other);
+    }
+
+    public int compareDeadline(Date other) {
+        if (getDeadline() != null && other != null) {
+            return getDeadline().compareTo(other);
+        }
+        
+        if (getDeadline() != null) {
+            return -1;
+        }
+        if (other != null) {
+            return 1;
+        }
+        
+        return 0;
+    }
     
+    public int compareStartDateTime(Date other) {
+        if (getStartDateTime() != null && other != null) {
+            return getStartDateTime().compareTo(other);
+        }
+        
+        if (getStartDateTime() != null) {
+            return -1;
+        }
+        if (other != null) {
+            return 1;
+        }
+        
+        return 0;
+    }
+    
+    public int compareDuration(Long other) {
+        if (getDuration() != null && other != null) {
+            return getDuration().compareTo(other);
+        }
+        
+        if (getDuration() != null) {
+            return -1;
+        }
+        
+        if (other != null) {
+            return 1;
+        }
+        
+        return 0;
+    }
+    
+    public int comparePriority(Priority other) {
+        return priority.compareTo(other);
+    }
+    
+    public int compareStatus(Boolean other) {
+        if (status == other) {
+            return 0;
+        }
+        
+        if (status == Task.INCOMPLETE) {
+            return -1;
+        }
+        
+        return 1;
+    }
+
     /**
      * Function for the gCalSyn class
      * @author songyy

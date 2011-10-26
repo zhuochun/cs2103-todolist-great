@@ -1,5 +1,7 @@
 package cs2103.t14j1.logic;
 
+import java.util.Date;
+
 import cs2103.t14j1.logic.search.Search;
 import cs2103.t14j1.logic.search.SearchEngine;
 import cs2103.t14j1.logic.smartbar.ParseCommand;
@@ -7,6 +9,7 @@ import cs2103.t14j1.storage.Priority;
 import cs2103.t14j1.storage.Task;
 import cs2103.t14j1.storage.TaskList;
 import cs2103.t14j1.storage.TaskLists;
+import cs2103.t14j1.storage.Priority;;
 
 public class ControlGUI {
     
@@ -69,31 +72,70 @@ public class ControlGUI {
      * @return the new task if successfully added or null if failed
      */
     public Task addTask() {
-        
-        // TODO: code for addTask
-        
-        // it will return the newTask to GUI, so GUI can display it to the user
-        return null;
+    	
+    	String name        = parseCommand.extractTaskName();
+		String list        = parseCommand.extractListName();
+		Priority priority  = parseCommand.extractPriority();
+		String place 	   = parseCommand.extractPlace();
+		Date startDateTime = parseCommand.extractStartDate();
+		Date endDateTime   = parseCommand.extractEndDate();
+		Long startTime     = parseCommand.extractStartTime();
+		Long endTime       = parseCommand.extractEndTime();
+		Date deadline 	   = parseCommand.extractDeadlineDate();
+		Long deadlineTime  = parseCommand.extractDeadlineTime();
+		Long duration      = parseCommand.extractDuration();
+		boolean status     = Task.INCOMPLETE;
+		
+		convertLongTimeToDate(startDateTime, startTime);
+		convertLongTimeToDate(endDateTime, endTime);
+		convertLongTimeToDate(deadline, deadlineTime);
+		
+		Task newTask = new Task(name, place, list, priority, startDateTime, endDateTime, deadline, duration, status);
+		
+		boolean result = lists.addTask(newTask.getList(), newTask);
+		
+		/*If task is successfully added, this function returns the task object to the GUI
+		 * Otherwise, a null value is returned to denote that some error has occured*/
+		if(result)
+			return newTask;
+		else
+			return null;
+	
     }
+    
+    private void convertLongTimeToDate (Date d, Long secondsFromStartOfDay) {
+		if(d == null)
+			return;
+		else if(secondsFromStartOfDay == null) {
+			/*A value of null indicates that the user did not specify any time and
+			so, we assume the time to be 00:00:00*/
+			
+			d.setHours(0);
+			d.setMinutes(0);
+			d.setSeconds(0);
+		}
+		
+		else {
+			int hours     = secondsFromStartOfDay.intValue() / 3600;
+			int minutes   = (secondsFromStartOfDay.intValue() - hours * 60*60)/60;
+			int seconds   = secondsFromStartOfDay.intValue() - hours * 3600 - minutes * 60;
+			d.setHours(hours);
+			d.setMinutes(minutes);
+			d.setSeconds(seconds);
+		}
+	}
     
     /**
      * if the user's command is DELETE_TASK/EDIT_TASK/MARK_COMPLETE/MARK_PRIORITY
      * GUI will call this method to get the index the user entered
      * 
-     * @return the index the user eneted
+     * @return the index the user entered
      */
     public int getTaskIdx() {
         
-        // TODO: finish the switch for task index, index starts from 1
+        int taskNum = parseCommand.extractTaskNum();
         
-        switch (userCommand) {
-            case EDIT_TASK:
-                return 0;
-            case DELETE_TASK:
-                return 0;
-        }
-        
-        return -1;
+        return taskNum;
     }
 
     /**
@@ -104,9 +146,12 @@ public class ControlGUI {
      */
     public Priority getNewTaskPriority() {
         
-        // TODO: for command MARK_PRIORITY
+    	Priority newPriority  = parseCommand.extractPriority();
         
-        return Priority.IMPORTANT;
+        if((newPriority != Priority.IMPORTANT) && (newPriority != Priority.NORMAL) && (newPriority != Priority.LOW))
+        	newPriority = null;
+        
+        return newPriority;
     }
 
     /**
@@ -130,9 +175,11 @@ public class ControlGUI {
     /**
      * if the user's command is EDIT_LIST, GUI will call this method to perform the actual editList
      * 
+     * @param oldListName
+     * @param newListName
      * @return true is editing is successful
      */
-    public boolean editList() {
+    public boolean editList(String oldListName, String newListName) {
         
         return false;
     }
@@ -142,29 +189,21 @@ public class ControlGUI {
      * 
      * @return true is deleting is successful
      */
-    public boolean deleteList() {
+    public boolean deleteList(String listName) {
         
         return false;
     }
     
     /**
-     * if the user's command is ADD_LIST/EDIT_LIST/DELETE_LIST/SWTICH_LIST
+     * if the user's command is ADD_LIST/DELETE_LIST/SWTICH_LIST
      * GUI will call this method to get the list name the user entered
      * 
      * @return the list name user enterd
      */
     public String getListName() {
         
-        // TODO: finish the switch for list name
-        
-        switch (userCommand) {
-            case ADD_LIST:
-                return "";
-            case EDIT_LIST:
-                return "";
-        }
-        
-        return null;
+                String listName = parseCommand.extractListName();
+                return listName;
     }
     
     /**
@@ -206,5 +245,17 @@ public class ControlGUI {
     public void setSearchProperty(Search property, Object value) {
         searchEngine.setProperty(property, value);
     }
+
+	public String extractOldListName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public String extractNewListName() {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+	
     
 }

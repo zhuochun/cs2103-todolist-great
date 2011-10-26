@@ -264,11 +264,11 @@ public class TaskMeter extends Shell {
                     addList(logic.getListName());
                     break;
                 case EDIT_LIST:
-                    logic.editList();
+                    logic.editList(logic.extractOldListName(), logic.extractNewListName());
                     refreshDisplay();
                     break;
                 case DELETE_LIST:
-                    logic.deleteList();
+                    logic.deleteList(logic.getListName());
                     refreshDisplay();
                     break;
                 case SWITCH_LIST:

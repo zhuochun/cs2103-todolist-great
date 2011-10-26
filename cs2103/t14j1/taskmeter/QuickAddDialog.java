@@ -1,0 +1,152 @@
+package cs2103.t14j1.taskmeter;
+
+import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.ModifyEvent;
+import org.eclipse.swt.events.ModifyListener;
+import org.eclipse.swt.events.SelectionAdapter;
+import org.eclipse.swt.events.SelectionEvent;
+import org.eclipse.swt.events.TraverseEvent;
+import org.eclipse.swt.events.TraverseListener;
+import org.eclipse.swt.graphics.Rectangle;
+import org.eclipse.swt.widgets.Button;
+import org.eclipse.swt.widgets.Dialog;
+import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.Shell;
+import org.eclipse.swt.widgets.Text;
+import org.eclipse.wb.swt.SWTResourceManager;
+
+import cs2103.t14j1.taskmeter.autocomplete.AutoComplete;
+
+public class QuickAddDialog extends Dialog {
+
+    private Shell shell;
+    private Display display;
+    
+    private Text quickAddBar;
+    private Button btnAdd;
+    private String result;
+    
+    private boolean active;
+    private AutoComplete autoComplete;
+    
+    private static final String MSG_EXECUTE = ">";
+    private static final String MSG_SUCCESS = "Added";
+    private static final String MSG_WAITING = "..";
+    private static final String MSG_FAIL    = "Failed";
+
+    /**
+     * Create the dialog.
+     * @param parent
+     * @param style
+     */
+    public QuickAddDialog(Shell parent, /*ControlGUI ctr,*/ AutoComplete ac) {
+        super(parent, SWT.NONE);
+        
+        active       = false;
+        autoComplete = ac;
+    }
+
+    /**
+     * Open the dialog.
+     */
+    public String open() {
+        createContents();
+        center();
+        
+        shell.open();
+        shell.layout();
+        
+        active = true;
+        
+        display = getParent().getDisplay();
+        while (!shell.isDisposed()) {
+            if (!display.readAndDispatch()) {
+                result = quickAddBar.getText();
+                display.sleep();
+            }
+        }
+        
+        active = false;
+        
+        return result;
+    }
+    
+    /**
+     * Create contents of the dialog.
+     */
+    private void createContents() {
+        shell = new Shell(getParent(), SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
+        shell.setSize(330, 68);
+        shell.setText("TaskMeter Quick Add");
+        
+        quickAddBar = new Text(shell, SWT.BORDER);
+        quickAddBar.addTraverseListener(new TraverseListener() {
+            public void keyTraversed(TraverseEvent e) {
+                if (e.keyCode == SWT.CR) { // Enter to execute Command
+                    setStatus(MSG_WAITING);
+                    focusQuickAdd();
+                } else if (e.keyCode == SWT.TAB) { // Tab to complete words
+                    e.doit = false;
+                    String txt = quickAddBar.getText();
+                    if (autoComplete.setInput(txt)) {
+                        quickAddBar.setText(autoComplete.getCompletedStr());
+                        quickAddBar.setSelection(autoComplete.getStartIdx(), autoComplete.getEndIdx());
+                    }
+                    quickAddBar.setFocus();
+                } else if (e.keyCode == SWT.ESC) { // ESC to confirm complete selection
+                    e.doit = false;
+                    if (quickAddBar.getSelectionCount() != 0) {
+                        quickAddBar.setSelection(quickAddBar.getText().length());
+                        quickAddBar.setFocus();
+                    }
+                }
+            }
+        });
+        quickAddBar.addModifyListener(new ModifyListener() {
+            public void modifyText(ModifyEvent arg0) {
+                if (quickAddBar.getText().trim().isEmpty()) {
+                    setStatus(MSG_EXECUTE);
+                }
+            }
+        });
+        quickAddBar.setFont(SWTResourceManager.getFont("Segoe UI", 12, SWT.NORMAL));
+        quickAddBar.setBounds(5, 5, 250, 30);
+        
+        btnAdd = new Button(shell, SWT.NONE);
+        btnAdd.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+            }
+        });
+        btnAdd.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
+        btnAdd.setBounds(260, 5, 60, 30);
+        setStatus(MSG_EXECUTE);
+    }
+
+    public void close() {
+        result = quickAddBar.getText();
+        shell.dispose();
+    }
+    
+    public boolean isActive() {
+        return active;
+    }
+    
+    public void focusQuickAdd() {
+        quickAddBar.setSelection(0, quickAddBar.getText().length());
+        quickAddBar.setFocus();
+    }
+    
+    private void setStatus(String str) {
+        btnAdd.setText(str);
+    }
+    
+    private void center() {
+        Rectangle parent = getParent().getBounds();
+        Rectangle rect = shell.getBounds();
+        int x = parent.x + (parent.width - rect.width) / 2;
+        int y = parent.y + (parent.height - rect.height) / 2;
+        shell.setLocation(x, y);
+    }
+
+}

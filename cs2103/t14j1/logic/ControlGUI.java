@@ -179,7 +179,7 @@ public class ControlGUI {
      * @param newListName
      * @return true is editing is successful
      */
-    public boolean editList(String oldListName, String newListName) {
+    public boolean renameList(String oldListName, String newListName) {
         
         return false;
     }

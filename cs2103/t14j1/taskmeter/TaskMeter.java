@@ -235,60 +235,6 @@ public class TaskMeter extends Shell {
     }
     
     /**
-     * execute input command from user
-     * 
-     * @param input         user's input string
-     */
-    private void executeCommand(String input) {
-        logic.setUserInput(input.trim());
-        
-        try {
-            switch (logic.getCommand()) {
-                case ADD_TASK:
-                    addTask(logic.addTask());
-                    break;
-                case DELETE_TASK:
-                    deleteTask(logic.getTaskIdx());
-                    break;
-                case MOVE_TASK:
-                    break;
-                case EDIT_TASK:
-                    editTask(logic.getTaskIdx());
-                    break;
-                case MARK_COMPLETE:
-                    toggleTaskStatus(logic.getTaskIdx());
-                    break;
-                case MARK_PRIORITY:
-                    togglePriority(logic.getTaskIdx(), logic.getNewTaskPriority());
-                    break;
-                case ADD_LIST:
-                    addList(logic.getListName());
-                    break;
-                case RENAME_LIST:
-                    logic.renameList(logic.extractOldListName(), logic.extractNewListName());
-                    refreshDisplay();
-                    break;
-                case DELETE_LIST:
-                    logic.deleteList(logic.getListName());
-                    refreshDisplay();
-                    break;
-                case SWITCH_LIST:
-                    switchList(logic.getListName());
-                    break;
-                case SEARCH:
-                    searchResult = logic.getSearchResult();
-                    displaySearchResult();
-                    break;
-                default:
-                    setStatusBar(getResourceString("msg.invalid.command"));
-                    break;
-            }
-        } catch (Exception e) {
-            setStatusBar(e.getMessage());
-        }
-    }
-
-    /**
      * Creates the menu at the top of the shell where most of the programs
      * functionality is accessed.
      */
@@ -605,7 +551,7 @@ public class TaskMeter extends Shell {
     }
 
     /**
-     * 
+     * create the table for displaying tasks
      */
     private void createTaskTable() {
         taskTable = new Table(this, SWT.BORDER | SWT.FULL_SELECTION);
@@ -710,6 +656,62 @@ public class TaskMeter extends Shell {
         setStatusBar(getResourceString("msg.welcome"));
     }
     
+    /**
+     * execute input command from user
+     * 
+     * @param input         user's input string
+     */
+    private void executeCommand(String input) {
+        logic.setUserInput(input.trim());
+        
+        try {
+            switch (logic.getCommand()) {
+                case ADD_TASK:
+                    addTask(logic.addTask());
+                    break;
+                case DELETE_TASK:
+                    deleteTask(logic.getTaskIdx());
+                    break;
+                case MOVE_TASK:
+                    break;
+                case EDIT_TASK:
+                    editTask(logic.getTaskIdx());
+                    break;
+                case MARK_COMPLETE:
+                    toggleTaskStatus(logic.getTaskIdx());
+                    break;
+                case MARK_PRIORITY:
+                    togglePriority(logic.getTaskIdx(), logic.getNewTaskPriority());
+                    break;
+                case ADD_LIST:
+                    addList(logic.getListName());
+                    break;
+                case EDIT_LIST:
+                    editList(logic.extractNewListName(), null);
+                    break;
+                case RENAME_LIST:
+                    editList(logic.extractNewListName(), logic.extractNewListName());
+                    break;
+                case DELETE_LIST:
+                    logic.deleteList(logic.getListName());
+                    refreshDisplay();
+                    break;
+                case SWITCH_LIST:
+                    switchList(logic.getListName());
+                    break;
+                case SEARCH:
+                    searchResult = logic.getSearchResult();
+                    displaySearchResult();
+                    break;
+                default:
+                    setStatusBar(getResourceString("msg.invalid.command"));
+                    break;
+            }
+        } catch (Exception e) {
+            setStatusBar(e.getMessage());
+        }
+    }
+
     /**
      * refresh all lists and tasks in display
      */
@@ -928,6 +930,38 @@ public class TaskMeter extends Shell {
                 isModified = true;
             } else {
                 feedback = String.format(LIST_EXIST, newList);
+            }
+        } catch (NullPointerException e) {
+            feedback = e.getMessage();
+        }
+        
+        setStatusBar(feedback);
+    }
+    
+    /**
+     * edit list name to a new list name
+     * 
+     * @param oldName
+     * @param newName
+     */
+    private void editList(String oldName, String newName) {
+        String feedback = null;
+        
+        if (newName == null) {
+            AddListDialog dialog = new AddListDialog(this);
+            dialog.setListName(oldName);
+            newName = dialog.open();
+        }
+        
+        try {
+            boolean success = logic.renameList(oldName, newName);
+            
+            if (success) {
+                isModified = true;
+                refreshDisplay();
+                feedback = String.format(RENAME_LIST, oldName, newName);
+            } else {
+                feedback = String.format(RENAME_LIST_FAIL, oldName);
             }
         } catch (NullPointerException e) {
             feedback = e.getMessage();
@@ -1255,4 +1289,6 @@ public class TaskMeter extends Shell {
     private static final String SEARCH_RESULT   = "%1$d task(s) have been found";
     private static final String SWITCH_LIST     = "Current list : %1$s";
     private static final String VIEW_TASK       = "View task : %1$s";
+    private static final String RENAME_LIST     = "List \"%1$s\" is renamed to \"%2$s\"";
+    private static final String RENAME_LIST_FAIL= "Rename List \"%1$s\" is failed";
 }

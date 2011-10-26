@@ -29,10 +29,10 @@ import org.eclipse.wb.swt.SWTResourceManager;
 public class AddListDialog extends Dialog {
 
     private static ResourceBundle resourceBundle = ResourceBundle.getBundle("taskmeter_res");
-    protected String  result;
+    protected String  result;       // new list name
     protected Shell   shell;
-    private Text      text;
-    private boolean  button;
+    private Text      text;         // list text box
+    private boolean   button;       // whether to take new list name
 
     /**
      * Create the dialog.
@@ -62,6 +62,10 @@ public class AddListDialog extends Dialog {
             }
         }
         return result;
+    }
+    
+    public void setListName(String name) {
+        text.setText(name);
     }
 
     /**

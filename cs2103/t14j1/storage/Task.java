@@ -24,6 +24,7 @@ public class Task {
     // additional parameter to note if it's to be synced with gCalendar
     private int syncWithGCal = GCalSyn.NOT_SYN;
     private String gCalId = null;
+	private Date lastEditTime;
 
     public static final boolean COMPLETED  = true;
     public static final boolean INCOMPLETE = false;
@@ -33,6 +34,7 @@ public class Task {
      */
     public Task(String name, String place, String list, Priority priority, Date startDateTime, Date endDateTime,
             Date deadline, Long duration, boolean status) {
+    	this();
         this.name          = name;
         this.place         = place;
         this.list          = (list == null) ? TaskLists.INBOX : list;
@@ -45,6 +47,7 @@ public class Task {
      * new constructor with all parameters
      */
     public Task(String name, String place, String list, Priority priority, When when, boolean status) {
+    	this();
         this.name          = name;
         this.place         = place;
         this.list          = (list == null) ? TaskLists.INBOX : list;
@@ -63,6 +66,7 @@ public class Task {
         this.priority      = Priority.NORMAL;
         this.when          = new When();
         this.status        = INCOMPLETE;
+        this.lastEditTime  = new Date();	// mark the last edit time to be the time when created
     }
 
     public String getName() {
@@ -354,25 +358,9 @@ public class Task {
     
     /**
      * Function for the gCalSyn class
-     * To call this function and set the property, one should use the magic 
-     * constants set in GCalSyn
      * @author songyy
      * @return
      */
-    public boolean setGCalProperty(int propertyToSet){
-    	this.syncWithGCal = propertyToSet;
-		return true;
-    }
-    
-    /**
-     * @author songyy
-     * @return
-     * 	a integer, it's the magic string defined in gCalSyn class 
-     */
-    public int getGCalProperty(){
-    	return this.syncWithGCal;
-    }
-    
     public void setGCalId(String id){
     	this.gCalId = id;
     }
@@ -380,6 +368,40 @@ public class Task {
     public String getGCalId(){
     	return this.gCalId;
     }
+    
+	/**
+	 * Needed by GCalSync
+	 * @author songyy
+	 * @return
+	 */
+	public Date getLastEditTime() {
+		return this.lastEditTime;
+	}
+	
+	/**
+	 * Needed by GCalSync
+	 * @author songyy
+	 * @return
+	 */
+	public void setLastEditTime(Date time) {
+		this.lastEditTime = time;
+	}
+	
+	/**
+	 * Needed by GCalSyn
+	 * @return
+	 */
+	public String getGCalDescription(){
+        StringBuilder str = new StringBuilder();
+
+        str.append("Created by Task metter. Here's the priorities in TaskMeter cannot sync directly: \n");
+        addOutput(str, "	Place: " + place, place);
+        addOutput(str, "	Priority: " + getPriorityStr(), priority);
+        addOutput(str, "	Duration: " + getDurationStr(), when.getDurationStr());
+        addOutput(str, "	Deadline: " + getDeadlineShort(), when.getDeadline());
+
+        return str.toString();
+	}
     
     
     // used as XML tag names
@@ -392,4 +414,5 @@ public class Task {
     public static final String DEADLINE   = "deadline";
     public static final String STATUS     = "status";
     public static final String DURATION   = "duration";
+
 }

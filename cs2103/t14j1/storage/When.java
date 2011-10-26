@@ -10,7 +10,7 @@ import java.util.Date;
  * 
  * @author Zhuochun
  */
-public class When {
+public class When implements Comparable{
     public Calendar startDateTime;
     public Calendar endDateTime;
     public Calendar deadline;
@@ -579,4 +579,41 @@ public class When {
     
     private static final int CLEAR_BELOW_SECOND = 0;
     private static final int CLEAR_BELOW_HOUR   = 1;
+
+	/* (non-Javadoc)
+	 * @see java.lang.Comparable#compareTo(java.lang.Object)
+	 * 
+	 * @author songyy
+	 * this When class is supposed to be non-comparable; this method
+	 * is implemented to support the use of TreeMap on When class
+	 * 
+	 * Used by GCalSyn
+	 */
+	@Override
+	public int compareTo(Object b) {
+		When c = (When) b;	// b is the type of when
+		if(this.getStartDateTime() == null && c.getStartDateTime() == null){
+			return 0;
+		} else if(this.getStartDateTime() == null){
+			return -1;
+		} else if(c.getStartDateTime() == null){
+			return 1;
+		} else if(this.getStartDateTime().before(c.getStartDateTime())){
+			return -1;
+		} else if(this.getStartDateTime().after(c.getStartDateTime())){
+			return 1;
+		} else if(this.getEndDateTime() == null && c.getEndDateTime() == null){
+			return 0;
+		} else if(this.getEndDateTime() == null){
+			return -1;
+		} else if(c.getEndDateTime() == null){
+			return 1;
+		} else if(this.getEndDateTime().before(c.getEndDateTime())){
+			return -1;
+		} else if(this.getEndDateTime().after(c.getEndDateTime())){
+			return 1;
+		} else{
+			return 0;
+		}
+	}
 }

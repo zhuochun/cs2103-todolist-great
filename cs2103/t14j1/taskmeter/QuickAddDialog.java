@@ -15,6 +15,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import cs2103.t14j1.logic.ControlGUI;
 import cs2103.t14j1.taskmeter.autocomplete.AutoComplete;
 
 public class QuickAddDialog extends Dialog {
@@ -27,23 +28,28 @@ public class QuickAddDialog extends Dialog {
     private String result;
     
     private boolean active;
+    private boolean isModified;
+    
+    private ControlGUI   logic;
     private AutoComplete autoComplete;
     
     private static final String MSG_EXECUTE = ">";
     private static final String MSG_SUCCESS = "Added";
-    private static final String MSG_WAITING = "..";
     private static final String MSG_FAIL    = "Failed";
+    private static final String MSG_INVALID = "Invalid";
 
     /**
      * Create the dialog.
      * @param parent
      * @param style
      */
-    public QuickAddDialog(Shell parent, /*ControlGUI ctr,*/ AutoComplete ac) {
+    public QuickAddDialog(Shell parent, ControlGUI control, AutoComplete autocomp) {
         super(parent, SWT.NONE);
         
         active       = false;
-        autoComplete = ac;
+        isModified   = false;
+        autoComplete = autocomp;
+        logic        = control;
     }
 
     /**
@@ -56,7 +62,8 @@ public class QuickAddDialog extends Dialog {
         shell.open();
         shell.layout();
         
-        active = true;
+        active     = true;
+        isModified = false;
         
         display = getParent().getDisplay();
         while (!shell.isDisposed()) {
@@ -83,7 +90,7 @@ public class QuickAddDialog extends Dialog {
         quickAddBar.addTraverseListener(new TraverseListener() {
             public void keyTraversed(TraverseEvent e) {
                 if (e.keyCode == SWT.CR) { // Enter to execute Command
-                    setStatus(MSG_WAITING);
+                    executeCommand(quickAddBar.getText());
                     focusQuickAdd();
                 } else if (e.keyCode == SWT.TAB) { // Tab to complete words
                     e.doit = false;
@@ -122,7 +129,38 @@ public class QuickAddDialog extends Dialog {
         btnAdd.setBounds(260, 5, 60, 30);
         setStatus(MSG_EXECUTE);
     }
-
+    
+    /**
+     * execute input command from user
+     * 
+     * @param input         user's input string
+     */
+    private void executeCommand(String input) {
+        if (input.toLowerCase().matches("^add\\s.*$")) {
+            logic.setUserInput(input.trim());
+        } else { // in quick add view, can ignore add command
+            logic.setUserInput("add " + input.trim());
+        }
+        
+        try {
+            switch (logic.getCommand()) {
+                case ADD_TASK:
+                    if (logic.addTask() != null) {
+                        isModified = true;
+                        setStatus(MSG_SUCCESS);
+                    } else {
+                        setStatus(MSG_FAIL);
+                    }
+                    break;
+                default:
+                    setStatus(MSG_INVALID);
+                    break;
+            }
+        } catch (Exception e) {
+            setStatus(MSG_INVALID);
+        }
+    }
+    
     public void close() {
         result = quickAddBar.getText();
         shell.dispose();
@@ -130,6 +168,10 @@ public class QuickAddDialog extends Dialog {
     
     public boolean isActive() {
         return active;
+    }
+    
+    public boolean isModified() {
+        return isModified;
     }
     
     public void focusQuickAdd() {

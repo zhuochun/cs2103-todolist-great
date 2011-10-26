@@ -149,7 +149,7 @@ public class ControlGUI {
     	Priority newPriority  = parseCommand.extractPriority();
         
         if((newPriority != Priority.IMPORTANT) && (newPriority != Priority.NORMAL) && (newPriority != Priority.LOW))
-        	newPriority = null;
+        	newPriority = Priority.IMPORTANT;
         
         return newPriority;
     }

@@ -14,16 +14,16 @@ import cs2103.t14j1.storage.gCal.GCalSyn;
 public class Task implements Comparable<Object> {
 
     // private members
-    private String              name;              // define the task action
-    private String              place;             // define the place of task
-    private String              list;              // belong to which list
-    private Priority            priority;          // priority of the task
-    private When                when;             // stores start/end, duration, deadline
-    private boolean             status;            // completed or not
+    private String      name;        // define the task action
+    private String      place;       // define the place of task
+    private String      list;        // belong to which list
+    private Priority    priority;    // priority of the task
+    private When        when;        // stores start/end, duration, deadline
+    private boolean     status;      // completed or not
     
     // additional parameter to note if it's to be synced with gCalendar
     private int syncWithGCal = GCalSyn.NOT_SYN;
-    private String gCalId = null;
+    private String gCalId    = null;
 	private Date lastEditTime;
 
     public static final boolean COMPLETED  = true;
@@ -57,7 +57,7 @@ public class Task implements Comparable<Object> {
         setPlace(place);
         setList(list);
         setPriority(priority);
-        setWhen(new When());
+        setWhen(when);
         setStatus(status);
     }
 

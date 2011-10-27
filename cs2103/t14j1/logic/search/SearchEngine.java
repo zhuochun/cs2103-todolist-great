@@ -1,6 +1,11 @@
 package cs2103.t14j1.logic.search;
 
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.Iterator;
+import java.util.Map.Entry;
+
+import com.ibm.icu.util.StringTokenizer;
 
 import cs2103.t14j1.storage.Priority;
 import cs2103.t14j1.storage.Task;
@@ -56,14 +61,112 @@ public class SearchEngine {
      * contains 0 tasks.
      */
     public TaskList performSearch() {
-        TaskList searchResult = new TaskList("Search Result");
         
-        // TODO: search through the lists according to the properties set
+        ArrayList<TaskList> searchLists = selectListsToBeSearched();
         
+        TaskList searchResult = searchSelectedTaskLists(searchLists);
+        	
         return searchResult;
     }
     
     /**
+     * Depending on the value after the hash-tag in the user input, creates a list of TaskLists which need to searched
+     * @return the list of TaskLists
+     */
+    private ArrayList<TaskList> selectListsToBeSearched() {
+    	
+    	ArrayList<TaskList> searchLists = new ArrayList<TaskList>();
+    	
+    	if((list != null) && (!lists.hasList(list))) {
+        }   	
+    	else if(list != null)
+        	searchLists.add(lists.getList(list));
+        else {
+        	Iterator<Entry<String, TaskList>> iterator = lists.iterator();
+        	while (iterator.hasNext()) {
+        		TaskList taskList = iterator.next().getValue();
+        		searchLists.add(taskList);
+        	}
+        }
+    	
+    	return searchLists;
+	}
+
+	/**
+	 * Performs the search in the TaskLists passed to it
+	 * @param searchLists the list of TaskLists which need to searched
+	 * @return the search result in the form of a list of tasks which meet the search criteria 
+	 */
+	private TaskList searchSelectedTaskLists(ArrayList<TaskList> searchLists) {
+		
+    	TaskList searchResult = new TaskList("Search Result");
+    	
+    	for(int i = 0; i < searchLists.size(); i ++) {
+    		ArrayList<Task> searchResultsInThisList = searchList(searchLists.get(i));
+    		for(int j = 0; j < searchResultsInThisList.size(); j ++) {
+    			searchResult.addTask(searchResultsInThisList.get(j));
+    		}
+    	}
+    	
+    	return searchResult;
+    	
+	}
+
+	/**
+     * Searches for tasks in a particular list
+     * @param taskList the taskList which is to be searched
+     * @return a list of all tasks which match the search criteria
+     */
+    private ArrayList<Task> searchList(TaskList taskList) {
+    	
+    	ArrayList<Task> searchResults = new ArrayList<Task>();
+    	
+    	Iterator<Task> iter = taskList.iterator();
+    	
+    	while(iter.hasNext()) {
+    		Task task = iter.next();
+    		if(doesTaskNameContainSearchString(task)
+					&& isStartDateSame(startDateTime, currentTask)
+					&& isEndDateSame(endDateTime, currentTask)
+					&& isDeadlineDateSame(deadlineDate, currentTask)
+					&& isPlaceSame(place, currentTask)
+					&& isPrioritySame(priority, currentTask)
+					&& isDateAfterGivenDateAndTime(afterDate, duration, currentTask)
+					&& isDateBeforeGivenDateAndTime(beforeDate, duration, currentTask)
+					&& isDurationSame(duration, currentTask)
+					&& isListNameSame(listName, currentTask)) {
+				searchResult.add(currentTask);
+    	}
+    	
+    }
+
+	private boolean doesTaskNameContainSearchString(Task task) {
+		
+		if(name == null)
+			return true;
+		
+		String trimmedName = name.trim();
+		
+		if(trimmedName.compareTo("") == 0)
+			return true;
+		
+		String taskNameLowerCase = task.getName().toLowerCase();
+		String trimmedNameLowerCase = trimmedName.toLowerCase();
+		
+		StringTokenizer st = new StringTokenizer(trimmedNameLowerCase);
+				
+		while(st.hasMoreTokens()) {
+			String word = st.nextToken();
+			if(taskNameLowerCase.contains(word))
+				continue;
+			if((task.getPlace() != null) && (task.getPlace().toLowerCase().contains(word)))
+				continue;
+			return false;
+		}
+		return true;
+	}
+
+	/**
      * able to set an individual property of the searchEngine
      * 
      * @param property

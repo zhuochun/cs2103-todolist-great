@@ -126,19 +126,51 @@ public class SearchEngine {
     	while(iter.hasNext()) {
     		Task task = iter.next();
     		if(doesTaskNameContainSearchString(task)
-					&& isStartDateSame(startDateTime, currentTask)
+					&& isStartDateSame(task)
 					&& isEndDateSame(endDateTime, currentTask)
 					&& isDeadlineDateSame(deadlineDate, currentTask)
-					&& isPlaceSame(place, currentTask)
-					&& isPrioritySame(priority, currentTask)
+					&& isPlaceSame(task)
+					&& isPrioritySame(task)
 					&& isDateAfterGivenDateAndTime(afterDate, duration, currentTask)
 					&& isDateBeforeGivenDateAndTime(beforeDate, duration, currentTask)
-					&& isDurationSame(duration, currentTask)
-					&& isListNameSame(listName, currentTask)) {
-				searchResult.add(currentTask);
+					&& isDurationSame(duration, currentTask)) {
+				searchResults.add(task);
+    		}
     	}
-    	
+    	return searchResults;
     }
+
+	private boolean isPrioritySame(Task task) {
+		if(priority == null)
+			return true;
+		return (priority == task.getPriority());
+	}
+
+	private boolean isPlaceSame(Task task) {
+		
+		if(place == null)
+			return true;
+		
+		String trimmedPlace = place.trim();
+		
+		if(trimmedPlace.compareTo("") == 0)
+			return true;
+		
+		String taskPlaceLowerCase = task.getPlace().toLowerCase();
+		String trimmedPlaceLowerCase = trimmedPlace.toLowerCase();
+		
+		StringTokenizer st = new StringTokenizer(trimmedPlaceLowerCase);
+		while(st.hasMoreTokens()) {
+			String word = st.nextToken();
+			if(taskPlaceLowerCase.contains(word))
+				continue;
+			if((task.getPlace() != null) && (task.getPlace().toLowerCase().contains(word)))
+				continue;
+			return false;
+		}
+		
+		return true;
+	}
 
 	private boolean doesTaskNameContainSearchString(Task task) {
 		

@@ -1,6 +1,7 @@
 package cs2103.t14j1.logic;
 
 import java.util.Date;
+import java.util.Iterator;
 
 import cs2103.t14j1.logic.search.Search;
 import cs2103.t14j1.logic.search.SearchEngine;
@@ -181,7 +182,20 @@ public class ControlGUI {
      */
     public boolean renameList(String oldListName, String newListName) {
         
-        return false;
+    	TaskList oldList = lists.getList(oldListName);
+    	if(oldList == null)//No list with the name oldListname exists
+    		return false;
+    	
+    	TaskList newList = new TaskList(newListName);
+    	
+    	Iterator<Task> iterOldList = oldList.iterator();
+    	
+    	while(iterOldList.hasNext()) {
+    		Task task = iterOldList.next();
+    		newList.addTask(task);
+    	}
+    	
+    	return true;
     }
     
     /**
@@ -191,7 +205,15 @@ public class ControlGUI {
      */
     public boolean deleteList(String listName) {
         
-        return false;
+    	if(listName.equals("Inbox") || listName.equals("Trash"))
+    		return false;
+    	
+    	if(!lists.hasList(listName))
+    		return false;
+    	
+    	lists.removeList(listName);
+    	
+    	return false;
     }
     
     /**
@@ -202,8 +224,8 @@ public class ControlGUI {
      */
     public String getListName() {
         
-                String listName = parseCommand.extractListName();
-                return listName;
+    	String listName = parseCommand.extractListName();
+        return listName;
     }
     
     /**
@@ -247,13 +269,14 @@ public class ControlGUI {
     }
 
 	public String extractOldListName() {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return parseCommand.extractListName();
 	}
 
 	public String extractNewListName() {
-		// TODO Auto-generated method stub
-		return null;
+		
+		return parseCommand.extractNewListName();
+		
 	}
 	
 	

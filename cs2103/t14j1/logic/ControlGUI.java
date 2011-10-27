@@ -179,12 +179,16 @@ public class ControlGUI {
      * @param oldListName
      * @param newListName
      * @return true is editing is successful
+     * @throws Exception 
      */
-    public boolean renameList(String oldListName, String newListName) {
+    public boolean renameList(String oldListName, String newListName) throws Exception {
         
     	TaskList oldList = lists.getList(oldListName);
-    	if(oldList == null)//No list with the name oldListname exists
-    		return false;
+    	
+    	//If no list with the name oldListname exists
+    	if(oldList == null) {
+    		throw new Exception(oldListName + " does not exist");
+    	}
     	
     	TaskList newList = new TaskList(newListName);
     	

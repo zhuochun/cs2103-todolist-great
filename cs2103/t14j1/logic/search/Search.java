@@ -17,5 +17,9 @@ public enum Search {
     
     DURATION,
     
-    STATUS
+    STATUS,
+    
+    AFTERDATETIME,
+    
+    BEFOREDATETIME
 }

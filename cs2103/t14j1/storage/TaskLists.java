@@ -20,8 +20,8 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
     public static final String TRASH = "Trash";
     
     // Exception Strings
-    private static final String EXCEPTION_EMPTY_LIST_NAME = "TaskList name cannot be empty";
-    private static final String EXCEPTION_NULL_LIST = "TaskList cannot be null";
+    private static final String EXCEPTION_EMPTY_LIST_NAME      = "TaskList name cannot be empty";
+    private static final String EXCEPTION_NULL_LIST            = "TaskList cannot be null";
     private static final String EXCEPTION_REMOVE_DEFAULT_LISTS = "Default lists \"Inbox\" and \"Trash\" cannot be removed";
 
     public TaskLists() {
@@ -167,6 +167,28 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
             return false;
         }
 
+        return true;
+    }
+    
+    /**
+     * move a task from old list to new list
+     * 
+     * @param newList
+     *              the new list name
+     * @param task
+     *              the task to remove
+     * @return the result of moving task
+     */
+    public boolean moveTask(String newList, Task task) {
+        if (task == null) {
+            return false;
+        }
+        
+        TaskList oldlist = getList(task.getList());
+        task.setList(newList);
+        addTask(newList, task);
+        oldlist.removeTask(task);
+        
         return true;
     }
 

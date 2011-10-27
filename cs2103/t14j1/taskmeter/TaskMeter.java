@@ -1214,15 +1214,18 @@ public class TaskMeter extends Shell {
         String feedback = null;
         
         try {
-            Task delTask = null;
+            Task delTask = getIndexedTask(index);
             
-            if (mode == MODE_LIST) {
-                delTask = currentList.removeTask(index);
-            } else { // mode == MODE_SEARCH
-                delTask = searchResult.removeTask(index);
+            boolean success = false;
+            
+            // move task to trash, if task is in trash, delete it
+            if (delTask.getList().equals(TaskLists.TRASH)) {
+                success = lists.removeTask(delTask.getList(), delTask);
+            } else {
+                success = lists.moveTask(TaskLists.TRASH, delTask);
             }
             
-            if (delTask != null) {
+            if (success) {
                 feedback = String.format(DELETE_SUCCESS, TASK, delTask.getName());
                 isModified = true;
                 displayTasks();
@@ -1230,6 +1233,8 @@ public class TaskMeter extends Shell {
                 feedback = String.format(DELETE_FAIL, TASK);
             }
         } catch (IndexOutOfBoundsException e) {
+            feedback = e.getMessage();
+        } catch (Exception e) {
             feedback = e.getMessage();
         }
         

@@ -28,7 +28,7 @@ public class TaskList implements Iterable<Task> {
     private static final String EXCEPTION_LIST_EMPTY_NAME = "TaskList name cannot be empty";
     private static final String EXCEPTION_INVALID_INDEX   = "Invalid index on retriving/deleting task";
     private static final String EXCEPTION_EMPTY_TASK      = "Task cannot be null or empty";
-
+    
     // sort terms
     public static final int SORT_ID       = 0;
     public static final int SORT_NAME     = 1;

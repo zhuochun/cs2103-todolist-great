@@ -215,7 +215,7 @@ public class Control {
 	//
 	// 5. TODO: all those is..() functions should put into a separate search class in logic. And, I think function
 	//    names like isDateBeforeGivenDateAndTime() is too long. 
-	// Okay, would put into a separate Search file in Logic in V0.2
+	// Okay, would put into a separate Search class in Logic in V0.2
 	//
 	private String search() {
 	    searchResult = new TaskList("search result");

@@ -7,6 +7,8 @@ import java.util.MissingResourceException;
 import java.util.ResourceBundle;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.MenuAdapter;
 import org.eclipse.swt.events.MenuEvent;
 import org.eclipse.swt.events.MouseAdapter;
@@ -222,6 +224,16 @@ public class TaskMeter extends Shell {
 	 */
     private void createSmartBar() {
         smartBar = new Text(this, SWT.BORDER);
+        smartBar.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                // Space to confirm completion
+                if (e.character == ' ' && smartBar.getSelectionCount() != 0) {
+                    smartBar.setSelection(smartBar.getText().length());
+                    smartBar.setFocus();
+                }
+            }
+        });
         smartBar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 11, 1));
         smartBar.addTraverseListener(new TraverseListener() {
             public void keyTraversed(TraverseEvent e) {
@@ -237,8 +249,7 @@ public class TaskMeter extends Shell {
                         smartBar.setSelection(autoComplete.getStartIdx(), autoComplete.getEndIdx());
                     }
                     smartBar.setFocus();
-                } else if (e.keyCode == SWT.ESC
-                        || e.keyCode == SWT.TRAVERSE_TAB_NEXT) { // ESC, S-Tab to confirm completion
+                } else if (e.keyCode == SWT.ESC) { // ESC to confirm completion
                     if (smartBar.getSelectionCount() != 0) {
                         e.doit = false;
                         smartBar.setSelection(smartBar.getText().length());

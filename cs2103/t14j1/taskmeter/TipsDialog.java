@@ -63,7 +63,8 @@ public class TipsDialog extends Dialog {
         shell.setText(getText());
         shell.setLayout(new GridLayout(3, false));
         
-        txtText = new Text(shell, SWT.BORDER | SWT.WRAP | SWT.H_SCROLL | SWT.CANCEL | SWT.MULTI);
+        txtText = new Text(shell, SWT.BORDER | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
+        txtText.setBackground(SWTResourceManager.getColor(255, 255, 255));
         txtText.setEditable(false);
         txtText.setFont(SWTResourceManager.getFont("Segoe UI", 12, SWT.NORMAL));
         txtText.setText(Helps.getTip());

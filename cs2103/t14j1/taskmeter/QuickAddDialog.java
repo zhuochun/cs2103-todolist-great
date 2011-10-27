@@ -1,6 +1,8 @@
 package cs2103.t14j1.taskmeter;
 
 import org.eclipse.swt.SWT;
+import org.eclipse.swt.events.KeyAdapter;
+import org.eclipse.swt.events.KeyEvent;
 import org.eclipse.swt.events.ModifyEvent;
 import org.eclipse.swt.events.ModifyListener;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -16,20 +18,21 @@ import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 import cs2103.t14j1.logic.ControlGUI;
+import cs2103.t14j1.storage.Task;
 import cs2103.t14j1.taskmeter.autocomplete.AutoComplete;
 
 public class QuickAddDialog extends Dialog {
-
-    private Shell shell;
+    private Shell   shell;
     private Display display;
     
-    private Text quickAddBar;
+    private Text   quickAddBar;
     private Button btnAdd;
-    private String result;
+    private Text   txtResult;
     
     private boolean active;
     private boolean isModified;
     
+    private String       result;
     private ControlGUI   logic;
     private AutoComplete autoComplete;
     
@@ -78,15 +81,33 @@ public class QuickAddDialog extends Dialog {
         return result;
     }
     
+    private void setSize(boolean mini) {
+        if (mini) {
+            shell.setSize(330, 68);
+        } else {
+            shell.setSize(330, 200);
+        }
+    }
+    
     /**
      * Create contents of the dialog.
      */
     private void createContents() {
-        shell = new Shell(getParent(), SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
-        shell.setSize(330, 68);
+        shell = new Shell(getParent(), SWT.DIALOG_TRIM);
+        setSize(true);
         shell.setText("TaskMeter Quick Add");
         
+        
         quickAddBar = new Text(shell, SWT.BORDER);
+        quickAddBar.addKeyListener(new KeyAdapter() {
+            @Override
+            public void keyPressed(KeyEvent e) {
+                if (e.character == ' ' && quickAddBar.getSelectionCount() != 0) {
+                    quickAddBar.setSelection(quickAddBar.getText().length());
+                    quickAddBar.setFocus();
+                }
+            }
+        });
         quickAddBar.addTraverseListener(new TraverseListener() {
             public void keyTraversed(TraverseEvent e) {
                 if (e.keyCode == SWT.CR) { // Enter to execute Command
@@ -113,6 +134,7 @@ public class QuickAddDialog extends Dialog {
             public void modifyText(ModifyEvent arg0) {
                 if (quickAddBar.getText().trim().isEmpty()) {
                     setStatus(MSG_EXECUTE);
+                    setSize(true);
                 }
             }
         });
@@ -123,10 +145,20 @@ public class QuickAddDialog extends Dialog {
         btnAdd.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
+                if (btnAdd.getText().equals(MSG_EXECUTE)) {
+                    executeCommand(quickAddBar.getText());
+                }
             }
         });
-        btnAdd.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
+        btnAdd.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
         btnAdd.setBounds(260, 5, 60, 30);
+        
+        txtResult = new Text(shell, SWT.BORDER | SWT.READ_ONLY | SWT.WRAP | SWT.V_SCROLL | SWT.MULTI);
+        txtResult.setEnabled(false);
+        txtResult.setBackground(SWTResourceManager.getColor(255, 255, 240));
+        txtResult.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
+        txtResult.setBounds(5, 40, 315, 125);
+        
         setStatus(MSG_EXECUTE);
     }
     
@@ -145,11 +177,15 @@ public class QuickAddDialog extends Dialog {
         try {
             switch (logic.getCommand()) {
                 case ADD_TASK:
-                    if (logic.addTask() != null) {
+                    Task newTask = logic.addTask();
+                    if (newTask != null) {
                         isModified = true;
                         setStatus(MSG_SUCCESS);
+                        setResult(newTask.toString());
+                        setSize(false);
                     } else {
                         setStatus(MSG_FAIL);
+                        setResult("");
                     }
                     break;
                 default:
@@ -158,6 +194,8 @@ public class QuickAddDialog extends Dialog {
             }
         } catch (Exception e) {
             setStatus(MSG_INVALID);
+            setResult(e.getMessage());
+            setSize(false);
         }
     }
     
@@ -183,6 +221,10 @@ public class QuickAddDialog extends Dialog {
         btnAdd.setText(str);
     }
     
+    private void setResult(String str) {
+        txtResult.setText(str);
+    }
+    
     private void center() {
         Rectangle parent = getParent().getBounds();
         Rectangle rect = shell.getBounds();
@@ -190,5 +232,4 @@ public class QuickAddDialog extends Dialog {
         int y = parent.y + (parent.height - rect.height) / 2;
         shell.setLocation(x, y);
     }
-
 }

@@ -177,7 +177,7 @@ public class Control {
 		String result = lists.addTask(newTask.getList(), newTask);
 		
 		// want to show the task details added; so assume it succeeds
-		result += ("\n  Task details:\n" + newTask.getDisplayTaskStr());
+		result += ("\n  Task details:\n" + newTask.toString());
 		
 		return result;
 	}
@@ -632,14 +632,14 @@ public class Control {
 			if(taskToDisplay == null){
 				return "Invalid task range in search result";
 			} else{
-				return taskToDisplay.getDisplayTaskStr();
+				return taskToDisplay.toString();
 			}
 		} else{	// when search result is null, use the current list
 			Task taskToDisplay = lists.getList(currentListName).getTask(taskNum);
 			if(taskToDisplay == null){
 				return "Invalid task range in current list: " + currentListName;
 			} else {
-				return taskToDisplay.getDisplayTaskStr();
+				return taskToDisplay.toString();
 			}
 			
 		}

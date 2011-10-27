@@ -114,7 +114,7 @@ Expected result is
             System.out.println(list.getKey());
             
             for (Task task : list.getValue()) {
-                System.out.println(task.getDisplayTaskStr());
+                System.out.println(task.toString());
             }
             
             System.out.println("--------------");
@@ -129,7 +129,7 @@ Expected result is
             System.out.println(tlist.getKey());
             
             for (Task task : tlist.getValue()) {
-                System.out.println(task.getDisplayTaskStr());
+                System.out.println(task.toString());
             }
             
             System.out.println("--------------");

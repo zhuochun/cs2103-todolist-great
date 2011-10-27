@@ -374,24 +374,13 @@ public class Task implements Comparable<Object> {
     public String toString() {
         StringBuilder str = new StringBuilder();
 
-        str.append(name);
-        str.append(" | ");
-        str.append(getPriorityStr());
-        str.append(" | ");
-        str.append(getStatusStr());
-
-        return str.toString();
-    }
-
-    public String getDisplayTaskStr() {
-        StringBuilder str = new StringBuilder();
-
-        addOutput(str, "Task:" + name, name);
-        addOutput(str, "Place: " + place, place);
-        addOutput(str, "Priority: " + getPriorityStr(), priority);
-        addOutput(str, "Date: " + getStartEndDate(), when.getStartDateTime());
-        addOutput(str, "Duration: " + getDurationStr(), when.getDurationStr());
+        addOutput(str, "Task: "     + name,               name);
+        addOutput(str, "Place: "    + place,              place);
+        addOutput(str, "Priority: " + getPriorityStr(),   priority);
+        addOutput(str, "Date: "     + getStartEndDate(),  when.getStartDateTime());
+        addOutput(str, "Duration: " + getDurationStr(),   when.getDurationStr());
         addOutput(str, "Deadline: " + getDeadlineShort(), when.getDeadline());
+        addOutput(str, "Status: "   + getStatusStr(),     getStatusStr());
 
         return str.toString();
     }
@@ -400,8 +389,8 @@ public class Task implements Comparable<Object> {
         if (obj == null) {
             return;
         }
-        str.append("\n");
         str.append(info);
+        str.append("\n");
     }
 
     @Override

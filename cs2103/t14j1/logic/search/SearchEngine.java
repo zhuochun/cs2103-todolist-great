@@ -20,7 +20,7 @@ public class SearchEngine {
     private Date     endDateTime;       // end date and time
     private Date     deadline;          // deadline date and time
     private Long     duration;          // duration of task
-    private boolean status;            // completed or not
+    private boolean  status;            // completed or not
     
     /**
      * ControlGUI will initial searchEngine and pass in a copy of the lists
@@ -48,9 +48,10 @@ public class SearchEngine {
     }
     
     /**
-     * perform the search according to the properties being set
+     * perform the search according to the properties that have been set
      * 
-     * @return the search result in TaskList, empty list if nothing found
+     * @return the search result as a TaskList object. If nothing is found, the TaskList
+     * contains 0 tasks.
      */
     public TaskList performSearch() {
         TaskList searchResult = new TaskList("Search Result");

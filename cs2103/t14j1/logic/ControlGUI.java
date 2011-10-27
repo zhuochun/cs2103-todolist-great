@@ -231,12 +231,13 @@ public class ControlGUI {
      * 1. The search properties can be set through GUI search dialog
      * 2. The search properties can be set through user command SEARCH
      * 
-     * @return the list of search result, empty list if nothing is found
+     * @return the list of search results, empty list if nothing is found
      */
     public TaskList getSearchResult() {
-        if (userCommand == Commands.SEARCH) {
-            setSearchProperties();
-        }
+        
+    	assert (userCommand == Commands.SEARCH);
+    	
+    	setSearchProperties();
         
         TaskList searchResult = searchEngine.performSearch();
         
@@ -249,9 +250,43 @@ public class ControlGUI {
     private void setSearchProperties() {
         
         // TODO: code here for properties setting
-        // TODO: finish the searchEngine class
         
-        searchEngine.setProperty(Search.NAME, "Hello"); // a eg to set properties
+    	String name        = parseCommand.extractTaskName();
+		String list        = parseCommand.extractListName();
+		Priority priority  = parseCommand.extractPriority();
+		String place 	   = parseCommand.extractPlace();
+		Date startDateTime = parseCommand.extractStartDate();
+		Date endDateTime   = parseCommand.extractEndDate();
+		Long startTime     = parseCommand.extractStartTime();
+		Long endTime       = parseCommand.extractEndTime();
+		Date deadline 	   = parseCommand.extractDeadlineDate();
+		Long deadlineTime  = parseCommand.extractDeadlineTime();
+		Long duration      = parseCommand.extractDuration();
+		boolean status     = parseCommand.extractStatus();
+		
+		convertLongTimeToDate(startDateTime, startTime);
+		convertLongTimeToDate(endDateTime, endTime);
+		convertLongTimeToDate(deadline, deadlineTime);
+		
+		Date afterDateTime = parseCommand.extractSearchAfterDate();
+		Long afterTime = parseCommand.extractSearchAfterTime();
+		convertLongTimeToDate(afterDateTime, afterTime);
+		
+		Date beforeDateTime = parseCommand.extractSearchBeforeDate();
+		Long beforeTime = parseCommand.extractSearchBeforeTime();
+		convertLongTimeToDate(beforeDateTime, beforeTime);
+		
+		searchEngine.setProperty(Search.NAME, name);
+		searchEngine.setProperty(Search.LIST, list);
+		searchEngine.setProperty(Search.PRIORITY, priority);
+		searchEngine.setProperty(Search.PLACE, place);
+		searchEngine.setProperty(Search.STARTDATETIME, startDateTime);
+		searchEngine.setProperty(Search.ENDDATETIME, endDateTime);
+		searchEngine.setProperty(Search.DEADLINE, deadline);
+		searchEngine.setProperty(Search.DURATION, duration);
+		searchEngine.setProperty(Search.STATUS, status);
+		searchEngine.setProperty(Search.AFTERDATETIME, afterDateTime);
+		searchEngine.setProperty(Search.BEFOREDATETIME, beforeDateTime);
     }
     
     /**

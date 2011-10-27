@@ -111,13 +111,13 @@ public class TaskMeter extends Shell {
             TaskMeter application = new TaskMeter(display);
             application.open();
             application.layout();
-            Process p = Runtime.getRuntime().exec("TaskMeterHotKeys.exe");
+            //Process p = Runtime.getRuntime().exec("TaskMeterHotKeys.exe");
             while (!application.isDisposed()) {
                 if (!display.readAndDispatch()) {
                     display.sleep();
                 }
             }
-            p.destroy();
+            //p.destroy();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -1161,7 +1161,7 @@ public class TaskMeter extends Shell {
         String feedback;
         
         if (newTask != null) {
-            feedback = String.format(ADD_SUCCESS, TASK, newTask.getName());
+            feedback = String.format(ADD_TASK_SUCCESS, newTask.getName(), newTask.getList());
             isModified = true;
 
             if (mode == MODE_LIST && newTask.getList().equals(currentList.getName())) {
@@ -1171,7 +1171,19 @@ public class TaskMeter extends Shell {
             feedback = String.format(ADD_FAIL, TASK);
         }
 
+        displayLists();
+        
+        switchTask(newTask.getList());
+        
         setStatusBar(feedback);
+    }
+    
+    private void switchTask(String listname) {
+        if (!listname.equals(currentList.getName())) {
+            switchList(listname);
+        }
+        
+        taskTable.setSelection(taskTable.getItemCount()-1);
     }
 
     private void editTask(int index) {
@@ -1422,6 +1434,7 @@ public class TaskMeter extends Shell {
     private static final String TOGGLE          = "Task \"%1$s\" is marked as %2$s";
     private static final String LIST_EXIST      = "List \"%1$s\" already exists";
     private static final String ADD_SUCCESS     = "%1$s \"%2$s\" is successfully added";
+    private static final String ADD_TASK_SUCCESS= "Task \"%1$s\" is successfully added to List \"%2$s\"";
     private static final String ADD_FAIL        = "New %1$s fail to be added";
     private static final String EDIT_SUCCESS    = "%1$s \"%2$s\" is successfully edited";
     private static final String DELETE_SUCCESS  = "%1$s \"%2$s\" is successfully deleted";

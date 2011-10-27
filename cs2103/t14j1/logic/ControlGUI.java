@@ -249,8 +249,6 @@ public class ControlGUI {
      */
     private void setSearchProperties() {
         
-        // TODO: code here for properties setting
-        
     	String name        = parseCommand.extractTaskName();
 		String list        = parseCommand.extractListName();
 		Priority priority  = parseCommand.extractPriority();

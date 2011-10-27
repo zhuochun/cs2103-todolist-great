@@ -157,6 +157,13 @@ public class ParseCommand {
 	private Time searchAfterTime;
 	private Calendar searchAfterDate;
 	
+	
+	// some magic string used in defining the property
+	private static final int EARLIEST_TIME	= 0;
+	private static final int LATEST_TIME	= 1;
+	private static final int CURRENT_TIME	= 2;
+	
+	
 	// fields for other commands
 	private Integer taskNum = null;
 		
@@ -944,7 +951,7 @@ public class ParseCommand {
 		// test match here
 		String taskStr = "Get up tomorrow";	// test time
 		
-		String testStr = "edit #luala";
+		String testStr = "add #luala by 3pm tomorrow";
 		
 		// for testing
 		BufferedReader in;
@@ -1009,20 +1016,8 @@ public class ParseCommand {
 
 
 	/**
-	 **** Zhuochun's Last Words: 
-	 * 
-	 * Yangyu, the following function names cannot be changed, only modify inside
-	 * and return the correct type
-	 * 
-	 * Zhuochun
-	 * 
-	 ****
-	 * Yangyu's Reply:
-	 *   We've only defined the "search task", "switch list", and "add task"
-	 *   Therefore I only support these 3 in this phase.
-	 * 
-	 ****
-	 * 
+	 * This is the first method to be called of the Parse Command
+	 * The Types of command are defined in Commands Enum 
 	 * @return the type of the Command for the Input String
 	 */
 	public Commands extractCommand() {
@@ -1082,7 +1077,7 @@ public class ParseCommand {
 	 * @param time
 	 * @return
 	 */
-	private static Date _extractDateHelper(Calendar date, Time time){
+	private static Date _extractDateHelper(Calendar date, Time time, int defaultTimeOnNull){
 		if(date == null){
 			return null;
 		}
@@ -1096,6 +1091,14 @@ public class ParseCommand {
 			setHour = (int) (definedTime/3600);
 			setMinute = (int) (definedTime%3600)/60;
 			setSecond = (int) (definedTime%60);
+		} else if(defaultTimeOnNull == EARLIEST_TIME){
+			setHour	= 0;
+			setMinute = 0;
+			setSecond = 0;
+		} else if(defaultTimeOnNull == LATEST_TIME){
+			setHour = 23;
+			setMinute = 59;
+			setSecond = 59;
 		}
 		
 		date.set(Calendar.HOUR_OF_DAY, setHour);
@@ -1120,7 +1123,7 @@ public class ParseCommand {
 		 *   we've discussed --), nor does Calendar... do I have to use the 
 		 *   seemingly depreciated "Date" class here.
 		 */
-		return _extractDateHelper(startDate,startTime);
+		return _extractDateHelper(startDate,startTime, CURRENT_TIME);
 	}
 	
 	/**
@@ -1131,8 +1134,8 @@ public class ParseCommand {
 	public Long extractDuration(){
 		
 		// call this two method to add the "time" to Date
-		_extractDateHelper(startDate,startTime);
-		_extractDateHelper(endDate,endTime);
+		_extractDateHelper(startDate,startTime,CURRENT_TIME);
+		_extractDateHelper(endDate,endTime,CURRENT_TIME);
 		
 		// when there is a duration already
 		// don't necessarily have a startDate, because sometimes the user only
@@ -1182,7 +1185,7 @@ public class ParseCommand {
 	 * 	The end date and time as a Date class 
 	 */
 	public Date extractEndDate() {
-		return _extractDateHelper(endDate, endTime);
+		return _extractDateHelper(endDate, endTime,CURRENT_TIME);
 	}
 	
 	public Long extractEndTime() {
@@ -1198,6 +1201,10 @@ public class ParseCommand {
 	 */
 	public Date extractDeadlineDate() {
 		
+		if(this.deadlineDate != null){
+			return _extractDateHelper(this.deadlineDate,this.deadlineTime,LATEST_TIME);
+		}
+		
 		// the only null case is when startDate is not specified
 		if(startDate == null){
 			return null;
@@ -1209,7 +1216,7 @@ public class ParseCommand {
 			deadlineTime.setTime((long)3600 * 24 -1);
 		}
 		
-		return _extractDateHelper(deadlineDate, deadlineTime);
+		return _extractDateHelper(deadlineDate, deadlineTime,LATEST_TIME);
 	}
 	
 	/**
@@ -1226,7 +1233,7 @@ public class ParseCommand {
 	
 	/* These four method are for search command only */
 	public Date extractSearchBeforeDate() {
-		return _extractDateHelper(searchBeforeDate, searchBeforeTime);
+		return _extractDateHelper(searchBeforeDate, searchBeforeTime,LATEST_TIME);
 	}
 	
 	
@@ -1235,7 +1242,7 @@ public class ParseCommand {
 	}
 	
 	public Date extractSearchAfterDate() {
-		return _extractDateHelper(searchAfterDate, searchAfterTime);
+		return _extractDateHelper(searchAfterDate, searchAfterTime,EARLIEST_TIME);
 	}
 	
 	public Long extractSearchAfterTime(){

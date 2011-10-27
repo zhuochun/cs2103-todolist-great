@@ -190,14 +190,7 @@ public class ControlGUI {
     		throw new Exception(oldListName + " does not exist");
     	}
     	
-    	TaskList newList = new TaskList(newListName);
-    	
-    	Iterator<Task> iterOldList = oldList.iterator();
-    	
-    	while(iterOldList.hasNext()) {
-    		Task task = iterOldList.next();
-    		newList.addTask(task);
-    	}
+    	oldList.setName(newListName);
     	
     	return true;
     }

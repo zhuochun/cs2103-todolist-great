@@ -21,6 +21,8 @@ public class SearchEngine {
     private Date     deadline;          // deadline date and time
     private Long     duration;          // duration of task
     private boolean  status;            // completed or not
+    private Date afterDateTime;			// If afterDateTime is specified, only tasks having date and time after afterDateTime will be included in the search results
+    private Date beforeDateTime;		// If beforeDateTime is specified, only tasks having date and time before beforeDateTime will be included in the search results
     
     /**
      * ControlGUI will initial searchEngine and pass in a copy of the lists
@@ -69,15 +71,40 @@ public class SearchEngine {
      */
     public void setProperty(Search property, Object value) {
         
-        // TODO: finish the switches
-        
         switch (property) {
             case NAME:
                 this.name = (String) value;
                 break;
             case PLACE:
-                
-                break;
+            	this.place = (String)value;
+            	break;
+            case LIST:
+            	this.list = (String)value;
+            	break;
+            case PRIORITY:
+            	this.priority = (Priority)value;
+            	break;
+            case STARTDATETIME:
+            	this.startDateTime = (Date)value;
+            	break;
+            case ENDDATETIME:
+            	this.endDateTime = (Date)value;
+            	break;
+            case DEADLINE:
+            	this.deadline = (Date)value;
+            	break;
+            case DURATION:
+            	this.duration = (Long)value;
+            	break;
+            case STATUS:
+            	this.status = (Boolean)value;
+            	break;
+            case AFTERDATETIME:
+            	this.afterDateTime = (Date)value;
+            	break;
+            case BEFOREDATETIME:
+            	this.beforeDateTime = (Date)value;
+            	break;
         }
         
     }

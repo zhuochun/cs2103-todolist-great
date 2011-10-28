@@ -12,17 +12,19 @@ import cs2103.t14j1.storage.Priority;
 import cs2103.t14j1.storage.Task;
 import cs2103.t14j1.storage.TaskList;
 
+/**
+ * test class for Reminder
+ * 
+ * @author Zhuochun
+ *
+ */
 public class ReminderTest {
     
-    private TaskList ls;
+    private TaskList       ls;
 
     @Before
     public void setUp() throws Exception {
         ls = new TaskList("ReminderTest");
-        
-        Date date = new Date();
-        
-        date.setTime(date.getTime() + 20000);
         
         // add task
         String name = "new task 1";
@@ -56,19 +58,26 @@ public class ReminderTest {
 
     @Test
     public void test() {
-        Reminder r = new Reminder();
+        Reminder r  = new Reminder();
+        Reminder r1 = new Reminder();
         
         Date date = new Date();
         
-        for (Task t : ls) {
-            date.setTime(date.getTime() + 9000);
-            r.addReminder(t, date);
-            System.out.println("set " + t.getName() + " on " + date.toString());
+        //for (Task t : ls) {
+            date.setTime(date.getTime() + 5000);
+            //r.addReminder(t, date);
+            r.addReminder(ls.getTask(1), date);
+            System.out.println("set " + ls.getTask(1).getName() + " on " + date.toString());
             System.out.println(r.getSize() + " reminders");
-        }
+            
+            date.setTime(date.getTime() + 5000);
+            r1.addReminder(ls.getTask(2), date);
+            System.out.println("set " + ls.getTask(1).getName() + " on " + date.toString());
+            System.out.println(r1.getSize() + " reminders");
+        //}
         
         try {
-            Thread.sleep(45000);
+            Thread.sleep(23000);
         } catch (InterruptedException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

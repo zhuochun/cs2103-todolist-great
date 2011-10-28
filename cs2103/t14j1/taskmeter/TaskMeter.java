@@ -41,6 +41,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 
 import cs2103.t14j1.logic.ControlGUI;
 import cs2103.t14j1.logic.DateFormat;
+import cs2103.t14j1.logic.reminder.Reminder;
 import cs2103.t14j1.storage.FileHandler;
 import cs2103.t14j1.storage.Priority;
 import cs2103.t14j1.storage.Task;
@@ -73,6 +74,7 @@ public class TaskMeter extends Shell {
     private TaskList   currentList;  // stores the current list in display
     private TaskList   searchResult; // stores the search result in display
     
+    private Reminder       reminder;     // reminder module
     private AutoComplete   autoComplete; // auto complete module for smartBar
     private QuickAddDialog quickAddView; // quick Add view, Ctrl + M to toggle between two views
     
@@ -212,6 +214,7 @@ public class TaskMeter extends Shell {
         
         // initial modules
         logic        = new ControlGUI(lists);
+        reminder     = new Reminder();
         autoComplete = new AutoComplete(lists);
         smartBar.setFocus();
         
@@ -437,7 +440,8 @@ public class TaskMeter extends Shell {
         mntmSearch.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                doSearch();
+                //doSearch();
+                addReminder(getSelectedIdx());
             }
         });
         mntmSearch.setText(getResourceString("find"));
@@ -1289,6 +1293,20 @@ public class TaskMeter extends Shell {
             isModified = true;
             refreshTask(index, task);
         } catch (IndexOutOfBoundsException e) {
+            feedback = e.getMessage();
+        }
+        
+        setStatusBar(feedback);
+    }
+
+    private void addReminder(int index) {
+        String feedback = null;
+        
+        try {
+            Task task = getIndexedTask(index);
+            reminder.addReminder(task, task.getStartDateTime());
+            feedback = "Reminder is set for task : " + task.getName();
+        } catch (Exception e) {
             feedback = e.getMessage();
         }
         

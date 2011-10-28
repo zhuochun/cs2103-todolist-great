@@ -5,13 +5,16 @@ import java.util.Date;
 import java.util.Timer;
 import java.util.TimerTask;
 
-import org.eclipse.swt.widgets.Shell;
-
 import cs2103.t14j1.storage.Task;
 
+/**
+ * a thread reminder of task
+ * 
+ * @author Zhuochun
+ */
 public class Reminder {
     
-    private final Shell      shell;
+    private ReminderDialog   dialog;
     private ArrayList<Timer> timers; // A list of timers
     
     /**
@@ -19,17 +22,9 @@ public class Reminder {
      * 
      * @param shell the shell of application
      */
-    public Reminder(Shell shell) {
-        this.shell  = shell;
-        this.timers = new ArrayList<Timer>();
-    }
-    
-    /**
-     * this constructor is for testing
-     */
     public Reminder() {
-        shell       = null;
         this.timers = new ArrayList<Timer>();
+        this.dialog = new ReminderDialog();
     }
     
     public Timer addReminder(Task task, Date date) {
@@ -83,6 +78,17 @@ public class Reminder {
             timer.cancel();
             
             timers.remove(timer);
+            
+            openDialog();
+        }
+    }
+    
+    void openDialog() {
+        try {
+            ReminderDialog window = new ReminderDialog();
+            window.open();
+        } catch (Exception e) {
+            e.printStackTrace();
         }
     }
 }

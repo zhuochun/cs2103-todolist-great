@@ -41,7 +41,6 @@ import org.eclipse.wb.swt.SWTResourceManager;
 
 import cs2103.t14j1.logic.ControlGUI;
 import cs2103.t14j1.logic.DateFormat;
-import cs2103.t14j1.logic.reminder.Reminder;
 import cs2103.t14j1.storage.FileHandler;
 import cs2103.t14j1.storage.Priority;
 import cs2103.t14j1.storage.Task;
@@ -74,7 +73,7 @@ public class TaskMeter extends Shell {
     private TaskList   currentList;  // stores the current list in display
     private TaskList   searchResult; // stores the search result in display
     
-    private Reminder       reminder;     // reminder module
+    private ReminderDialog reminder;     // reminder module
     private AutoComplete   autoComplete; // auto complete module for smartBar
     private QuickAddDialog quickAddView; // quick Add view, Ctrl + M to toggle between two views
     
@@ -214,12 +213,13 @@ public class TaskMeter extends Shell {
         
         // initial modules
         logic        = new ControlGUI(lists);
-        reminder     = new Reminder();
         autoComplete = new AutoComplete(lists);
         smartBar.setFocus();
         
         // initial quick Add View
         quickAddView = new QuickAddDialog(this, logic, autoComplete);
+        // initial reminder dialog
+        reminder     = new ReminderDialog(this);
     }
 
     /**
@@ -374,6 +374,18 @@ public class TaskMeter extends Shell {
         });
         mntmEditTask.setText(getResourceString("edit"));
         
+        final MenuItem mntmRemind = new MenuItem(menuEdit, SWT.NONE);
+        mntmRemind.setAccelerator(SWT.MOD1 + 'R');
+        mntmRemind.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                if (taskTable.isFocusControl() && taskTable.getSelectionCount() != 0) {
+                    addReminder(getSelectedIdx());
+                }
+            }
+        });
+        mntmRemind.setText(getResourceString("remind"));
+        
         final MenuItem mntmDeleteTask = new MenuItem(menuEdit, SWT.NONE);
         mntmDeleteTask.setAccelerator(SWT.DEL);
         mntmDeleteTask.addSelectionListener(new SelectionAdapter() {
@@ -440,8 +452,7 @@ public class TaskMeter extends Shell {
         mntmSearch.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                //doSearch();
-                addReminder(getSelectedIdx());
+                doSearch();
             }
         });
         mntmSearch.setText(getResourceString("find"));
@@ -1304,9 +1315,13 @@ public class TaskMeter extends Shell {
         
         try {
             Task task = getIndexedTask(index);
-            reminder.addReminder(task, task.getStartDateTime());
+            
+            reminder.addReminder(task.getStartDateTime(), task);
+            
             feedback = "Reminder is set for task : " + task.getName();
-        } catch (Exception e) {
+        } catch (NullPointerException e) {
+            feedback = e.getMessage();
+        } catch (IllegalArgumentException e) {
             feedback = e.getMessage();
         }
         

@@ -1094,6 +1094,8 @@ public class TaskMeter extends Shell {
             }
         } catch (NullPointerException e) {
             feedback = e.getMessage();
+        } catch (Exception e) {
+            feedback = e.getMessage();
         }
         
         setStatusBar(feedback);

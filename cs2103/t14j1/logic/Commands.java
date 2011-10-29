@@ -31,6 +31,17 @@ public enum Commands {
      * Syntax: [num] + [!1~3]
      */
     MARK_PRIORITY,
+    
+    /**
+     * Syntax: remind [id] [start|end|deadline|custom]
+     * 
+     * start    -> on StartDateTime
+     * end      -> on EndDateTime
+     * deadline -> on Deadline
+     * custom   -> according to user. eg remind 2 5 mins [later], remind 3:23pm etc..
+     * 
+     */
+    ADD_REMINDER,
 
     /**
      * Syntax: add [#list]

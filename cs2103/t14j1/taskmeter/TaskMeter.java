@@ -50,6 +50,7 @@ import cs2103.t14j1.storage.When;
 import cs2103.t14j1.storage.user.User;
 import cs2103.t14j1.taskmeter.autocomplete.AutoComplete;
 import cs2103.t14j1.taskmeter.quickadd.QuickAddDialog;
+import cs2103.t14j1.taskmeter.reminder.Reminder;
 import cs2103.t14j1.taskmeter.reminder.ReminderDialog;
 
 /**
@@ -68,7 +69,7 @@ public class TaskMeter extends Shell {
 
     private boolean   isModified;
     private int       mode;         // MODE_LIST and MODE_SEARCH for different events
-    private int       filter;       // Filter tasks display according to different filters
+    private Filter    filter;       // Filter tasks display according to different filters
     private int       lastSortColumn;
     
     private ControlGUI logic;        // the logic part center
@@ -89,21 +90,11 @@ public class TaskMeter extends Shell {
             getResourceString("table.duration"),
             getResourceString("table.status")
     };
-    private int[] columnWidths = { 25, 200, 70, 120, 70, 70, 75 };
+    private int[] columnWidths = { 25, 200, 70, 160, 80, 80, 85 };
     
     // 2 different modes
     private static final int MODE_LIST   = 0;
     private static final int MODE_SEARCH = 1;
-    
-    // 8 different filters
-    private static final int FILTER_ALL          = 0;
-    private static final int FILTER_IMPORTANT    = 1;
-    private static final int FILTER_COMPLETED    = 2;
-    private static final int FILTER_OVERDUE      = 3;
-    private static final int FILTER_TODAY        = 4;
-    private static final int FILTER_TOMORROW     = 5;
-    private static final int FILTER_NEXT_DAYS    = 6;
-    private static final int FILTER_WITHOUT_DATE = 7;
     
     /**
      * Launch the application.
@@ -204,7 +195,7 @@ public class TaskMeter extends Shell {
         // initial variables
         isModified = false;
         mode       = MODE_LIST;
-        filter     = FILTER_ALL;
+        filter     = Filter.FILTER_ALL;
         
         // initial lists from files
         lists = new TaskLists();
@@ -384,7 +375,11 @@ public class TaskMeter extends Shell {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 if (isTasksFocus()) {
-                    addReminder(getSelectedIdx());
+                    int index = getSelectedIdx();
+                    if (getIndexedTask(index).getReminder() == null)
+                        addReminder(getSelectedIdx(), Reminder.START);
+                    else
+                        removeReminder(index);
                 }
             }
         });
@@ -681,9 +676,9 @@ public class TaskMeter extends Shell {
         btnAll.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                filter = FILTER_ALL;
+                filter = Filter.FILTER_ALL;
                 displayTasks();
-                setStatusBar(String.format(FILTER, getResourceString("filter.all")));
+                setStatusBar(String.format(getResourceString("msg.FILTER"), getResourceString("filter.all")));
             }
         });
         btnAll.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
@@ -693,9 +688,9 @@ public class TaskMeter extends Shell {
         btnImportant.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                filter = FILTER_IMPORTANT;
+                filter = Filter.FILTER_IMPORTANT;
                 displayTasks();
-                setStatusBar(String.format(FILTER, getResourceString("filter.important")));
+                setStatusBar(String.format(getResourceString("msg.FILTER"), getResourceString("filter.important")));
             }
         });
         btnImportant.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
@@ -705,9 +700,9 @@ public class TaskMeter extends Shell {
         btnCompleted.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                filter = FILTER_COMPLETED;
+                filter = Filter.FILTER_COMPLETED;
                 displayTasks();
-                setStatusBar(String.format(FILTER, getResourceString("filter.completed")));
+                setStatusBar(String.format(getResourceString("msg.FILTER"), getResourceString("filter.completed")));
             }
         });
         btnCompleted.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
@@ -717,9 +712,9 @@ public class TaskMeter extends Shell {
         btnOverdue.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                filter = FILTER_OVERDUE;
+                filter = Filter.FILTER_OVERDUE;
                 displayTasks();
-                setStatusBar(String.format(FILTER, getResourceString("filter.overdue")));
+                setStatusBar(String.format(getResourceString("msg.FILTER"), getResourceString("filter.overdue")));
             }
         });
         btnOverdue.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
@@ -733,9 +728,9 @@ public class TaskMeter extends Shell {
         btnToday.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                filter = FILTER_TODAY;
+                filter = Filter.FILTER_TODAY;
                 displayTasks();
-                setStatusBar(String.format(FILTER, getResourceString("filter.today")));
+                setStatusBar(String.format(getResourceString("msg.FILTER"), getResourceString("filter.today")));
             }
         });
         btnToday.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
@@ -745,9 +740,9 @@ public class TaskMeter extends Shell {
         btnTomorrow.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                filter = FILTER_TOMORROW;
+                filter = Filter.FILTER_TOMORROW;
                 displayTasks();
-                setStatusBar(String.format(FILTER, getResourceString("filter.tomorrow")));
+                setStatusBar(String.format(getResourceString("msg.FILTER"), getResourceString("filter.tomorrow")));
             }
         });
         btnTomorrow.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
@@ -757,9 +752,9 @@ public class TaskMeter extends Shell {
         btnNextDays.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                filter = FILTER_NEXT_DAYS;
+                filter = Filter.FILTER_NEXT_DAYS;
                 displayTasks();
-                setStatusBar(String.format(FILTER, getResourceString("filter.custom")));
+                setStatusBar(String.format(getResourceString("msg.FILTER"), getResourceString("filter.custom")));
             }
         });
         btnNextDays.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
@@ -769,9 +764,9 @@ public class TaskMeter extends Shell {
         btnWithoutDate.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                filter = FILTER_WITHOUT_DATE;
+                filter = Filter.FILTER_WITHOUT_DATE;
                 displayTasks();
-                setStatusBar(String.format(FILTER, getResourceString("filter.nodate")));
+                setStatusBar(String.format(getResourceString("msg.FILTER"), getResourceString("filter.nodate")));
             }
         });
         btnWithoutDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
@@ -812,6 +807,9 @@ public class TaskMeter extends Shell {
                     break;
                 case EDIT_TASK:
                     editTask(logic.getTaskIdx());
+                    break;
+                case ADD_REMINDER:
+                    addReminder(logic.getTaskIdx(), logic.getReminderParameter());
                     break;
                 case MARK_COMPLETE:
                     toggleStatus(logic.getTaskIdx());
@@ -948,16 +946,16 @@ public class TaskMeter extends Shell {
      * filter tasks according to different filters
      */
     private void filterTask(int idx, Task task) {
-        if (filter == FILTER_ALL) {
+        if (filter == Filter.FILTER_ALL) {
             displayNewTask(idx, task);
-        } else if (filter == FILTER_IMPORTANT && task.getPriority() == Priority.IMPORTANT) {
+        } else if (filter == Filter.FILTER_IMPORTANT && task.getPriority() == Priority.IMPORTANT) {
             displayNewTask(idx, task);
-        } else if (filter == FILTER_COMPLETED && task.isCompleted()) {
+        } else if (filter == Filter.FILTER_COMPLETED && task.isCompleted()) {
             displayNewTask(idx, task);
-        } else if (filter == FILTER_OVERDUE && !task.isCompleted()
+        } else if (filter == Filter.FILTER_OVERDUE && !task.isCompleted()
                 && task.compareDeadline(DateFormat.getNow()) < 0) {
             displayNewTask(idx, task);
-        } else if (filter == FILTER_TODAY) {
+        } else if (filter == Filter.FILTER_TODAY) {
             Calendar now = Calendar.getInstance();
             When.clear(now, When.CLEAR_BELOW_HOUR);
             
@@ -967,7 +965,7 @@ public class TaskMeter extends Shell {
             if (task.isWithinPeriod(todayStart, todayEnd)) {
                 displayNewTask(idx, task);
             }
-        } else if (filter == FILTER_TOMORROW) {
+        } else if (filter == Filter.FILTER_TOMORROW) {
             Calendar now = Calendar.getInstance();
             When.clear(now, When.CLEAR_BELOW_HOUR);
             
@@ -977,7 +975,7 @@ public class TaskMeter extends Shell {
             if (task.isWithinPeriod(tmlStart, tmlEnd)) {
                 displayNewTask(idx, task);
             }
-        } else if (filter == FILTER_NEXT_DAYS) {
+        } else if (filter == Filter.FILTER_NEXT_DAYS) {
             Calendar now = Calendar.getInstance();
             When.clear(now, When.CLEAR_BELOW_HOUR);
             
@@ -987,7 +985,7 @@ public class TaskMeter extends Shell {
             if (task.isWithinPeriod(weekStart, weekEnd)) {
                 displayNewTask(idx, task);
             }
-        } else if (filter == FILTER_WITHOUT_DATE && task.getStartDateTime() == null) {
+        } else if (filter == Filter.FILTER_WITHOUT_DATE && task.getStartDateTime() == null) {
             displayNewTask(idx, task);
         }
     }
@@ -1004,7 +1002,7 @@ public class TaskMeter extends Shell {
             displayLists();
             displayTasks(searchResult);
             
-            setStatusBar(String.format(SEARCH_RESULT, searchResult.getSize()));
+            setStatusBar(String.format(getResourceString("msg.SEARCH_RESULT"), searchResult.getSize()));
         }
     }
     
@@ -1109,11 +1107,11 @@ public class TaskMeter extends Shell {
         
         try {
             if (lists.addList(newList)) {
-                feedback = String.format(ADD_SUCCESS, LIST, newList);
+                feedback = String.format(getResourceString("msg.ADD_SUCCESS"), "LIST", newList);
                 displayNewList(newList);
                 isModified = true;
             } else {
-                feedback = String.format(LIST_EXIST, newList);
+                feedback = String.format(getResourceString("msg.LIST_EXIST"), newList);
             }
         } catch (NullPointerException e) {
             feedback = e.getMessage();
@@ -1145,9 +1143,9 @@ public class TaskMeter extends Shell {
                 
                 displayLists();
                 
-                feedback = String.format(RENAME_LIST, oldName, newName);
+                feedback = String.format(getResourceString("msg.RENAME_LIST"), oldName, newName);
             } else {
-                feedback = String.format(RENAME_LIST_FAIL, oldName);
+                feedback = String.format(getResourceString("msg.RENAME_LIST_FAIL"), oldName);
             }
         } catch (NullPointerException e) {
             feedback = e.getMessage();
@@ -1173,9 +1171,9 @@ public class TaskMeter extends Shell {
                 
                 refreshDisplay();
                 
-                feedback = String.format(DELETE_SUCCESS, LIST, name);
+                feedback = String.format(getResourceString("msg.DELETE_SUCCESS"), "LIST", name);
             } else {
-                feedback = String.format(DELETE_FAIL, LIST);
+                feedback = String.format(getResourceString("msg.DELETE_FAIL"), "LIST");
             }
         } catch (Exception e) {
             feedback = e.getMessage();
@@ -1207,9 +1205,9 @@ public class TaskMeter extends Shell {
         displayCurrentList(name);
         displayLists();
 
-        filter = FILTER_ALL;
+        filter = Filter.FILTER_ALL;
 
-        setStatusBar(String.format(SWITCH_LIST, name));
+        setStatusBar(String.format(getResourceString("msg.SWITCH_LIST"), name));
     }
 
     /**
@@ -1237,14 +1235,14 @@ public class TaskMeter extends Shell {
         String feedback;
         
         if (newTask != null) {
-            feedback = String.format(ADD_TASK_SUCCESS, newTask.getName(), newTask.getList());
+            feedback = String.format(getResourceString("msg.ADD_TASK_SUCCESS"), newTask.getName(), newTask.getList());
             isModified = true;
 
             if (mode == MODE_LIST && newTask.getList().equals(currentList.getName())) {
                 displayNewTask(taskTable.getItemCount()+1, newTask);
             }
         } else {
-            feedback = String.format(ADD_FAIL, TASK);
+            feedback = String.format(getResourceString("msg.ADD_FAIL"), "TASK");
         }
 
         displayLists();
@@ -1275,9 +1273,9 @@ public class TaskMeter extends Shell {
             if (dialog.open()) {
                 refreshTask(index, task);
                 isModified = true;
-                feedback = String.format(EDIT_SUCCESS, TASK, task.getName());
+                feedback = String.format(getResourceString("msg.EDIT_SUCCESS"), "TASK", task.getName());
             } else {
-                feedback = String.format(VIEW_TASK, task.getName());
+                feedback = String.format(getResourceString("msg.VIEW_TASK"), task.getName());
             }
         } catch (IndexOutOfBoundsException e) {
             feedback = e.getMessage();
@@ -1302,11 +1300,11 @@ public class TaskMeter extends Shell {
             }
             
             if (success) {
-                feedback = String.format(DELETE_SUCCESS, TASK, delTask.getName());
+                feedback = String.format(getResourceString("msg.DELETE_SUCCESS"), "TASK", delTask.getName());
                 isModified = true;
                 displayTasks();
             } else {
-                feedback = String.format(DELETE_FAIL, TASK);
+                feedback = String.format(getResourceString("msg.DELETE_FAIL"), "TASK");
             }
         } catch (IndexOutOfBoundsException e) {
             feedback = e.getMessage();
@@ -1325,10 +1323,10 @@ public class TaskMeter extends Shell {
             
             if (task.isCompleted()) {
                 task.setStatus(Task.INCOMPLETE);
-                feedback = String.format(TOGGLE, task.getName(), task.getStatusStr());
+                feedback = String.format(getResourceString("msg.TOGGLE"), task.getName(), task.getStatusStr());
             } else {
                 task.setStatus(Task.COMPLETED);
-                feedback = String.format(TOGGLE, task.getName(), task.getStatusStr());
+                feedback = String.format(getResourceString("msg.TOGGLE"), task.getName(), task.getStatusStr());
             }
             
             isModified = true;
@@ -1347,7 +1345,7 @@ public class TaskMeter extends Shell {
             Task task = getIndexedTask(index);
             
             task.setPriority(newPriority);
-            feedback = String.format(TOGGLE, task.getName(), task.getPriorityStr());
+            feedback = String.format(getResourceString("msg.TOGGLE"), task.getName(), task.getPriorityStr());
             
             isModified = true;
             refreshTask(index, task);
@@ -1358,15 +1356,35 @@ public class TaskMeter extends Shell {
         setStatusBar(feedback);
     }
 
-    private void addReminder(int index) {
+    private void addReminder(int index, Reminder parameter) {
         String feedback = null;
         
         try {
             Task task = getIndexedTask(index);
             
-            reminder.addReminder(task.getStartDateTime(), task);
+            Date remindTime = null;
+
+            switch (parameter) {
+                case START:
+                    remindTime = task.getStartDateTime();
+                    break;
+                case END:
+                    remindTime = task.getEndDateTime();
+                    break;
+                case DEADLINE:
+                    remindTime = task.getDeadline();
+                    break;
+                case CUSTOM:
+                    remindTime = logic.getReminderTime();
+                    break;
+            }
+
+            reminder.addReminder(remindTime, task);
             
-            feedback = "Reminder is set for task \"" + task.getName() + "\" on " + task.getStartShort();
+            refreshTask(index, task);
+            isModified = true;
+            
+            feedback = String.format(getResourceString("msg.ADD_REMINDER"), task.getName(), DateFormat.dateToStrShort(remindTime));
         } catch (NullPointerException e) {
             feedback = e.getMessage();
         } catch (IllegalArgumentException e) {
@@ -1375,7 +1393,33 @@ public class TaskMeter extends Shell {
         
         setStatusBar(feedback);
     }
-
+    
+    private void removeReminder(int index) {
+        String feedback = null;
+        
+        try {
+            Task task = getIndexedTask(index);
+            
+            boolean success = reminder.removeReminder(task);
+            
+            if (success) {
+                isModified = true;
+                
+                refreshTask(index, task);
+                
+                feedback = String.format("Reminder for task \"%1$s\" is successfully removed", task.getName());
+            } else {
+                feedback = "Failed to remove reminder";
+            }
+        } catch (NullPointerException e) {
+            feedback = e.getMessage();
+        } catch (IllegalArgumentException e) {
+            feedback = e.getMessage();
+        }
+        
+        setStatusBar(feedback);
+    }
+    
     /**
      * open searchDialog that get user's search
      */
@@ -1493,6 +1537,11 @@ public class TaskMeter extends Shell {
             item.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLACK));
             item.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
         }
+        
+        // TODO: color will not cleared when reminder has cleared before refresh the tasks again
+        if (task.getReminder() != null) {
+            item.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLUE));
+        }
     }
     
     /**
@@ -1531,22 +1580,4 @@ public class TaskMeter extends Shell {
     protected void checkSubclass() {
         // Disable the check that prevents subclassing of SWT components
     }
-    
-    /* messages */
-    private static final String LIST            = "List";
-    private static final String TASK            = "Task";
-    private static final String TOGGLE          = "Task \"%1$s\" is marked as %2$s";
-    private static final String LIST_EXIST      = "List \"%1$s\" already exists";
-    private static final String ADD_SUCCESS     = "%1$s \"%2$s\" is successfully added";
-    private static final String ADD_TASK_SUCCESS= "Task \"%1$s\" is successfully added to List \"%2$s\"";
-    private static final String ADD_FAIL        = "New %1$s fail to be added";
-    private static final String EDIT_SUCCESS    = "%1$s \"%2$s\" is successfully edited";
-    private static final String DELETE_SUCCESS  = "%1$s \"%2$s\" is successfully deleted";
-    private static final String DELETE_FAIL     = "%1$s fail to delete";
-    private static final String SEARCH_RESULT   = "%1$d task(s) have been found";
-    private static final String SWITCH_LIST     = "Current list : %1$s";
-    private static final String VIEW_TASK       = "View task : %1$s";
-    private static final String RENAME_LIST     = "List \"%1$s\" is renamed to \"%2$s\"";
-    private static final String RENAME_LIST_FAIL= "Rename List \"%1$s\" is failed";
-    private static final String FILTER          = "Filter tasks : %1$s";
 }

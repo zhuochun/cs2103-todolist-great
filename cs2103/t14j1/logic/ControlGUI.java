@@ -9,6 +9,7 @@ import cs2103.t14j1.storage.Priority;
 import cs2103.t14j1.storage.Task;
 import cs2103.t14j1.storage.TaskList;
 import cs2103.t14j1.storage.TaskLists;
+import cs2103.t14j1.taskmeter.reminder.Reminder;
 
 public class ControlGUI {
     
@@ -308,7 +309,15 @@ public class ControlGUI {
 		return parseCommand.extractNewListName();
 		
 	}
-	
-	
+
+    public Reminder getReminderParameter() {
+        // TODO Auto-generated method stub
+        return Reminder.START; // be default return START, do not return null
+    }
+
+    public Date getReminderTime() {
+        // TODO Auto-generated method stub
+        return null;
+    }
     
 }

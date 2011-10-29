@@ -113,6 +113,10 @@ public class TaskList implements Iterable<Task> {
         
         return tasks.remove(task);
     }
+    
+    public boolean hasTask(Task task) {
+        return tasks.contains(task);
+    }
 
     /**
      * index start from 1

@@ -19,6 +19,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 
 import cs2103.t14j1.logic.ControlGUI;
 import cs2103.t14j1.storage.Task;
+import cs2103.t14j1.taskmeter.TaskMeter;
 import cs2103.t14j1.taskmeter.autocomplete.AutoComplete;
 
 public class QuickAddDialog extends Dialog {
@@ -95,8 +96,7 @@ public class QuickAddDialog extends Dialog {
     private void createContents() {
         shell = new Shell(getParent(), SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
         setSize(true);
-        shell.setText("TaskMeter Quick Add");
-        
+        shell.setText(TaskMeter.getResourceString("QuickAddDialog.title")); 
         
         quickAddBar = new Text(shell, SWT.BORDER);
         quickAddBar.addKeyListener(new KeyAdapter() {

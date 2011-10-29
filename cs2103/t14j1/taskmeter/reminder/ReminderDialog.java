@@ -19,6 +19,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 import cs2103.t14j1.logic.DateFormat;
 import cs2103.t14j1.storage.Task;
 import cs2103.t14j1.storage.TaskList;
+import cs2103.t14j1.taskmeter.TaskMeter;
 
 /**
  * a concurrent reminder
@@ -123,7 +124,7 @@ public class ReminderDialog extends Dialog {
      */
     private void createContents() {
         shell.setSize(325, 330);
-        shell.setText("Reminder - TaskMeter");
+        shell.setText(TaskMeter.getResourceString("ReminderDialog.title"));
         shell.setLayout(new GridLayout(1, false));
         
         lblRemindMe = new Label(shell, SWT.NONE);

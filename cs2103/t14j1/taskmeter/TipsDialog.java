@@ -1,8 +1,5 @@
 package cs2103.t14j1.taskmeter;
 
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
-
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -21,7 +18,6 @@ import cs2103.t14j1.storage.user.Helps;
 
 public class TipsDialog extends Dialog {
 
-    private static ResourceBundle resourceBundle = ResourceBundle.getBundle("taskmeter_res");
     protected Shell shell;
     
     private Text txtText;
@@ -35,7 +31,7 @@ public class TipsDialog extends Dialog {
      */
     public TipsDialog(Shell parent) {
         super(parent, SWT.NONE);
-        setText(getResourceString("TipsDialog.title"));
+        setText(TaskMeter.getResourceString("TipsDialog.title"));
     }
 
     /**
@@ -129,19 +125,5 @@ public class TipsDialog extends Dialog {
         int x = parent.x + (parent.width - rect.width) / 2;
         int y = parent.y + (parent.height - rect.height) / 2;
         shell.setLocation(x, y);
-    }
-
-    /**
-     * Returns a string from the resource bundle. We don't want to crash because
-     * of a missing String. Returns the key if not found.
-     */
-    public static String getResourceString(String key) {
-        try {
-            return resourceBundle.getString(key);
-        } catch (MissingResourceException e) {
-            return key;
-        } catch (NullPointerException e) {
-            return "!" + key + "!";
-        }
     }
 }

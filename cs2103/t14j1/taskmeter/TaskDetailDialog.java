@@ -2,8 +2,6 @@ package cs2103.t14j1.taskmeter;
 
 import java.util.Calendar;
 import java.util.Date;
-import java.util.MissingResourceException;
-import java.util.ResourceBundle;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
@@ -32,7 +30,6 @@ import cs2103.t14j1.storage.When;
  */
 public class TaskDetailDialog extends Dialog {
 
-    private static ResourceBundle resourceBundle = ResourceBundle.getBundle("taskmeter_res");
     protected Shell    shell;
     private Task       task;
     private int        mode;
@@ -68,9 +65,9 @@ public class TaskDetailDialog extends Dialog {
         mode = choice;
 
         if (mode == ADD_TASK) {
-            setText(getResourceString("taskDetailDialog.new.title"));
+            setText(TaskMeter.getResourceString("taskDetailDialog.new.title"));
         } else {
-            setText(getResourceString("taskDetailDialog.title"));
+            setText(TaskMeter.getResourceString("taskDetailDialog.title"));
         }
 
         task = new Task();
@@ -122,7 +119,7 @@ public class TaskDetailDialog extends Dialog {
         lblWhere.setAlignment(SWT.RIGHT);
         lblWhere.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
         lblWhere.setBounds(10, 131, 50, 25);
-        lblWhere.setText(getResourceString("taskDetailDialog.where"));
+        lblWhere.setText(TaskMeter.getResourceString("taskDetailDialog.where"));
 
         txtWhere = new Text(shell, SWT.BORDER);
         txtWhere.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
@@ -133,7 +130,7 @@ public class TaskDetailDialog extends Dialog {
         lblList.setAlignment(SWT.RIGHT);
         lblList.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
         lblList.setBounds(10, 160, 50, 25);
-        lblList.setText(getResourceString("taskDetailDialog.list"));
+        lblList.setText(TaskMeter.getResourceString("taskDetailDialog.list"));
 
         txtList = new Text(shell, SWT.BORDER);
         txtList.setEnabled(false);
@@ -156,7 +153,7 @@ public class TaskDetailDialog extends Dialog {
         });
         btnSave.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
         btnSave.setBounds(230, 254, 80, 30);
-        btnSave.setText(getResourceString("button.save"));
+        btnSave.setText(TaskMeter.getResourceString("button.save"));
 
         Button btnClose = new Button(shell, SWT.NONE);
         btnClose.addSelectionListener(new SelectionAdapter() {
@@ -168,7 +165,7 @@ public class TaskDetailDialog extends Dialog {
         });
         btnClose.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
         btnClose.setBounds(315, 254, 75, 30);
-        btnClose.setText(getResourceString("button.cancel"));
+        btnClose.setText(TaskMeter.getResourceString("button.cancel"));
 
     }
 
@@ -265,7 +262,7 @@ public class TaskDetailDialog extends Dialog {
         lblPriority.setAlignment(SWT.RIGHT);
         lblPriority.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
         lblPriority.setBounds(10, 191, 50, 25);
-        lblPriority.setText(getResourceString("taskDetailDialog.priority"));
+        lblPriority.setText(TaskMeter.getResourceString("taskDetailDialog.priority"));
 
         cboPriority = new Combo(shell, SWT.READ_ONLY);
         cboPriority.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
@@ -277,7 +274,7 @@ public class TaskDetailDialog extends Dialog {
         lblStatus.setAlignment(SWT.RIGHT);
         lblStatus.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
         lblStatus.setBounds(10, 222, 50, 22);
-        lblStatus.setText(getResourceString("taskDetailDialog.status"));
+        lblStatus.setText(TaskMeter.getResourceString("taskDetailDialog.status"));
 
         cboStatus = new Combo(shell, SWT.READ_ONLY);
         cboStatus.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
@@ -441,19 +438,5 @@ public class TaskDetailDialog extends Dialog {
         int x = parent.x + (parent.width - rect.width) / 2;
         int y = parent.y + (parent.height - rect.height) / 2;
         shell.setLocation(x, y);
-    }
-
-    /**
-     * Returns a string from the resource bundle. We don't want to crash because
-     * of a missing String. Returns the key if not found.
-     */
-    private static String getResourceString(String key) {
-        try {
-            return resourceBundle.getString(key);
-        } catch (MissingResourceException e) {
-            return key;
-        } catch (NullPointerException e) {
-            return "!" + key + "!";
-        }
     }
 }

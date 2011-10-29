@@ -48,6 +48,8 @@ import cs2103.t14j1.storage.TaskList;
 import cs2103.t14j1.storage.TaskLists;
 import cs2103.t14j1.storage.When;
 import cs2103.t14j1.taskmeter.autocomplete.AutoComplete;
+import cs2103.t14j1.taskmeter.quickadd.QuickAddDialog;
+import cs2103.t14j1.taskmeter.reminder.ReminderDialog;
 
 /**
  * TaskMeter Main Graphic User Interface
@@ -1318,7 +1320,7 @@ public class TaskMeter extends Shell {
             
             reminder.addReminder(task.getStartDateTime(), task);
             
-            feedback = "Reminder is set for task : " + task.getName();
+            feedback = "Reminder is set for task \"" + task.getName() + "\" on " + task.getStartShort();
         } catch (NullPointerException e) {
             feedback = e.getMessage();
         } catch (IllegalArgumentException e) {

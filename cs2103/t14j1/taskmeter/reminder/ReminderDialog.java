@@ -1,4 +1,4 @@
-package cs2103.t14j1.taskmeter;
+package cs2103.t14j1.taskmeter.reminder;
 
 import java.util.ArrayList;
 import java.util.Date;
@@ -31,6 +31,7 @@ public class ReminderDialog extends Dialog {
     protected final Shell shell;
     private final Display display;
     private Text txtDisplay;
+    private Label lblRemindMe;
     
     private ArrayList<ReminderTask> reminders;
     
@@ -42,12 +43,14 @@ public class ReminderDialog extends Dialog {
     public ReminderDialog(Shell parent) {
         super(parent, SWT.NONE);
         
-        shell = new Shell(getParent(), SWT.DIALOG_TRIM | SWT.RESIZE);
+        shell = new Shell(getParent(), SWT.DIALOG_TRIM | SWT.RESIZE | SWT.APPLICATION_MODAL);
         shell.addShellListener(new ShellAdapter() {
             @Override
             public void shellClosed(ShellEvent e) {
                 e.doit = false;
                 shell.setVisible(false);
+                setLabel("Reminder");
+                setDisplay("");
             }
         });
         shell.layout();
@@ -59,7 +62,6 @@ public class ReminderDialog extends Dialog {
     }
     
     public void open() {
-        
         shell.open();
     }
 
@@ -94,7 +96,7 @@ public class ReminderDialog extends Dialog {
         shell.setText("Reminder - TaskMeter");
         shell.setLayout(new GridLayout(1, false));
         
-        Label lblRemindMe = new Label(shell, SWT.NONE);
+        lblRemindMe = new Label(shell, SWT.NONE);
         lblRemindMe.setForeground(SWTResourceManager.getColor(165, 42, 42));
         lblRemindMe.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
         lblRemindMe.setFont(SWTResourceManager.getFont("Segoe UI", 14, SWT.NORMAL));
@@ -109,6 +111,10 @@ public class ReminderDialog extends Dialog {
     
     public void setDisplay(String str) {
         txtDisplay.setText(str);
+    }
+    
+    public void setLabel(String str) {
+        lblRemindMe.setText(str);
     }
     
     /**
@@ -129,15 +135,15 @@ public class ReminderDialog extends Dialog {
         
         public ReminderTask (Date date, Task task) {
             tasks = new TaskList("Reminder on " + date.toString());
-            
-            remindTime = date;
             tasks.addTask(task);
+            remindTime = date;
         }
         
         public void setReminder() {
             runnable = new Runnable() {
                 public void run() {
                     setDisplay(getDisplayStr());
+                    setLabel(getLabelStr());
                     
                     if (shell.isVisible()) {
                         shell.setFocus();
@@ -187,6 +193,21 @@ public class ReminderDialog extends Dialog {
             for (int i = 2; i <= tasks.getSize(); i++) {
                 str.append("=========================\n");
                 str.append(tasks.getTask(i).toString());
+            }
+            
+            return str.toString();
+        }
+        
+        private String getLabelStr() {
+            StringBuilder str = new StringBuilder();
+            
+            str.append("You have ");
+            str.append(tasks.getSize());
+            
+            if (tasks.getSize() == 1) {
+                str.append(" reminder:");
+            } else {
+                str.append(" reminders:");
             }
             
             return str.toString();

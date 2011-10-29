@@ -260,7 +260,7 @@ public class ControlGUI {
 		Date deadline 	   = parseCommand.extractDeadlineDate();
 		Long deadlineTime  = parseCommand.extractDeadlineTime();
 		Long duration      = parseCommand.extractDuration();
-		boolean status     = parseCommand.extractStatus();
+		Boolean status     = parseCommand.extractStatus();
 		
 		convertLongTimeToDate(startDateTime, startTime);
 		convertLongTimeToDate(endDateTime, endTime);

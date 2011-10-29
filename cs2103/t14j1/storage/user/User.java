@@ -2,8 +2,11 @@ package cs2103.t14j1.storage.user;
 
 public class User {
     
-    private static String name = "default";
+    private static String  name = "default";
     private static boolean isFirstTime = false;
+    
+    // Settings
+    public static boolean performAutoComplete = true;
     
     // Exception Strings
     private static final String EXCEPTION_EMPTY_NAME = "User name cannot be null or empty";

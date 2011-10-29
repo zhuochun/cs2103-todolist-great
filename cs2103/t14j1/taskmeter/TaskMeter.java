@@ -48,6 +48,8 @@ import cs2103.t14j1.storage.TaskList;
 import cs2103.t14j1.storage.TaskLists;
 import cs2103.t14j1.storage.When;
 import cs2103.t14j1.taskmeter.autocomplete.AutoComplete;
+import cs2103.t14j1.taskmeter.quickadd.QuickAddDialog;
+import cs2103.t14j1.taskmeter.reminder.ReminderDialog;
 
 /**
  * TaskMeter Main Graphic User Interface
@@ -73,6 +75,7 @@ public class TaskMeter extends Shell {
     private TaskList   currentList;  // stores the current list in display
     private TaskList   searchResult; // stores the search result in display
     
+    private ReminderDialog reminder;     // reminder module
     private AutoComplete   autoComplete; // auto complete module for smartBar
     private QuickAddDialog quickAddView; // quick Add view, Ctrl + M to toggle between two views
     
@@ -217,6 +220,8 @@ public class TaskMeter extends Shell {
         
         // initial quick Add View
         quickAddView = new QuickAddDialog(this, logic, autoComplete);
+        // initial reminder dialog
+        reminder     = new ReminderDialog(this);
     }
 
     /**
@@ -370,6 +375,18 @@ public class TaskMeter extends Shell {
             }
         });
         mntmEditTask.setText(getResourceString("edit"));
+        
+        final MenuItem mntmRemind = new MenuItem(menuEdit, SWT.NONE);
+        mntmRemind.setAccelerator(SWT.MOD1 + 'R');
+        mntmRemind.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                if (taskTable.isFocusControl() && taskTable.getSelectionCount() != 0) {
+                    addReminder(getSelectedIdx());
+                }
+            }
+        });
+        mntmRemind.setText(getResourceString("remind"));
         
         final MenuItem mntmDeleteTask = new MenuItem(menuEdit, SWT.NONE);
         mntmDeleteTask.setAccelerator(SWT.DEL);
@@ -1094,6 +1111,8 @@ public class TaskMeter extends Shell {
             }
         } catch (NullPointerException e) {
             feedback = e.getMessage();
+        } catch (Exception e) {
+            feedback = e.getMessage();
         }
         
         setStatusBar(feedback);
@@ -1287,6 +1306,24 @@ public class TaskMeter extends Shell {
             isModified = true;
             refreshTask(index, task);
         } catch (IndexOutOfBoundsException e) {
+            feedback = e.getMessage();
+        }
+        
+        setStatusBar(feedback);
+    }
+
+    private void addReminder(int index) {
+        String feedback = null;
+        
+        try {
+            Task task = getIndexedTask(index);
+            
+            reminder.addReminder(task.getStartDateTime(), task);
+            
+            feedback = "Reminder is set for task \"" + task.getName() + "\" on " + task.getStartShort();
+        } catch (NullPointerException e) {
+            feedback = e.getMessage();
+        } catch (IllegalArgumentException e) {
             feedback = e.getMessage();
         }
         

@@ -1,4 +1,4 @@
-package cs2103.t14j1.taskmeter;
+package cs2103.t14j1.taskmeter.quickadd;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
@@ -93,7 +93,7 @@ public class QuickAddDialog extends Dialog {
      * Create contents of the dialog.
      */
     private void createContents() {
-        shell = new Shell(getParent(), SWT.DIALOG_TRIM);
+        shell = new Shell(getParent(), SWT.DIALOG_TRIM | SWT.APPLICATION_MODAL);
         setSize(true);
         shell.setText("TaskMeter Quick Add");
         

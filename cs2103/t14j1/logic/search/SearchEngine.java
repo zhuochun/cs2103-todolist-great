@@ -11,6 +11,7 @@ import cs2103.t14j1.storage.Priority;
 import cs2103.t14j1.storage.Task;
 import cs2103.t14j1.storage.TaskList;
 import cs2103.t14j1.storage.TaskLists;
+import cs2103.t14j1.storage.When;
 
 public class SearchEngine {
     
@@ -25,7 +26,7 @@ public class SearchEngine {
     private Date     endDateTime;       // end date and time
     private Date     deadline;          // deadline date and time
     private Long     duration;          // duration of task
-    private boolean  status;            // completed or not
+    private Boolean  status;            // completed or not
     private Date afterDateTime;			// If afterDateTime is specified, only tasks having date and time after afterDateTime will be included in the search results
     private Date beforeDateTime;		// If beforeDateTime is specified, only tasks having date and time before beforeDateTime will be included in the search results
     
@@ -77,9 +78,9 @@ public class SearchEngine {
     	
     	ArrayList<TaskList> searchLists = new ArrayList<TaskList>();
     	
-    	if((list != null) && (!lists.hasList(list))) {
+    	if(!lists.hasList(list)) {
         }   	
-    	else if(list != null)
+    	else if(list != TaskLists.INBOX)
         	searchLists.add(lists.getList(list));
         else {
         	Iterator<Entry<String, TaskList>> iterator = lists.iterator();
@@ -126,19 +127,70 @@ public class SearchEngine {
     	while(iter.hasNext()) {
     		Task task = iter.next();
     		if(doesTaskNameContainSearchString(task)
-					&& isStartDateSame(task)
-					&& isEndDateSame(endDateTime, currentTask)
-					&& isDeadlineDateSame(deadlineDate, currentTask)
 					&& isPlaceSame(task)
 					&& isPrioritySame(task)
-					&& isDateAfterGivenDateAndTime(afterDate, duration, currentTask)
-					&& isDateBeforeGivenDateAndTime(beforeDate, duration, currentTask)
-					&& isDurationSame(duration, currentTask)) {
+					&& isDateAfterAndBeforeGivenDatesAndTimes(task)
+					&& isDurationSame(task)
+					&& isStatusSame(task)) {
 				searchResults.add(task);
     		}
     	}
     	return searchResults;
     }
+
+	private boolean isStatusSame(Task task) {
+		if(status == null)
+			return true;
+		else
+			return (status == task.getStatus());
+	}
+
+	private boolean isDurationSame(Task task) {
+		When when = task.getWhen();
+		if(duration == null)
+			return true;
+		else if(when.getDuration() == null)
+			return false;
+		else if(duration == when.getDuration())
+			return true;
+		else return false;
+	}
+
+	private boolean isDateAfterAndBeforeGivenDatesAndTimes(Task task) {
+		When when = task.getWhen();
+		if((afterDateTime == null) && (beforeDateTime == null))
+			return true;
+		else if(afterDateTime == null) {
+			if((when.getStartDateTime() == null) && (when.getDeadline() == null))
+				return false;
+			else if((when.getDeadline() == null) && (when.getEndDateTime().getTime() <= beforeDateTime.getTime()))
+				return true;
+			else if((when.getEndDateTime() == null) && (when.getDeadline().getTime() <= beforeDateTime.getTime()))
+				return true;
+			else
+				return false;
+		}
+		else if(beforeDateTime == null) {
+			if((when.getStartDateTime() == null) && (when.getDeadline() == null))
+				return false;
+			else if((when.getDeadline() == null) && (when.getStartDateTime().getTime() >= afterDateTime.getTime()))
+				return true;
+			else if((when.getStartDateTime() == null) && (when.getDeadline().getTime() >= afterDateTime.getTime()))
+				return true;
+			else
+				return false;
+		}
+		else {
+			if((when.getStartDateTime() == null) && (when.getDeadline() == null))
+				return false;
+			else if((when.getDeadline() == null) && ((when.getStartDateTime().getTime() >= afterDateTime.getTime()) || (when.getEndDateTime().getTime() <= beforeDateTime.getTime())))
+				return true;
+			else if((when.getEndDateTime() == null) && ((when.getDeadline().getTime() >= afterDateTime.getTime()) || (when.getDeadline().getTime() <= beforeDateTime.getTime())))
+				return true;
+			else
+				return false;
+		}
+	}
 
 	private boolean isPrioritySame(Task task) {
 		if(priority == null)

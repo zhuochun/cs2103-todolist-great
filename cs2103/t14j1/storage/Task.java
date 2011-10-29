@@ -19,6 +19,7 @@ public class Task implements Comparable<Object> {
     private String      list;        // belong to which list
     private Priority    priority;    // priority of the task
     private When        when;        // stores start/end, duration, deadline
+    private Date        reminder;    // store reminder time
     private boolean     status;      // completed or not
     
     // additional parameter to note if it's to be synced with gCalendar
@@ -70,6 +71,7 @@ public class Task implements Comparable<Object> {
         this.list          = TaskLists.INBOX;
         this.priority      = Priority.NORMAL;
         this.when          = new When();
+        this.reminder      = null;
         this.status        = INCOMPLETE;
         this.lastEditTime  = new Date();	// mark the last edit time to be the time when created
     }
@@ -118,6 +120,14 @@ public class Task implements Comparable<Object> {
         }
 
         when = newWhen;
+    }
+    
+    public Date getReminder() {
+        return reminder;
+    }
+    
+    public void setReminder(Date date) {
+        reminder = date;
     }
 
     public Priority getPriority() {

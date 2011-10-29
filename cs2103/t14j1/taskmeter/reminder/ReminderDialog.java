@@ -35,6 +35,13 @@ public class ReminderDialog extends Dialog {
     
     private ArrayList<ReminderTask> reminders;
     
+    // Exception strings
+    private static final String EXCEPTION_NULL_TASK    = "You cannot set a reminder on unexisting task";
+    private static final String EXCEPTION_NULL_DATE    = "You cannot set a reminder without a date and time";
+    private static final String EXCEPTION_NO_REMINDER  = "You cannot remove a reminder on task that has no reminder";
+    private static final String EXCEPTION_BEFORE_NOW   = "The reminder is already in the past";
+    private static final String EXCEPTION_HAS_REMINDER = "You have already set a reminder for task \"%1$s\"";
+    
     /**
      * Create the dialog.
      * @param parent
@@ -64,13 +71,19 @@ public class ReminderDialog extends Dialog {
     public void open() {
         shell.open();
     }
-
+    
     public void addReminder(Date date, Task task) {
-        if (date == null || task == null) {
-            throw new NullPointerException("Null date or Task");
+        if (task == null) {
+            throw new NullPointerException(EXCEPTION_NULL_TASK);
+        } else if (date == null) {
+            throw new NullPointerException(EXCEPTION_NULL_DATE);
         } else if (date.before(DateFormat.getNow())) {
-            throw new IllegalArgumentException("Reminder is before present time");
+            throw new IllegalArgumentException(EXCEPTION_BEFORE_NOW);
+        } else if (task.getReminder() != null) {
+            throw new IllegalArgumentException(String.format(EXCEPTION_HAS_REMINDER, task.getName()));
         }
+        
+        task.setReminder(date);
         
         // check is existing reminder on the same dateTime
         for (ReminderTask t : reminders) {
@@ -86,6 +99,23 @@ public class ReminderDialog extends Dialog {
         
         // put the reminder into list
         reminders.add(newTask);
+    }
+    
+    public boolean removeReminder(Task task) {
+        if (task == null) {
+            throw new NullPointerException(EXCEPTION_NULL_TASK);
+        } else if (task.getReminder() == null) {
+            throw new IllegalArgumentException(EXCEPTION_NO_REMINDER);
+        }
+        
+        for (ReminderTask t : reminders) {
+            if (t.hasTask(task)) {
+                t.removeTask(task);
+                return true;
+            }
+        }
+        
+        return false;
     }
 
     /**
@@ -133,7 +163,7 @@ public class ReminderDialog extends Dialog {
         protected TaskList tasks;
         protected Runnable runnable;
         
-        public ReminderTask (Date date, Task task) {
+        public ReminderTask(Date date, Task task) {
             tasks = new TaskList("Reminder on " + date.toString());
             tasks.addTask(task);
             remindTime = date;
@@ -151,6 +181,10 @@ public class ReminderDialog extends Dialog {
                         center();
                         shell.open();
                     }
+                    
+                    for (Task t : tasks) {
+                        t.setReminder(null);
+                    }
                 }
             };
             
@@ -167,6 +201,15 @@ public class ReminderDialog extends Dialog {
             display.timerExec(-1, runnable);
         }
         
+        public void removeTask(Task task) {
+            tasks.removeTask(task);
+            task.setReminder(null);
+            
+            if (tasks.isEmpty()) {
+                resetReminder();
+            }
+        }
+        
         private int getMilliSecond() {
             return (int) (remindTime.getTime() - DateFormat.getNow().getTime());
         }
@@ -175,14 +218,8 @@ public class ReminderDialog extends Dialog {
             return remindTime.compareTo(date) == 0;
         }
         
-        public boolean isSameTask(Task task) {
-            for (Task t : tasks) {
-                if (t.equals(task)) {
-                    return true;
-                }
-            }
-            
-            return false;
+        public boolean hasTask(Task task) {
+            return tasks.hasTask(task);
         }
         
         private String getDisplayStr() {

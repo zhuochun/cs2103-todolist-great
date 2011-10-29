@@ -951,7 +951,7 @@ public class ParseCommand {
 		// test match here
 		String taskStr = "Get up tomorrow";	// test time
 		
-		String testStr = "add #luala by 3pm tomorrow";
+		String testStr = "add do last at 22nd November";
 		
 		// for testing
 		BufferedReader in;
@@ -1034,7 +1034,7 @@ public class ParseCommand {
 	 *  </quote>
 	 */
 	public String extractTaskName() {
-		return taskTitle; // if TaskTitle is not found, return null
+		return this.commandStr; // if TaskTitle is not found, return null
 	}
 
 	/**

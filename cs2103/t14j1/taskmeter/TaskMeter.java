@@ -47,6 +47,7 @@ import cs2103.t14j1.storage.Task;
 import cs2103.t14j1.storage.TaskList;
 import cs2103.t14j1.storage.TaskLists;
 import cs2103.t14j1.storage.When;
+import cs2103.t14j1.storage.user.User;
 import cs2103.t14j1.taskmeter.autocomplete.AutoComplete;
 import cs2103.t14j1.taskmeter.quickadd.QuickAddDialog;
 import cs2103.t14j1.taskmeter.reminder.ReminderDialog;
@@ -238,12 +239,25 @@ public class TaskMeter extends Shell {
                     smartBar.setFocus();
                 }
             }
+            @Override
+            public void keyReleased(KeyEvent e) {
+                // Only perform auto completion when user input characters
+                if (User.performAutoComplete && (e.character > 'A' && e.character < 'z')) {
+                    String txt = smartBar.getText();
+                    if (autoComplete.setInput(txt)) {
+                        smartBar.setText(autoComplete.getCompletedStr());
+                        smartBar.setSelection(autoComplete.getStartIdx(), autoComplete.getEndIdx());
+                    }
+                    smartBar.setFocus();
+                }
+            }
         });
         smartBar.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 11, 1));
         smartBar.addTraverseListener(new TraverseListener() {
             public void keyTraversed(TraverseEvent e) {
                 if (e.keyCode == SWT.CR) {              // Enter to execute Command
                     executeCommand(smartBar.getText());
+                    autoComplete.reset();
                     smartBar.setSelection(0, smartBar.getText().length());
                     smartBar.setFocus();
                 } else if (e.keyCode == SWT.TAB) {      // Tab to complete words
@@ -361,6 +375,20 @@ public class TaskMeter extends Shell {
     
         final MenuItem mntmRedo = new MenuItem(menuEdit, SWT.NONE);
         mntmRedo.setText(getResourceString("redo"));
+        
+        new MenuItem(menuEdit, SWT.SEPARATOR);
+        
+        final MenuItem mntmRemind = new MenuItem(menuEdit, SWT.NONE);
+        mntmRemind.setAccelerator(SWT.MOD1 + 'R');
+        mntmRemind.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                if (isTasksFocus()) {
+                    addReminder(getSelectedIdx());
+                }
+            }
+        });
+        mntmRemind.setText(getResourceString("remind"));
     
         new MenuItem(menuEdit, SWT.SEPARATOR);
     
@@ -369,32 +397,24 @@ public class TaskMeter extends Shell {
         mntmEditTask.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                if (taskTable.isFocusControl() && taskTable.getSelectionCount() != 0) {
+                if (isTasksFocus()) {
                     editTask(getSelectedIdx());
+                } else if (isListsFocus()) {
+                    editList(getSelectedListName(), null);
                 }
             }
         });
         mntmEditTask.setText(getResourceString("edit"));
-        
-        final MenuItem mntmRemind = new MenuItem(menuEdit, SWT.NONE);
-        mntmRemind.setAccelerator(SWT.MOD1 + 'R');
-        mntmRemind.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                if (taskTable.isFocusControl() && taskTable.getSelectionCount() != 0) {
-                    addReminder(getSelectedIdx());
-                }
-            }
-        });
-        mntmRemind.setText(getResourceString("remind"));
         
         final MenuItem mntmDeleteTask = new MenuItem(menuEdit, SWT.NONE);
         mntmDeleteTask.setAccelerator(SWT.DEL);
         mntmDeleteTask.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                if (taskTable.isFocusControl() && taskTable.getSelectionCount() != 0) {
+                if (isTasksFocus()) {
                     deleteTask(getSelectedIdx());
+                } else if (isListsFocus()) {
+                    deleteList(getSelectedListName());
                 }
             }
         });
@@ -461,14 +481,23 @@ public class TaskMeter extends Shell {
         
         menuEdit.addMenuListener(new MenuAdapter() {
             public void menuShown(MenuEvent e) {
-                mntmEditTask.setEnabled(taskTable.getSelectionCount() != 0);
-                mntmDeleteTask.setEnabled(taskTable.getSelectionCount() != 0);
-                mntmMarkCompleted.setEnabled(taskTable.getSelectionCount() != 0);
-                mntmMarkPriority1.setEnabled(taskTable.getSelectionCount() != 0);
-                mntmMarkPriority2.setEnabled(taskTable.getSelectionCount() != 0);
-                mntmMarkPriority3.setEnabled(taskTable.getSelectionCount() != 0);
+                mntmRemind.setEnabled(isTasksFocus());
+                mntmEditTask.setEnabled(isTasksFocus() || isListsFocus());
+                mntmDeleteTask.setEnabled(isTasksFocus() || isListsFocus());
+                mntmMarkCompleted.setEnabled(isTasksFocus());
+                mntmMarkPriority1.setEnabled(isTasksFocus());
+                mntmMarkPriority2.setEnabled(isTasksFocus());
+                mntmMarkPriority3.setEnabled(isTasksFocus());
             }
         });
+    }
+    
+    private boolean isTasksFocus() {
+        return taskTable.getSelectionCount() != 0 && taskTable.isFocusControl();
+    }
+    
+    private boolean isListsFocus() {
+        return taskList.getSelectionCount() != 0 && taskList.isFocusControl();
     }
 
     /**
@@ -514,6 +543,17 @@ public class TaskMeter extends Shell {
     
         MenuItem mntmUserSettings = new MenuItem(menuSetting, SWT.NONE);
         mntmUserSettings.setText(getResourceString("setting"));
+        
+        MenuItem mntmAutoComplete = new MenuItem(menuSetting, SWT.CHECK);
+        mntmAutoComplete.setAccelerator(SWT.MOD1 + '0');
+        mntmAutoComplete.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                User.performAutoComplete = User.performAutoComplete ? false : true;
+            }
+        });
+        mntmAutoComplete.setSelection(true);
+        mntmAutoComplete.setText(getResourceString("autocomplete"));
     }
 
     /**
@@ -576,9 +616,7 @@ public class TaskMeter extends Shell {
         taskList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseDoubleClick(MouseEvent e) { // switch lists
-                TableItem[] items = taskList.getSelection();
-                String listname = items[0].getText();
-                switchList(listname);
+                switchList(getSelectedListName());
             }
         });
         GridData gd_taskList = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -1104,7 +1142,9 @@ public class TaskMeter extends Shell {
             
             if (success) {
                 isModified = true;
-                refreshDisplay();
+                
+                displayLists();
+                
                 feedback = String.format(RENAME_LIST, oldName, newName);
             } else {
                 feedback = String.format(RENAME_LIST_FAIL, oldName);
@@ -1126,7 +1166,13 @@ public class TaskMeter extends Shell {
             
             if (success) {
                 isModified = true;
+                
+                if (name.equals(currentList.getName())) {
+                    currentList = lists.getList(TaskLists.INBOX);
+                }
+                
                 refreshDisplay();
+                
                 feedback = String.format(DELETE_SUCCESS, LIST, name);
             } else {
                 feedback = String.format(DELETE_FAIL, LIST);
@@ -1365,6 +1411,11 @@ public class TaskMeter extends Shell {
         } else { // mode == MODE_SEARCH
             return searchResult.getTask(index);
         }
+    }
+    
+    private String getSelectedListName() {
+        TableItem[] items = taskList.getSelection();
+        return items[0].getText();
     }
     
     /**

@@ -42,6 +42,9 @@ public class AddListDialog extends Dialog {
     public AddListDialog(Shell parent) {
         super(parent, SWT.NONE);
         setText(getResourceString("addListDialog.title"));
+        
+        createContents();
+        
         button = false;
     }
 
@@ -51,11 +54,12 @@ public class AddListDialog extends Dialog {
      * @return the result
      */
     public String open() {
-        createContents();
         center();
+        
         shell.open();
         shell.layout();
         Display display = getParent().getDisplay();
+        
         while (!shell.isDisposed()) {
             if (!display.readAndDispatch()) {
                 display.sleep();

@@ -1,7 +1,6 @@
 package cs2103.t14j1.logic;
 
 import java.util.Date;
-import java.util.Iterator;
 
 import cs2103.t14j1.logic.search.Search;
 import cs2103.t14j1.logic.search.SearchEngine;
@@ -10,7 +9,6 @@ import cs2103.t14j1.storage.Priority;
 import cs2103.t14j1.storage.Task;
 import cs2103.t14j1.storage.TaskList;
 import cs2103.t14j1.storage.TaskLists;
-import cs2103.t14j1.storage.Priority;;
 
 public class ControlGUI {
     
@@ -182,7 +180,6 @@ public class ControlGUI {
      * @throws Exception 
      */
     public boolean renameList(String oldListName, String newListName) throws Exception {
-        
     	TaskList oldList = lists.getList(oldListName);
     	
     	//If no list with the name oldListname exists
@@ -191,6 +188,10 @@ public class ControlGUI {
     	}
     	
     	oldList.setName(newListName);
+    	
+    	// remove oldList from lists because lists use treeMap
+    	lists.removeList(oldListName);
+    	lists.addList(oldList);
     	
     	return true;
     }
@@ -201,7 +202,6 @@ public class ControlGUI {
      * @return true is deleting is successful
      */
     public boolean deleteList(String listName) {
-        
     	if(listName.equals("Inbox") || listName.equals("Trash"))
     		return false;
     	
@@ -210,7 +210,7 @@ public class ControlGUI {
     	
     	lists.removeList(listName);
     	
-    	return false;
+    	return true;
     }
     
     /**
@@ -260,7 +260,7 @@ public class ControlGUI {
 		Date deadline 	   = parseCommand.extractDeadlineDate();
 		Long deadlineTime  = parseCommand.extractDeadlineTime();
 		Long duration      = parseCommand.extractDuration();
-		boolean status     = parseCommand.extractStatus();
+		//boolean status     = parseCommand.extractStatus();
 		
 		convertLongTimeToDate(startDateTime, startTime);
 		convertLongTimeToDate(endDateTime, endTime);

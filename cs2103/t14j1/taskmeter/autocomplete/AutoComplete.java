@@ -27,11 +27,12 @@ public class AutoComplete {
     private int listIdx;
     
     private final String[] Commands = {
-            "add", "del", "move", "edit", "done", "rename"
+            "add", "del", "move", "edit", "done", "rename", "remind"
     };
     
     private final String[] Dictionary = {
-            "this", "next", "today", "tomorrow", "done", "before", "after",
+            "this", "next", "today", "tomorrow", "done",
+            "before", "after", "start", "end", "deadline",
             "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
             "January", "Feburary", "March", "April", "May", "June", "July", "August",
             "September", "October", "November", "December"
@@ -167,6 +168,15 @@ public class AutoComplete {
     }
     
     /**
+     * get the last user input String
+     * 
+     * @return String
+     */
+    public String getInputStr() {
+        return lastInput;
+    }
+    
+    /**
      * get the last index of the input string before completion
      * 
      * @return int
@@ -184,11 +194,21 @@ public class AutoComplete {
         return endIdx;
     }
     
+    private String formCompleteWord(String complete, String input) {
+        StringBuilder result = new StringBuilder();
+        
+        result.append(input);
+        result.append(complete.substring(input.length()));
+        
+        return result.toString();
+    }
+    
     private boolean completeCommand() {
         if (lastInputLowerCase.matches("^([a-z]){0,3}$")) {
             for (; commandIdx < Commands.length; commandIdx++) {
                 if (Commands[commandIdx].startsWith(lastInputLowerCase)) {
-                    completedInput = Commands[commandIdx++];
+                    completedInput = formCompleteWord(Commands[commandIdx], lastInput);
+                    commandIdx++;
                     return true;
                 }
             }
@@ -199,7 +219,7 @@ public class AutoComplete {
     
     private boolean completeList() {
         if (lastInputLowerCase.matches("^.*#[^\\)]*$")) {
-            int     hashIdx    = lastInput.lastIndexOf("#");
+            int hashIdx = lastInput.lastIndexOf("#");
             
             boolean hasBracket = false;
             if (hashIdx != lastInput.length()-1) {
@@ -210,7 +230,7 @@ public class AutoComplete {
                 hashIdx++;
             }
             
-            String   keyword   = lastInputLowerCase.substring(hashIdx+1);
+            String keyword = lastInputLowerCase.substring(hashIdx+1);
             
             for (; listIdx < listNames.length; listIdx++) {
                 //System.out.println(listNames[listIdx]);
@@ -249,7 +269,7 @@ public class AutoComplete {
         if (lastInputLowerCase.matches("^.*!(\\d)*$")) {
             int expIdx = lastInput.lastIndexOf("!");
             
-            startIdx = expIdx; // update startIdx
+            startIdx = expIdx+1; // update startIdx
             
             // check if there is priority set already
             if (expIdx != lastInput.length()-1) {
@@ -323,9 +343,11 @@ public class AutoComplete {
                     StringBuilder result = new StringBuilder();
                     
                     result.append(lastInput.substring(0, lastInput.length() - keyword.length()));
-                    result.append(Dictionary[dictionaryIdx++]);
+                    result.append(formCompleteWord(Dictionary[dictionaryIdx], keyword));
                     
                     completedInput = result.toString();
+                    
+                    dictionaryIdx++;
                     return true;
                 }
             }

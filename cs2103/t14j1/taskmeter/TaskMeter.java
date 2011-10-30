@@ -187,7 +187,9 @@ public class TaskMeter extends Shell {
         // set application tray
         setTray(display);
         // set minimum size
+        setText(getResourceString("app.title.full"));
         setMinimumSize(new Point(750, 500));
+        setSize(750, 500);
 
         // create each components
         createMenuBar();
@@ -292,21 +294,9 @@ public class TaskMeter extends Shell {
             }
         });
         
-        // set application title and size
-        setText(getResourceString("app.title.full"));
-        setSize(750, 500);
-
         // initial variables
         isModified = false;
         mode       = MODE_LIST;
-        
-        // initial lists from files
-        lists = new TaskLists();
-        FileHandler.loadAll(lists);
-        
-        // display tasks and lists
-        displayCurrentList(TaskLists.INBOX);
-        displayLists();
         
         // initial modules
         FilterTask.setFilter(Filter.FILTER_ALL);
@@ -316,8 +306,8 @@ public class TaskMeter extends Shell {
         
         // initial quick Add View
         quickAddView = new QuickAddDialog(this, logic, autoComplete);
-        // initial reminder dialog
-        reminder     = new ReminderDialog(this);
+        // initial reminder
+        reminder = new ReminderDialog(this);
         reminder.addRefreshListener(new RefreshListener() {
             public void refresh() {
                 displayTasks();
@@ -326,6 +316,25 @@ public class TaskMeter extends Shell {
                 openTrayReminder(title, msg);
             }
         });
+        
+        // initial lists from files
+        lists = new TaskLists();
+        TaskList reminderList = new TaskList("Reminder List");
+        FileHandler.loadAll(lists, reminderList);
+        
+        // load reminders into application
+        for (Task t : reminderList) {
+            try {
+                Date date = t.getReminder();
+                t.setReminder(null);
+                reminder.addReminder(date, t);
+            } catch (IllegalArgumentException e) {
+            }
+        }
+        
+        // display tasks and lists
+        displayCurrentList(TaskLists.INBOX);
+        displayLists();
     }
 
     /**

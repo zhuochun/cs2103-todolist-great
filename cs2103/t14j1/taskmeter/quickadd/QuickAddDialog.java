@@ -19,6 +19,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 
 import cs2103.t14j1.logic.ControlGUI;
 import cs2103.t14j1.storage.Task;
+import cs2103.t14j1.storage.user.User;
 import cs2103.t14j1.taskmeter.TaskMeter;
 import cs2103.t14j1.taskmeter.autocomplete.AutoComplete;
 
@@ -104,6 +105,18 @@ public class QuickAddDialog extends Dialog {
             public void keyPressed(KeyEvent e) {
                 if (e.character == ' ' && quickAddBar.getSelectionCount() != 0) {
                     quickAddBar.setSelection(quickAddBar.getText().length());
+                    quickAddBar.setFocus();
+                }
+            }
+            @Override
+            public void keyReleased(KeyEvent e) {
+                // Only perform auto completion when user input characters
+                if (User.performAutoComplete && (e.character > 'A' && e.character < 'z')) {
+                    String txt = quickAddBar.getText();
+                    if (autoComplete.setInput(txt)) {
+                        quickAddBar.setText(autoComplete.getCompletedStr());
+                        quickAddBar.setSelection(autoComplete.getStartIdx(), autoComplete.getEndIdx());
+                    }
                     quickAddBar.setFocus();
                 }
             }

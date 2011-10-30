@@ -294,6 +294,11 @@ public class TaskMeter extends Shell {
             }
         });
         
+        // initial lists from files
+        lists = new TaskLists();
+        TaskList reminderList = new TaskList("Reminder List");
+        FileHandler.loadAll(lists, reminderList);
+        
         // initial variables
         isModified = false;
         mode       = MODE_LIST;
@@ -316,11 +321,6 @@ public class TaskMeter extends Shell {
                 openTrayReminder(title, msg);
             }
         });
-        
-        // initial lists from files
-        lists = new TaskLists();
-        TaskList reminderList = new TaskList("Reminder List");
-        FileHandler.loadAll(lists, reminderList);
         
         // load reminders into application
         for (Task t : reminderList) {
@@ -1457,6 +1457,44 @@ public class TaskMeter extends Shell {
         setStatusBar(feedback);
     }
 
+    private void addReminder(int index, Reminder parameter) {
+        String feedback = null;
+        
+        try {
+            Task task = getIndexedTask(index);
+            
+            Date remindTime = null;
+    
+            switch (parameter) {
+                case START:
+                    remindTime = task.getStartDateTime();
+                    break;
+                case END:
+                    remindTime = task.getEndDateTime();
+                    break;
+                case DEADLINE:
+                    remindTime = task.getDeadline();
+                    break;
+                case CUSTOM:
+                    remindTime = logic.getReminderTime();
+                    break;
+            }
+    
+            reminder.addReminder(remindTime, task);
+            
+            refreshTask(index, task);
+            isModified = true;
+            
+            feedback = String.format(getResourceString("msg.ADD_REMINDER"), task.getName(), DateFormat.dateToStrShort(remindTime));
+        } catch (NullPointerException e) {
+            feedback = e.getMessage();
+        } catch (IllegalArgumentException e) {
+            feedback = e.getMessage();
+        }
+        
+        setStatusBar(feedback);
+    }
+
     private void removeReminder(int index) {
         String feedback = null;
         
@@ -1525,44 +1563,6 @@ public class TaskMeter extends Shell {
         return items[0].getText();
     }
     
-    private void addReminder(int index, Reminder parameter) {
-        String feedback = null;
-        
-        try {
-            Task task = getIndexedTask(index);
-            
-            Date remindTime = null;
-    
-            switch (parameter) {
-                case START:
-                    remindTime = task.getStartDateTime();
-                    break;
-                case END:
-                    remindTime = task.getEndDateTime();
-                    break;
-                case DEADLINE:
-                    remindTime = task.getDeadline();
-                    break;
-                case CUSTOM:
-                    remindTime = logic.getReminderTime();
-                    break;
-            }
-    
-            reminder.addReminder(remindTime, task);
-            
-            refreshTask(index, task);
-            isModified = true;
-            
-            feedback = String.format(getResourceString("msg.ADD_REMINDER"), task.getName(), DateFormat.dateToStrShort(remindTime));
-        } catch (NullPointerException e) {
-            feedback = e.getMessage();
-        } catch (IllegalArgumentException e) {
-            feedback = e.getMessage();
-        }
-        
-        setStatusBar(feedback);
-    }
-
     private void openTaskMeter() {
         this.setMinimized(false);
         this.forceActive();

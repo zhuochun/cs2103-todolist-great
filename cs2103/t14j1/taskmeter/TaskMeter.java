@@ -223,6 +223,11 @@ public class TaskMeter extends Shell {
         quickAddView = new QuickAddDialog(this, logic, autoComplete);
         // initial reminder dialog
         reminder     = new ReminderDialog(this);
+        reminder.addRefreshListener(new RefreshListener() {
+            public void refresh() {
+                displayTasks();
+            }
+        });
     }
 
     /**
@@ -1550,7 +1555,6 @@ public class TaskMeter extends Shell {
             item.setBackground(SWTResourceManager.getColor(SWT.COLOR_WHITE));
         }
         
-        // TODO: color will not cleared when reminder has cleared before refresh the tasks again
         if (task.getReminder() != null) {
             item.setForeground(SWTResourceManager.getColor(SWT.COLOR_BLUE));
         }

@@ -19,6 +19,7 @@ import org.eclipse.wb.swt.SWTResourceManager;
 import cs2103.t14j1.logic.DateFormat;
 import cs2103.t14j1.storage.Task;
 import cs2103.t14j1.storage.TaskList;
+import cs2103.t14j1.taskmeter.RefreshListener;
 import cs2103.t14j1.taskmeter.TaskMeter;
 
 /**
@@ -33,6 +34,8 @@ public class ReminderDialog extends Dialog {
     private final Display display;
     private Text txtDisplay;
     private Label lblRemindMe;
+    
+    private RefreshListener refreshHandler;
     
     private ArrayList<ReminderTask> reminders;
     
@@ -65,6 +68,7 @@ public class ReminderDialog extends Dialog {
         
         display   = getParent().getDisplay();
         reminders = new ArrayList<ReminderTask>();
+        refreshHandler = null;
         
         createContents();
     }
@@ -140,6 +144,14 @@ public class ReminderDialog extends Dialog {
         txtDisplay.setText("");
     }
     
+    public void addRefreshListener(RefreshListener r) {
+        this.refreshHandler = r;
+    }
+    
+    public void removeRefreshListener() {
+        this.refreshHandler = null;
+    }
+    
     public void setDisplay(String str) {
         txtDisplay.setText(str);
     }
@@ -186,6 +198,8 @@ public class ReminderDialog extends Dialog {
                     for (Task t : tasks) {
                         t.setReminder(null);
                     }
+                    
+                    refreshHandler.refresh();
                 }
             };
             

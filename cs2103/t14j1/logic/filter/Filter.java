@@ -1,4 +1,4 @@
-package cs2103.t14j1.taskmeter;
+package cs2103.t14j1.logic.filter;
 
 public enum Filter {
     

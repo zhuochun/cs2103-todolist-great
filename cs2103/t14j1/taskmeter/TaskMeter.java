@@ -2,7 +2,6 @@ package cs2103.t14j1.taskmeter;
 
 import java.io.IOException;
 import java.io.InputStream;
-import java.util.Calendar;
 import java.util.Date;
 import java.util.Map.Entry;
 import java.util.MissingResourceException;
@@ -47,12 +46,13 @@ import org.eclipse.wb.swt.SWTResourceManager;
 
 import cs2103.t14j1.logic.ControlGUI;
 import cs2103.t14j1.logic.DateFormat;
+import cs2103.t14j1.logic.filter.Filter;
+import cs2103.t14j1.logic.filter.FilterTask;
 import cs2103.t14j1.storage.FileHandler;
 import cs2103.t14j1.storage.Priority;
 import cs2103.t14j1.storage.Task;
 import cs2103.t14j1.storage.TaskList;
 import cs2103.t14j1.storage.TaskLists;
-import cs2103.t14j1.storage.When;
 import cs2103.t14j1.storage.user.User;
 import cs2103.t14j1.taskmeter.autocomplete.AutoComplete;
 import cs2103.t14j1.taskmeter.quickadd.QuickAddDialog;
@@ -78,7 +78,6 @@ public class TaskMeter extends Shell {
 
     private boolean   isModified;
     private int       mode;         // MODE_LIST and MODE_SEARCH for different events
-    private Filter    filter;       // Filter tasks display according to different filters
     private int       lastSortColumn;
     
     private ControlGUI logic;        // the logic part center
@@ -300,7 +299,6 @@ public class TaskMeter extends Shell {
         // initial variables
         isModified = false;
         mode       = MODE_LIST;
-        filter     = Filter.FILTER_ALL;
         
         // initial lists from files
         lists = new TaskLists();
@@ -311,6 +309,7 @@ public class TaskMeter extends Shell {
         displayLists();
         
         // initial modules
+        FilterTask.setFilter(Filter.FILTER_ALL);
         logic        = new ControlGUI(lists);
         autoComplete = new AutoComplete(lists);
         smartBar.setFocus();
@@ -789,7 +788,7 @@ public class TaskMeter extends Shell {
         btnAll.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                filter = Filter.FILTER_ALL;
+                FilterTask.setFilter(Filter.FILTER_ALL);
                 displayTasks();
                 setStatusBar(String.format(getResourceString("msg.FILTER"), getResourceString("filter.all")));
             }
@@ -801,7 +800,7 @@ public class TaskMeter extends Shell {
         btnImportant.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                filter = Filter.FILTER_IMPORTANT;
+                FilterTask.setFilter(Filter.FILTER_IMPORTANT);
                 displayTasks();
                 setStatusBar(String.format(getResourceString("msg.FILTER"), getResourceString("filter.important")));
             }
@@ -813,7 +812,7 @@ public class TaskMeter extends Shell {
         btnCompleted.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                filter = Filter.FILTER_COMPLETED;
+                FilterTask.setFilter(Filter.FILTER_COMPLETED);
                 displayTasks();
                 setStatusBar(String.format(getResourceString("msg.FILTER"), getResourceString("filter.completed")));
             }
@@ -825,7 +824,7 @@ public class TaskMeter extends Shell {
         btnOverdue.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                filter = Filter.FILTER_OVERDUE;
+                FilterTask.setFilter(Filter.FILTER_OVERDUE);
                 displayTasks();
                 setStatusBar(String.format(getResourceString("msg.FILTER"), getResourceString("filter.overdue")));
             }
@@ -841,7 +840,7 @@ public class TaskMeter extends Shell {
         btnToday.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                filter = Filter.FILTER_TODAY;
+                FilterTask.setFilter(Filter.FILTER_TODAY);
                 displayTasks();
                 setStatusBar(String.format(getResourceString("msg.FILTER"), getResourceString("filter.today")));
             }
@@ -853,7 +852,7 @@ public class TaskMeter extends Shell {
         btnTomorrow.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                filter = Filter.FILTER_TOMORROW;
+                FilterTask.setFilter(Filter.FILTER_TOMORROW);
                 displayTasks();
                 setStatusBar(String.format(getResourceString("msg.FILTER"), getResourceString("filter.tomorrow")));
             }
@@ -865,7 +864,7 @@ public class TaskMeter extends Shell {
         btnNextDays.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                filter = Filter.FILTER_NEXT_DAYS;
+                FilterTask.setFilter(Filter.FILTER_NEXT_DAYS);
                 displayTasks();
                 setStatusBar(String.format(getResourceString("msg.FILTER"), getResourceString("filter.custom")));
             }
@@ -877,7 +876,7 @@ public class TaskMeter extends Shell {
         btnWithoutDate.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                filter = Filter.FILTER_WITHOUT_DATE;
+                FilterTask.setFilter(Filter.FILTER_WITHOUT_DATE);
                 displayTasks();
                 setStatusBar(String.format(getResourceString("msg.FILTER"), getResourceString("filter.nodate")));
             }
@@ -1032,7 +1031,9 @@ public class TaskMeter extends Shell {
         try {
             int idx = 1;
             for (Task task : tlist) {
-                filterTask(idx, task);
+                if (FilterTask.filter(task)) {
+                    displayNewTask(idx, task);
+                }
                 idx++;
             }
         } catch (NullPointerException e) {
@@ -1048,61 +1049,15 @@ public class TaskMeter extends Shell {
         
         try {
             for (int i = tlist.getSize(); i > 0; i--) {
-                filterTask(i, tlist.getTask(i));
+                if (FilterTask.filter(tlist.getTask(i))) {
+                    displayNewTask(i, tlist.getTask(i));
+                }
             }
         } catch (NullPointerException e) {
             // do nothing
         }
     }
     
-    /**
-     * filter tasks according to different filters
-     */
-    private void filterTask(int idx, Task task) {
-        if (filter == Filter.FILTER_ALL) {
-            displayNewTask(idx, task);
-        } else if (filter == Filter.FILTER_IMPORTANT && task.getPriority() == Priority.IMPORTANT) {
-            displayNewTask(idx, task);
-        } else if (filter == Filter.FILTER_COMPLETED && task.isCompleted()) {
-            displayNewTask(idx, task);
-        } else if (filter == Filter.FILTER_OVERDUE && !task.isCompleted()
-                && task.compareDeadline(DateFormat.getNow()) < 0) {
-            displayNewTask(idx, task);
-        } else if (filter == Filter.FILTER_TODAY) {
-            Calendar now = Calendar.getInstance();
-            When.clear(now, When.CLEAR_BELOW_HOUR);
-            
-            Date todayStart = now.getTime();
-            Date todayEnd   = DateFormat.getDateAfter(todayStart, 1);
-            
-            if (task.isWithinPeriod(todayStart, todayEnd)) {
-                displayNewTask(idx, task);
-            }
-        } else if (filter == Filter.FILTER_TOMORROW) {
-            Calendar now = Calendar.getInstance();
-            When.clear(now, When.CLEAR_BELOW_HOUR);
-            
-            Date tmlStart = DateFormat.getDateAfter(now.getTime(), 1);
-            Date tmlEnd   = DateFormat.getDateAfter(tmlStart, 1);
-            
-            if (task.isWithinPeriod(tmlStart, tmlEnd)) {
-                displayNewTask(idx, task);
-            }
-        } else if (filter == Filter.FILTER_NEXT_DAYS) {
-            Calendar now = Calendar.getInstance();
-            When.clear(now, When.CLEAR_BELOW_HOUR);
-            
-            Date weekStart = now.getTime();
-            Date weekEnd   = DateFormat.getDateAfter(weekStart, 7);
-            
-            if (task.isWithinPeriod(weekStart, weekEnd)) {
-                displayNewTask(idx, task);
-            }
-        } else if (filter == Filter.FILTER_WITHOUT_DATE && task.getStartDateTime() == null) {
-            displayNewTask(idx, task);
-        }
-    }
-
     /**
      * display all tasks in the search Result
      */
@@ -1318,7 +1273,7 @@ public class TaskMeter extends Shell {
         displayCurrentList(name);
         displayLists();
 
-        filter = Filter.FILTER_ALL;
+        FilterTask.setFilter(Filter.FILTER_ALL);
 
         setStatusBar(String.format(getResourceString("msg.SWITCH_LIST"), name));
     }

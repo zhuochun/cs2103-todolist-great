@@ -19,9 +19,6 @@ import java.util.GregorianCalendar;
  */
 public class DateFormat {
 
-    public static final String ZERO_OCLOCK_TIME = "2012-12-25 00:00:00";
-    public static final String LAST_MINTUE_TIME = "2012-12-25 23:59:00";
-
     /**
      * get current date and time without formatting
      * 
@@ -178,6 +175,9 @@ public class DateFormat {
      * @return String yyyy-MM-dd HH:mm:ss
      */
     public static String dateToStrLong(Date date) {
+        if (date == null)
+            return null;
+        
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
         String dateString = formatter.format(date);
         return dateString;
@@ -190,6 +190,9 @@ public class DateFormat {
      * @return String yyyy-MM-dd HH:mm
      */
     public static String dateToStrShort(Date date) {
+        if (date == null)
+            return null;
+        
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         String dateString = formatter.format(date);
         return dateString;
@@ -202,6 +205,9 @@ public class DateFormat {
      * @return String yyyy-MM-dd
      */
     public static String dateToStr(Date date) {
+        if (date == null)
+            return null;
+        
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd");
         String dateString = formatter.format(date);
         return dateString;
@@ -216,9 +222,35 @@ public class DateFormat {
      * @return String
      */
     public static String dateToStr(Date date, String format) {
+        if (date == null)
+            return null;
+        
         SimpleDateFormat formatter = new SimpleDateFormat(format);
         String dateStr = formatter.format(date);
         return dateStr;
+    }
+    
+    /**
+     * get the date after a number of second delay
+     * 
+     * eg 30 seconds after the date, delay = 30
+     * 
+     * @param nowTime
+     * @param delay
+     * @return date
+     */
+    public static Date getSecondAfter(Date nowTime, int delay) {
+        Date newDate = new Date();
+
+        try {
+            long Time = (nowTime.getTime() / 1000) + delay;
+            
+            newDate.setTime(Time * 1000);
+        } catch (Exception e) {
+            return null;
+        }
+
+        return newDate;
     }
 
     /**
@@ -226,21 +258,17 @@ public class DateFormat {
      * 
      * eg 30 minutes after the date, delay = 30
      * 
-     * @param fullDate
+     * @param nowTime
      * @param delay
-     * @return yyyy-MM-dd HH:mm:ss
+     * @return date
      */
-    public static String getMinuteAfter(String fullDate, int delay) {
-        String newDate = null;
+    public static Date getMinuteAfter(Date nowTime, int delay) {
+        Date newDate = new Date();
 
         try {
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-            Date date = format.parse(fullDate);
-
-            long Time = (date.getTime() / 1000) + delay * 60;
-            date.setTime(Time * 1000);
-
-            newDate = format.format(date);
+            long Time = (nowTime.getTime() / 1000) + delay * 60;
+            
+            newDate.setTime(Time * 1000);
         } catch (Exception e) {
             return null;
         }
@@ -248,33 +276,6 @@ public class DateFormat {
         return newDate;
     }
 
-    /**
-     * get the date after a number of days delay
-     * 
-     * eg 3 day after some day, then delay = 3
-     * 
-     * @param nowdate
-     * @param delay
-     * @return yyyy-MM-dd
-     */
-    public static String getDateAfter(String nowdate, int delay) {
-        String newDate = null;
-
-        try {
-            SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
-            Date d = strToDate(nowdate);
-
-            long myTime = (d.getTime() / 1000) + delay * 24 * 60 * 60;
-            d.setTime(myTime * 1000);
-
-            newDate = format.format(d);
-        } catch (Exception e) {
-            return null;
-        }
-
-        return newDate;
-    }
-    
     /**
      * get the date after a number of days delay
      * 

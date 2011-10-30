@@ -76,7 +76,8 @@ public class FileHandlerTest {
     public void testLoadAll() {
         TaskLists newLists = new TaskLists();
         
-        FileHandler.loadAll(newLists);
+        TaskList temp = new TaskList("name");
+        FileHandler.loadAll(newLists, temp);
         
         for (Entry<String, TaskList> list : newLists) {
             System.out.println(list.getKey());

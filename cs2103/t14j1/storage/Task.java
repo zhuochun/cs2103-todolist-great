@@ -36,7 +36,7 @@ public class Task implements Comparable<Object> {
     private static final String EXCEPTION_NULL_WHEN       = "Task's When property cannot be null";
 
     /**
-     * A Constructor with all parameters provided
+     * A Constructor with all parameters without reminder provided
      */
     public Task(String name, String place, String list, Priority priority, Date startDateTime, Date endDateTime,
             Date deadline, Long duration, boolean status) {
@@ -46,6 +46,21 @@ public class Task implements Comparable<Object> {
         setList(list);
         setPriority(priority);
         setWhen(new When(startDateTime, endDateTime, deadline, duration));
+        setStatus(status);
+    }
+    
+    /**
+     * A Constructor with all parameters and reminder provided
+     */
+    public Task(String name, String place, String list, Priority priority, Date startDateTime, Date endDateTime,
+            Date deadline, Date reminder, Long duration, boolean status) {
+        this();
+        setName(name);
+        setPlace(place);
+        setList(list);
+        setPriority(priority);
+        setWhen(new When(startDateTime, endDateTime, deadline, duration));
+        setReminder(reminder);
         setStatus(status);
     }
     
@@ -553,7 +568,7 @@ public class Task implements Comparable<Object> {
     public static final String START_DATE = "start_date";
     public static final String END_DATE   = "end_date";
     public static final String DEADLINE   = "deadline";
+    public static final String REMINDER   = "reminder";
     public static final String STATUS     = "status";
     public static final String DURATION   = "duration";
-
 }

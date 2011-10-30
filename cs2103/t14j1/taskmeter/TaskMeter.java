@@ -817,7 +817,7 @@ public class TaskMeter extends Shell {
                     deleteTask(logic.getTaskIdx());
                     break;
                 case MOVE_TASK:
-                    // TODO
+                    moveTask(logic.getTaskIdx(), logic.getListName());
                     break;
                 case EDIT_TASK:
                     editTask(logic.getTaskIdx());
@@ -1272,6 +1272,30 @@ public class TaskMeter extends Shell {
         }
         
         taskTable.setSelection(taskTable.getItemCount()-1);
+    }
+
+    private void moveTask(int taskIdx, String listName) {
+        String feedback = null;
+        
+        try {
+            Task task = getIndexedTask(taskIdx);
+            
+            lists.removeTask(task.getName(), task);
+            lists.addTask(listName, task);
+            
+            isModified = true;
+            refreshDisplay();
+            
+            feedback = String.format(getResourceString("msg.MOVE"), task.getName(), listName);
+        } catch (IllegalArgumentException e) {
+            feedback = e.getMessage();
+        } catch (NullPointerException e) {
+            feedback = e.getMessage();
+        } catch (IndexOutOfBoundsException e) {
+            feedback = e.getMessage();
+        }
+        
+        setStatusBar(feedback);
     }
 
     private void editTask(int index) {

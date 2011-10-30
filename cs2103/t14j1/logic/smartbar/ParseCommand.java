@@ -107,7 +107,7 @@ public class ParseCommand {
 	private static final String regTimeUnit = 
 			"((hour(s)?|h)|(minute(s)?|min)|(second(s)?|sec)|(day(s)?))";
 	private static final String regTimeUnitForSearch = 
-			"(" + regTimeUnit + "|" + regWeekText + "|" + regMonthText + ")";
+			"((this|next)\\ (" + regTimeUnit + "|week|month|year|" + regWeekText + "|" + regMonthText + "))";
 	
 	private static final String regDateOverallFormat =
 			"(" + regDateFormat_dd_$mm$M$_$yy$yy$$ + "|" + regDateFormat_order_weekD + 
@@ -424,7 +424,6 @@ public class ParseCommand {
 				matcherMatched(regDateTimeOverallFormat, stripedOut, true))){
 				Time newTime = new Time(null);
 				this.reminderTime = dateTimeProcess(newTime, matchedStr, null);
-				System.err.println(reminderTime.getTime());
 				if(reminderTime == null){	// invalid case
 					this.reminderType = Reminder.INVALID;
 					return;
@@ -474,8 +473,7 @@ public class ParseCommand {
 				searchAfterDate = dateTimeProcess(searchAfterTime, timeDateStr, null);
 			}
 			
-			if((matchedStr = matcherMatched("today|tomorrow|((this|next)\\ " + regTimeUnitForSearch + ")", command, true)) != null){
-				Calendar date;
+			if((matchedStr = matcherMatched("today|tomorrow|" + regTimeUnitForSearch, command, true)) != null){
 				this.searchAfterDate = Calendar.getInstance();
 				
 				if(matchedStr.compareToIgnoreCase("today") == 0){
@@ -489,16 +487,34 @@ public class ParseCommand {
 				} else{
 					String timeArgs[] = matchedStr.split("\\ ");
 					boolean next = (timeArgs[0].compareToIgnoreCase("next") == 0);
-					
+					int param = 0;
 					
 					// compare the time unit
-					String timeUnit = timeArgs[1];
-					if(timeUnit.length() >= 3 && timeUnit.substring(0, 3).compareToIgnoreCase("sec") == 0){
-						
+					String unit = timeArgs[1];
+					if(unit.length() >= 3 && unit.substring(0, 3).compareToIgnoreCase("sec") == 0){
+						_searchClearSetFieldHelper(next,Calendar.SECOND);
+					} else if(unit.length() >= 3 && unit.substring(0, 3).compareToIgnoreCase("min") == 0){
+						_searchClearSetFieldHelper(next,Calendar.MINUTE);
+					} else if(unit.length() >= 1 && unit.substring(0, 1).compareToIgnoreCase("h") == 0){
+						_searchClearSetFieldHelper(next,Calendar.HOUR_OF_DAY);
+					} else if(unit.length() >= 3 && unit.substring(0, 3).compareToIgnoreCase("day") == 0){
+						_searchClearSetFieldHelper(next, Calendar.DAY_OF_YEAR);
+					} else if(unit.compareToIgnoreCase("week") == 0){
+						_searchClearSetFieldHelper(next, Calendar.WEEK_OF_YEAR);
+					} else if(unit.compareToIgnoreCase("month") == 0){
+						_searchClearSetFieldHelper(next, Calendar.MONTH);
+					} else if(unit.compareToIgnoreCase("year") == 0){
+						_searchClearSetFieldHelper(next, Calendar.YEAR);
+					} else if((param = dateParseGetMonthFromText(unit)) != -1){
+						setSearchParamBasedOnFields(param,next,Calendar.MONTH);
+					} else if((param = dateParseGetDayOfWeekFromText(unit)) != -1){
+						setSearchParamBasedOnFields(param,next,Calendar.DAY_OF_WEEK);
+					} else{
+						outputErr("Problem with parsing search time period");
 					}
 				}
 				
-				
+				command = removeMatchedString(command, matchedStr);
 				matchedStr = null;
 			}
 		}
@@ -581,6 +597,45 @@ public class ParseCommand {
 		this.trimedStr = command.trim();
 	}
 	
+	private void setSearchParamBasedOnFields(int param, boolean next, int fieldName) {
+		// case of month
+		int current = this.searchAfterDate.get(fieldName);
+		if(current == param || !next){
+			_searchClearSetFieldHelper(next, fieldName);
+		} else if(current> param || next){
+			this.searchAfterDate.set(fieldName, param);
+			_searchClearSetFieldHelper(true, fieldName);
+		} else{	// case of month of this year
+			clearCalendarFields(this.searchAfterDate,fieldName);
+			this.searchAfterDate.set(fieldName, param);
+			_searchClearSetFieldHelper(next, fieldName);
+		}
+		
+	}
+
+	private void _searchClearSetFieldHelper(boolean next, int currentField) {
+		int lowerField = Calendar.MILLISECOND;
+		if(next)	this.searchAfterDate.add(currentField, 1);
+		this.searchBeforeDate = (Calendar) this.searchAfterDate.clone();
+		if(next)	clearCalendarFields(this.searchAfterDate,currentField);
+		clearCalendarFields(this.searchBeforeDate,currentField);
+		this.searchBeforeDate.add(currentField, 1);
+		this.searchBeforeDate.add(lowerField, -1);
+	}
+
+	/**
+	 * Clear all the fields lower than given field, exclusive
+	 * Say input field is Calendar.MINUTE, then this would clear the 
+	 * second and millisecond fields
+	 * @param date
+	 * @param field
+	 */
+	private void clearCalendarFields(Calendar date, int field) {
+		for(int i=field+1;i<=Calendar.MILLISECOND; i++){
+			date.set(i, 0);
+		}
+	}
+
 	private Calendar regSearchTimeUnitProcess(String matchedStr) {
 		Calendar res = Calendar.getInstance();
 		String periodInfo[] = matchedStr.split("\\ ");
@@ -1096,7 +1151,7 @@ public class ParseCommand {
 	
 	public static void main(String[] args){
 		// test match here
-		String testStr = "remind 1";
+		String testStr = "/remind next Year";
 			/* test cases to be added for Unit Test:
 			 * Reminder : 
 			 * 	"remind 3 4pm tomorrow";
@@ -1146,6 +1201,9 @@ public class ParseCommand {
 				System.out.println("Deadline Time: " + test.extractDeadlineTime());
 				System.out.println("Reminder Type: " + test.getRemindParamter());
 				System.out.println("Reminder Time: " + test.getRemindTime());
+				System.out.println("Search time after: " + test.extractSearchAfterDate());
+				System.out.println("Search time before: " + test.extractSearchBeforeDate());
+				
 				
 				if(testStr != null){
 					break;
@@ -1236,7 +1294,7 @@ public class ParseCommand {
 			return null;
 		}
 		
-		Long definedTime = time.getTime();
+		Long definedTime = time==null?null:time.getTime();
 		int setHour = 0;
 		int setMinute = 0;
 		int setSecond = 0;
@@ -1400,7 +1458,7 @@ public class ParseCommand {
 		
 		// when the time is specified
 		if(this.searchBeforeDate != null || this.searchBeforeTime.getTime() != null){
-			return _extractDateHelper(searchBeforeDate, searchBeforeTime,LATEST_TIME);
+			return this.searchBeforeDate.getTime();
 		}
 		
 		// if a period of time is specified in user's input
@@ -1429,7 +1487,7 @@ public class ParseCommand {
 		
 		// when the time is specified
 		if(this.searchAfterDate != null || this.searchAfterTime.getTime() != null){
-			return _extractDateHelper(searchAfterDate, searchAfterTime,EARLIEST_TIME);
+			return this.searchAfterDate.getTime();
 		}
 		
 		// if a period of time is specified in user's input
@@ -1437,7 +1495,7 @@ public class ParseCommand {
 			if(this.startTime.getTime() != null){	// when everything is clear
 				return _extractDateHelper(this.startDate, this.startTime, this.NO_CHANGE);
 			} else{
-				return _extractDateHelper(this.startDate, this.startTime, this.LATEST_TIME);
+				return _extractDateHelper(this.startDate, this.startTime, this.EARLIEST_TIME);
 			}
 		}
 		

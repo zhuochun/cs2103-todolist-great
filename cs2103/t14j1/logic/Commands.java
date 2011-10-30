@@ -38,8 +38,9 @@ public enum Commands {
      * start    -> on StartDateTime
      * end      -> on EndDateTime
      * deadline -> on Deadline
-     * custom   -> according to user. eg remind 2 5 mins [later], remind 3:23pm etc..
-     * 
+     * custom   -> supported custom type:
+     * 	-> in + time period: e.g.: in 2 hours, in 2 second, in 5 minutes
+     *  -> date/time format: a specific date/time point
      */
     ADD_REMINDER,
 

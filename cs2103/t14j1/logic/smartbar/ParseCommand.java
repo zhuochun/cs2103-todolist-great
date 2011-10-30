@@ -10,6 +10,7 @@ import java.util.regex.Pattern;
 import cs2103.t14j1.logic.Commands;
 import cs2103.t14j1.storage.Priority;
 import cs2103.t14j1.storage.TaskLists;
+import cs2103.t14j1.taskmeter.reminder.Reminder;
 
 /**
  * @author Song Yangyu
@@ -25,6 +26,10 @@ class Time implements Comparable<Time>{
 	
 	public void setTime(Long time){
 		this.time = time;
+	}
+	
+	public void setTime(Integer time){
+		this.time = (long)time;
 	}
 	
 	public Long getTime(){
@@ -112,12 +117,13 @@ public class ParseCommand {
 			"(" + regDateOverallFormat+ "(" + regWordSpacer + regTimeFormat + ")?)|" + 	// date (time)?
 			"(" + regTimeFormat + "("+ regWordSpacer + regDateOverallFormat + ")?)" +  // time (date)?
 			")";
-	private static final String regDurationFormat = 
-			"(for(\\ [\\d]+\\ " + regTimeUnit + ")+)";
+	private static final String regDurationFormat = "(for(\\ [\\d]+\\ " + regTimeUnit + ")+)";
+	private static final String regReminderAfterTimeFormat = "(in(\\ [\\d]+\\ " + regTimeUnit + ")+)";
 	private static final String regPlaceFormat = 
 		"((@[\\w]+)|(@\\([^\\)]+\\)))";	// format: @ + word; or: @ + (words)
 	private static final String regPriorityFormat = "(![123])";
 	private static final String regListFormat = "((#[\\w]+)|(#\\([^\\)]+\\)))";//"((#[\\w]+)|(#\\([.]+\\)))";
+	
 	
 	private static final String regDeleteTaskCmd = "^(delete|del)\\ [\\d]+$";
 	private static final String regDeleteListCmd = "^(delete|del)\\ "+ regListFormat + "$";
@@ -126,10 +132,11 @@ public class ParseCommand {
 	private static final String regMoveTaskToListCmd = "^(move|mv)\\ [\\d]+\\ (" + regListFormat + "|#)$";
 	private static final String regEditTaskCmd = "^(edit)\\ [\\d]+$";	// simply signal an edit
 	private static final String regMarkAsCompleteCmd = "(^(done)\\ [\\d]+$)|(^[\\d]+\\ (done)$)";	// Syntax 1: [num] + done;  Syntax 2: done + [num]
-	private static final String regSetPriorityCmd = "^[\\d]+\\ " + regPriorityFormat + "$";
-	private static final String regAddListCmd = "^(add)+\\ " + regListFormat + "$";
-	private static final String regRenameListCmd = "^(rename)+\\ " + regListFormat + "\\ " + regListFormat + "$";
-	private static final String regEditListCmd = "^(edit)+\\ " + regListFormat + "$";
+	private static final String regSetPriorityCmd = "^[\\d]\\ " + regPriorityFormat + "$";
+	private static final String regAddListCmd = "^(add)\\ " + regListFormat + "$";
+	private static final String regRenameListCmd = "^(rename)\\ " + regListFormat + "\\ " + regListFormat + "$";
+	private static final String regEditListCmd = "^(edit)\\ " + regListFormat + "$";
+	private static final String regReminderGeneralCmd = "^(remind)\\ [\\d]+\\ .+";
 	// @endgroup regex
 	
 	// basic properities 
@@ -156,12 +163,15 @@ public class ParseCommand {
 	private Time searchBeforeTime;
 	private Time searchAfterTime;
 	private Calendar searchAfterDate;
-	
+	private Reminder reminderType;
+	private Calendar reminderTime;
 	
 	// some magic string used in defining the property
 	private static final int EARLIEST_TIME	= 0;
 	private static final int LATEST_TIME	= 1;
 	private static final int CURRENT_TIME	= 2;
+	private static final int NO_CHANGE = 3;
+	
 	
 	
 	// fields for other commands
@@ -182,7 +192,7 @@ public class ParseCommand {
 	 * @return
 	 * 	-- the matched string; null on no match
 	 */
-	private String matcherMatched(String reg,String matchStr,boolean ignoreCase){
+	private static String matcherMatched(String reg,String matchStr,boolean ignoreCase){
 		Pattern regPattern = Pattern.compile(
 				reg,
 				ignoreCase?Pattern.CASE_INSENSITIVE:0);
@@ -360,7 +370,57 @@ public class ParseCommand {
 				&& commandStr.substring(0, 4).compareToIgnoreCase("add ") == 0){
 			commandStr = commandStr.substring(4);
 			commandType = Commands.ADD_TASK;
-		} 
+		} else if(	// reminder TODO: not complete yet
+				matcherMatched(regReminderGeneralCmd, commandStr, true)!=null){
+			String stripedOut = commandStr.substring(commandStr.indexOf(' ')+1);
+			String taskNStr = stripedOut.substring(0,stripedOut.indexOf(' '));
+			stripedOut = stripedOut.substring(stripedOut.indexOf(' ')+1).trim();
+			// get the task id
+			this.taskNum = Integer.parseInt(taskNStr);
+			this.commandType = Commands.ADD_REMINDER;
+			
+			if(stripedOut.compareToIgnoreCase("start") == 0){
+				this.reminderType = Reminder.START;
+			} else if(stripedOut.compareToIgnoreCase("end") == 0){
+				this.reminderType = Reminder.END;
+			} else if(stripedOut.compareToIgnoreCase("deadline") == 0){
+				this.reminderType = Reminder.DEADLINE;
+			} else if(null != (matchedStr = 
+					matcherMatched(regReminderAfterTimeFormat, stripedOut, true))){
+
+				this.commandType = commandType.ADD_REMINDER;
+				String pureDurationStr = matchedStr.substring(matchedStr.indexOf(' '));
+				Integer res = regDurationPartsProess(pureDurationStr);
+				if(res == null){
+					this.reminderType = Reminder.INVALID;
+					return;
+				}
+				
+				this.reminderTime = Calendar.getInstance();
+				reminderTime.add(Calendar.SECOND, (int) res);
+				this.reminderType = Reminder.CUSTOM;
+				// clean the matchedStr after use
+				matchedStr = null;
+			} else if(null != (matchedStr =
+				matcherMatched(regDateTimeOverallFormat, stripedOut, true))){
+				Time newTime = new Time(null);
+				this.reminderTime = dateTimeProcess(newTime, matchedStr, null);
+				System.err.println(reminderTime.getTime());
+				if(reminderTime == null){	// invalid case
+					this.reminderType = Reminder.INVALID;
+					return;
+				} else{
+					this.reminderType = Reminder.CUSTOM;
+				}
+				this.reminderType = Reminder.CUSTOM;
+				// clean the matchedStr after use
+				matchedStr = null;
+			} else{
+				outputErr("Problem with reminder, striped str: " + stripedOut);
+				this.reminderType = Reminder.INVALID;
+			}
+			return;	// finish exectuion, return
+		}
 		 else{
 			commandType = Commands.INVALID;
 			return;
@@ -505,7 +565,7 @@ public class ParseCommand {
 	}
 
 
-	private Calendar dateTimeProcess(Time time, String timeDateStr, Calendar dateSubstitute){
+	private static Calendar dateTimeProcess(Time time, String timeDateStr, Calendar dateSubstitute){
 		Calendar date = null;
 		// check the date
 		/**
@@ -576,6 +636,15 @@ public class ParseCommand {
 					date = regDateFormat_today_tomorrow_Process("today");
 				}
 			}
+		}
+		
+		if(date != null && time.getTime() != null){
+			long secNum = time.getTime();
+			System.out.println("Time in sec: " + (int)secNum);
+			date.set(Calendar.HOUR_OF_DAY, 0);
+			date.set(Calendar.MINUTE, 0);
+			date.set(Calendar.SECOND, (int)secNum);
+			System.out.println("Date: " + date.getTime());
 		}
 		
 		return date;
@@ -676,12 +745,32 @@ public class ParseCommand {
 	 * @return
 	 */
 	private boolean regDurationFormatProcess(String durationStr) {
-		String[] durationParts = durationStr.split("\\ ");
+		String pureDurationStr = durationStr.substring(durationStr.indexOf(' '));
 		
-		long res = 0;
+		Integer res = regDurationPartsProess(pureDurationStr);
+		if(res == null){
+			return false;	// processing duration unsuccessful
+		}
+		
+		duration.setTime(res);
+		
+		// after getting the duration, if the end_date is not set, set the end date/time
+		if(startTime.getTime() != null){
+			endTime.setTime(startTime.getTime() + duration.getTime());
+			if(endDate == null){
+				endDate = (Calendar) startDate.clone();
+			}
+		}
+		
+		return true;
+	}
+
+	private static Integer regDurationPartsProess(String durationStr){
+		String durationParts[] = durationStr.trim().split("\\ ");
+		int res = 0;
 		
 		// then try to tell the duration information
-		for(int i=1; i<durationParts.length; i+=2){
+		for(int i=0; i<durationParts.length; i+=2){
 			long base = Long.parseLong(durationParts[i]);
 			String unit = durationParts[i+1];
 			if(unit == null || unit.compareTo("")==0){
@@ -696,24 +785,13 @@ public class ParseCommand {
 			} else if(unit.length() >= 3 && unit.substring(0, 3).compareToIgnoreCase("day") == 0){
 				res += base * 3600 * 24;
 			} else {
-				System.err.println("duration str: " + durationStr);
-				return false;
+				return null;	// when failed to process duration
 			}
 		}
-		
-		duration.setTime(res);
-		// after getting the duration, if the end_date is not set, set the end date/time
-		if(startTime.getTime() != null){
-			endTime.setTime(startTime.getTime() + duration.getTime());
-			if(endDate == null){
-				endDate = (Calendar) startDate.clone();
-			}
-		}
-		
-		return true;
+		return res;
 	}
-
-	private boolean regTimeFormatProcess(Time timeObj, String timeStr) {
+	
+	private static boolean regTimeFormatProcess(Time timeObj, String timeStr) {
 		// first level: separate by :
 		Long time = new Long(0); 	// initialization
 		timeStr = timeStr.toLowerCase();
@@ -778,7 +856,7 @@ public class ParseCommand {
 		return date;
 	}
 
-	private Calendar regDateFormat_today_tomorrow_Process(String today_tomorrow) {
+	private static Calendar regDateFormat_today_tomorrow_Process(String today_tomorrow) {
 		Calendar date = Calendar.getInstance();
 		if(today_tomorrow.compareTo("today") == 0){
 			// do nothing here
@@ -900,7 +978,7 @@ public class ParseCommand {
 		return (monthNum<12)?monthNum:-1;	// return -1 on false
 	}
 	
-	private Calendar dateFormat_dd_mm_$yy$yy$$_Process(String dateStr) {
+	private static Calendar dateFormat_dd_mm_$yy$yy$$_Process(String dateStr) {
 		Calendar date = Calendar.getInstance();
 		date.clear();
 		
@@ -949,11 +1027,16 @@ public class ParseCommand {
 	
 	public static void main(String[] args){
 		// test match here
-		String taskStr = "Get up tomorrow";	// test time
+		String testStr = "remind 3 in 3 min 2 h";
+			/* test cases to be added for Unit Test:
+			 * Reminder : 
+			 * 	"remind 3 4pm tomorrow";
+			 * 	"remind 3 19:00 tomorrow"
+			 *  "remind 3 in 3h 2m"
+			 *  "remind 3 in 3 min 2 h" -- note: currently cannot support string like 3m2h yet
+			 */
 		
-		String testStr = "add do last at 22nd November";
-		
-		// for testing
+ 		// for testing
 		BufferedReader in;
 		try {
 			in = new BufferedReader(new FileReader("src/cs2103/t14j1/logic/smartbar/test.txt"));
@@ -992,6 +1075,8 @@ public class ParseCommand {
 				System.out.println("End Time: " + test.extractEndTime());
 				System.out.println("Deadline Date: " + test.extractDeadlineDate());
 				System.out.println("Deadline Time: " + test.extractDeadlineTime());
+				System.out.println("Reminder Type: " + test.getRemindParamter());
+				System.out.println("Reminder Time: " + test.getRemindTime());
 				
 				if(testStr != null){
 					break;
@@ -1099,6 +1184,16 @@ public class ParseCommand {
 			setHour = 23;
 			setMinute = 59;
 			setSecond = 59;
+		} else if(defaultTimeOnNull == NO_CHANGE){
+			Long timeLong = time.getTime();
+			
+			if(timeLong == null){
+				return date.getTime();
+			} else{	// set the date to the time's date
+				setHour = (int) (timeLong/3600);
+				setMinute = (int)(timeLong%3600)%60;
+				setSecond =(int) (timeLong%60);
+			}
 		}
 		
 		date.set(Calendar.HOUR_OF_DAY, setHour);
@@ -1268,5 +1363,13 @@ public class ParseCommand {
 		return this.newListName;
 	}
 	/* END: These methods are for other commands, not add task */
+	
+	public Reminder getRemindParamter(){
+		return this.reminderType;
+	}
+	
+	public Date getRemindTime(){
+		return _extractDateHelper(this.reminderTime,new Time(null),this.NO_CHANGE);
+	}
 }
 

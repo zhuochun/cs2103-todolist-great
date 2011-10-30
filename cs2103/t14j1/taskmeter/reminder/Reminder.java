@@ -8,6 +8,11 @@ public enum Reminder {
     
     DEADLINE,
     
-    CUSTOM;
+    CUSTOM, 
+    
+    /**
+     * When it doesn't matches the above cases
+     */
+    INVALID;
 
 }

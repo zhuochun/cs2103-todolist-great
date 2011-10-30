@@ -106,6 +106,8 @@ public class ParseCommand {
 			"(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])([- /.](19|20)\\d\\d)?";
 	private static final String regTimeUnit = 
 			"((hour(s)?|h)|(minute(s)?|min)|(second(s)?|sec)|(day(s)?))";
+	private static final String regTimeUnitForSearch = 
+			"(" + regTimeUnit + "|" + regWeekText + "|" + regMonthText + ")";
 	
 	private static final String regDateOverallFormat =
 			"(" + regDateFormat_dd_$mm$M$_$yy$yy$$ + "|" + regDateFormat_order_weekD + 
@@ -137,6 +139,7 @@ public class ParseCommand {
 	private static final String regRenameListCmd = "^(rename)\\ " + regListFormat + "\\ " + regListFormat + "$";
 	private static final String regEditListCmd = "^(edit)\\ " + regListFormat + "$";
 	private static final String regReminderGeneralCmd = "^(remind)\\ [\\d]+\\ .+";
+	private static final String regReminderNumOnly = "^(remind)\\ [\\d]$";
 	// @endgroup regex
 	
 	// basic properities 
@@ -149,7 +152,7 @@ public class ParseCommand {
 	private String place = null;
 	private Commands commandType = null;
 	
-	private String taskTitle = null;
+	private String trimedStr = null;
 	
 	// for rename list
 	private String newListName = null;
@@ -370,14 +373,30 @@ public class ParseCommand {
 				&& commandStr.substring(0, 4).compareToIgnoreCase("add ") == 0){
 			commandStr = commandStr.substring(4);
 			commandType = Commands.ADD_TASK;
-		} else if(	// reminder TODO: not complete yet
+		} else if(
+				matcherMatched(regReminderNumOnly, commandStr, true)!= null
+		){	// reminder case 1
+			this.taskNum = Integer.parseInt(commandStr.substring(commandStr.indexOf(' ')+1));
+			this.commandType = Commands.ADD_REMINDER;
+			this.reminderType = Reminder.START;
+			return;
+		}
+		else if(	// reminder rest of the cases
 				matcherMatched(regReminderGeneralCmd, commandStr, true)!=null){
 			String stripedOut = commandStr.substring(commandStr.indexOf(' ')+1);
+			
 			String taskNStr = stripedOut.substring(0,stripedOut.indexOf(' '));
-			stripedOut = stripedOut.substring(stripedOut.indexOf(' ')+1).trim();
 			// get the task id
 			this.taskNum = Integer.parseInt(taskNStr);
 			this.commandType = Commands.ADD_REMINDER;
+			
+			// case for remind + [id]
+			if(stripedOut.trim().length() == 0){
+				this.reminderType = Reminder.START;
+				return;
+			}
+			
+			stripedOut = stripedOut.substring(stripedOut.indexOf(' ')+1).trim();
 			
 			if(stripedOut.compareToIgnoreCase("start") == 0){
 				this.reminderType = Reminder.START;
@@ -428,7 +447,7 @@ public class ParseCommand {
 		
 		command = commandStr;
 		
-		// extra parameter for search: before/after time
+		// time parameter for search
 		if(this.commandType == Commands.SEARCH){
 			/**
 			 * Before Time Format:
@@ -451,8 +470,36 @@ public class ParseCommand {
 			}
 			
 			if(regAfterDateTimeMatcher.find()){
-				String timeDateStr = removeTheLeadingAndTailingWordSpacer(matchedStr = regBeforeDateTimeMatcher.group());
+				String timeDateStr = removeTheLeadingAndTailingWordSpacer(matchedStr = regAfterDateTimeMatcher.group());
 				searchAfterDate = dateTimeProcess(searchAfterTime, timeDateStr, null);
+			}
+			
+			if((matchedStr = matcherMatched("today|tomorrow|((this|next)\\ " + regTimeUnitForSearch + ")", command, true)) != null){
+				Calendar date;
+				this.searchAfterDate = Calendar.getInstance();
+				
+				if(matchedStr.compareToIgnoreCase("today") == 0){
+					this.searchBeforeDate = (Calendar) this.searchAfterDate.clone();
+					_extractDateHelper(this.searchBeforeDate, null, LATEST_TIME);
+				} else if(matchedStr.compareToIgnoreCase("tomorrow") == 0){
+					this.searchAfterDate.add(Calendar.DAY_OF_YEAR, 1);
+					this.searchBeforeDate = (Calendar) this.searchAfterDate.clone();
+					_extractDateHelper(this.searchBeforeDate, null, EARLIEST_TIME);
+					_extractDateHelper(this.searchBeforeDate, null, LATEST_TIME);
+				} else{
+					String timeArgs[] = matchedStr.split("\\ ");
+					boolean next = (timeArgs[0].compareToIgnoreCase("next") == 0);
+					
+					
+					// compare the time unit
+					String timeUnit = timeArgs[1];
+					if(timeUnit.length() >= 3 && timeUnit.substring(0, 3).compareToIgnoreCase("sec") == 0){
+						
+					}
+				}
+				
+				
+				matchedStr = null;
 			}
 		}
 		
@@ -531,9 +578,31 @@ public class ParseCommand {
 		}
 		command = removeMatchedString(command, matchedStr);matchedStr=null;
 		
-		this.taskTitle = command.trim();
+		this.trimedStr = command.trim();
 	}
 	
+	private Calendar regSearchTimeUnitProcess(String matchedStr) {
+		Calendar res = Calendar.getInstance();
+		String periodInfo[] = matchedStr.split("\\ ");
+		
+		boolean next = (periodInfo[0].compareTo("next") == 0);
+		
+		String timeUnit = matchedStr.substring(matchedStr.indexOf(' '));
+		
+		// start processing the time unit
+		
+		// case of month
+		
+		// case of week
+		
+		
+		
+		Integer durationRes; 
+		
+		
+		return null;
+	}
+
 	private boolean regDeadlineProcess(String deadlineStr) {
 		// eliminate the "by "
 		deadlineStr = deadlineStr.substring(3);
@@ -1027,7 +1096,7 @@ public class ParseCommand {
 	
 	public static void main(String[] args){
 		// test match here
-		String testStr = "remind 3 in 3 min 2 h";
+		String testStr = "remind 1";
 			/* test cases to be added for Unit Test:
 			 * Reminder : 
 			 * 	"remind 3 4pm tomorrow";
@@ -1119,7 +1188,7 @@ public class ParseCommand {
 	 *  </quote>
 	 */
 	public String extractTaskName() {
-		return this.commandStr; // if TaskTitle is not found, return null
+		return (commandType==Commands.SEARCH)?this.trimedStr.trim():this.commandStr; // if TaskTitle is not found, return null
 	}
 
 	/**
@@ -1328,19 +1397,60 @@ public class ParseCommand {
 	
 	/* These four method are for search command only */
 	public Date extractSearchBeforeDate() {
-		return _extractDateHelper(searchBeforeDate, searchBeforeTime,LATEST_TIME);
+		
+		// when the time is specified
+		if(this.searchBeforeDate != null || this.searchBeforeTime.getTime() != null){
+			return _extractDateHelper(searchBeforeDate, searchBeforeTime,LATEST_TIME);
+		}
+		
+		// if a period of time is specified in user's input
+		if(this.endDate != null){
+			if(this.endTime.getTime() != null){	// when everything is clear
+				return _extractDateHelper(this.endDate, this.endTime, this.NO_CHANGE);
+			} else{
+				return _extractDateHelper(this.endDate, this.endTime, this.LATEST_TIME);
+			}
+		}
+		
+		// when there's no end date
+		return null;
 	}
 	
 	
-	public Long extractSearchBeforeTime(){
+	/**
+	 * This would not be in use
+	 * @return
+	 */
+	private Long extractSearchBeforeTime(){
 		return searchBeforeTime.getTime();
 	}
 	
 	public Date extractSearchAfterDate() {
-		return _extractDateHelper(searchAfterDate, searchAfterTime,EARLIEST_TIME);
+		
+		// when the time is specified
+		if(this.searchAfterDate != null || this.searchAfterTime.getTime() != null){
+			return _extractDateHelper(searchAfterDate, searchAfterTime,EARLIEST_TIME);
+		}
+		
+		// if a period of time is specified in user's input
+		if(this.startDate != null){
+			if(this.startTime.getTime() != null){	// when everything is clear
+				return _extractDateHelper(this.startDate, this.startTime, this.NO_CHANGE);
+			} else{
+				return _extractDateHelper(this.startDate, this.startTime, this.LATEST_TIME);
+			}
+		}
+		
+		// when there's no end date
+		return new Date();
+		
 	}
 	
-	public Long extractSearchAfterTime(){
+	/**
+	 * This would not be in use either
+	 * @return
+	 */
+	private Long extractSearchAfterTime(){
 		return searchAfterTime.getTime();
 	}
 	/* These four method are for search command only */

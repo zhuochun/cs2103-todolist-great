@@ -13,7 +13,7 @@ public enum Commands {
     DELETE_TASK,
 
     /**
-     * Syntax: move [num] [#list]
+     * Syntax: [move|mv] [num] [#list]
      */
     MOVE_TASK,
     

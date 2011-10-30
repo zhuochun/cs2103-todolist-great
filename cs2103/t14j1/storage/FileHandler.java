@@ -68,10 +68,10 @@ public class FileHandler {
 	 * 
 	 * @param lists
 	 */
-	public static String loadAll(TaskLists lists) {
+	public static String loadAll(TaskLists lists, TaskList reminderList) {
 	    
 	    loadLists(lists);
-	    loadTasks(lists);
+	    loadTasks(lists, reminderList);
 		
 		return LOAD_SUCCESS;
 	}
@@ -153,6 +153,7 @@ public class FileHandler {
                     taskElement.appendChild(createElement(Task.END_DATE, task.getEndLong(), doc));
                     taskElement.appendChild(createElement(Task.DEADLINE, task.getDeadlineLong(), doc));
                     taskElement.appendChild(createElement(Task.DURATION, task.getDuration() == null ? null : Long.toString(task.getDuration()), doc));
+                    taskElement.appendChild(createElement(Task.REMINDER, DateFormat.dateToStrLong(task.getReminder()), doc));
                     taskElement.appendChild(createElement(Task.STATUS, task.getStatusStr(), doc));
                 }
             }
@@ -171,7 +172,7 @@ public class FileHandler {
         return node;
     }
 
-    private static void loadTasks(TaskLists lists) {
+    private static void loadTasks(TaskLists lists, TaskList reminderList) {
         Document doc = openXmlDocument(fileFolder, taskFileName);
 
         if (doc == null) { // if doc failed to load
@@ -202,11 +203,19 @@ public class FileHandler {
             Date   deadline     = DateFormat.strToDateLong(deadlineStr);
             String durationStr  = getTagValue(Task.DURATION, taskElement);
             Long   duration     = durationStr == null ? null : Long.parseLong(durationStr);
+            String reminderStr  = getTagValue(Task.REMINDER, taskElement);
+            Date   reminder     = DateFormat.strToDateLong(reminderStr);
             String statusStr    = getTagValue(Task.STATUS, taskElement);
             boolean status     = statusStr.compareToIgnoreCase("completed") == 0;
             
+            Task newTask = new Task(name, place, list, priority, startDate, endDate, deadline, reminder, duration, status);
+            
             // add task to correct list
-            lists.addTask(list, new Task(name, place, list, priority, startDate, endDate, deadline, duration, status));
+            lists.addTask(list, newTask);
+            // add task to reminderList
+            if (reminder != null) {
+                reminderList.addTask(newTask);
+            }
         }
 	}
 

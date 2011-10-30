@@ -177,7 +177,7 @@ public class ReminderDialog extends Dialog {
         protected Runnable runnable;
         
         public ReminderTask(Date date, Task task) {
-            tasks = new TaskList("Reminder on " + date.toString());
+            tasks = new TaskList("Reminder on " + DateFormat.dateToStrShort(date));
             tasks.addTask(task);
             remindTime = date;
         }
@@ -186,7 +186,7 @@ public class ReminderDialog extends Dialog {
             runnable = new Runnable() {
                 public void run() {
                     setDisplay(getDisplayStr());
-                    setLabel(getLabelStr());
+                    setLabel(getLabelStr() + ":");
                     
                     if (shell.isVisible()) {
                         shell.setFocus();
@@ -200,6 +200,7 @@ public class ReminderDialog extends Dialog {
                     }
                     
                     refreshHandler.refresh();
+                    refreshHandler.trayRemind(tasks.getName(), getLabelStr());
                 }
             };
             
@@ -257,9 +258,9 @@ public class ReminderDialog extends Dialog {
             str.append(tasks.getSize());
             
             if (tasks.getSize() == 1) {
-                str.append(" reminder:");
+                str.append(" reminder");
             } else {
-                str.append(" reminders:");
+                str.append(" reminders");
             }
             
             return str.toString();

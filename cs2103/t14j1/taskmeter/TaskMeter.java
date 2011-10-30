@@ -125,7 +125,7 @@ public class TaskMeter extends Shell {
      * 
      * @param display
      */
-    public TaskMeter(Display display) {
+    public TaskMeter(final Display display) {
         super(display, SWT.SHELL_TRIM | SWT.BORDER | SWT.APPLICATION_MODAL);
         
         // set grid layout
@@ -163,6 +163,15 @@ public class TaskMeter extends Shell {
                 }
             }
         });
+        
+        // setup up auto save
+        Runnable autoSave = new Runnable() {
+            public void run() {
+                saveTaskMeter();
+                display.timerExec(300000, this);
+            }
+        };
+        display.timerExec(300000, autoSave);
 
         // set application logo
         setImage(new Image(display, "taskMeter.png"));
@@ -1467,8 +1476,11 @@ public class TaskMeter extends Shell {
      * @return
      */
     private boolean saveTaskMeter() {
-        FileHandler.saveAll(lists);
-        isModified = false;
+        if (isModified) {
+            FileHandler.saveAll(lists);
+            isModified = false;
+        }
+        
         return true;
     }
 

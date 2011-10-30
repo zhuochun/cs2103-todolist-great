@@ -334,7 +334,8 @@ public class Task implements Comparable<Object> {
             result = true;
         } else if (when.hasDateTime()) {
             if (start != null && end != null) {
-                result = start.before(when.getStartDateTime()) && end.after(when.getEndDateTime());
+                // as long as the startDateTime is within period start ~ date, it is considered within period
+                result = start.compareTo(getStartDateTime()) <= 0 && end.compareTo(getStartDateTime()) >= 0;
             } else if (start == null) {
                 result = end.after(when.getEndDateTime());
             } else if (end == null) {
@@ -342,7 +343,7 @@ public class Task implements Comparable<Object> {
             }
         } else if (when.hasDeadline()) {
             if (start != null && end != null) {
-                result = start.before(when.getDeadline()) && end.after(when.getDeadline());
+                result = start.compareTo(getDeadline()) <= 0 && end.compareTo(getDeadline()) >= 0;
             } else if (start == null) {
                 result = end.after(when.getDeadline());
             } else if (end == null) {

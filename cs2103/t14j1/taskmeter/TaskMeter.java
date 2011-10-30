@@ -1,5 +1,7 @@
 package cs2103.t14j1.taskmeter;
 
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.Map.Entry;
@@ -20,6 +22,7 @@ import org.eclipse.swt.events.ShellEvent;
 import org.eclipse.swt.events.TraverseEvent;
 import org.eclipse.swt.events.TraverseListener;
 import org.eclipse.swt.graphics.Image;
+import org.eclipse.swt.graphics.ImageData;
 import org.eclipse.swt.graphics.Point;
 import org.eclipse.swt.layout.GridData;
 import org.eclipse.swt.layout.GridLayout;
@@ -37,6 +40,9 @@ import org.eclipse.swt.widgets.Table;
 import org.eclipse.swt.widgets.TableColumn;
 import org.eclipse.swt.widgets.TableItem;
 import org.eclipse.swt.widgets.Text;
+import org.eclipse.swt.widgets.ToolTip;
+import org.eclipse.swt.widgets.Tray;
+import org.eclipse.swt.widgets.TrayItem;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 import cs2103.t14j1.logic.ControlGUI;
@@ -66,6 +72,9 @@ public class TaskMeter extends Shell {
     private Table taskTable;        // task table lists all the tasks
     private Table taskList;         // task list lists all the lists of tasks
     private Text  smartBar;         // smart bar
+    private Image logo;             // logo image
+    private TrayItem trayItem;      // tray item
+    private ToolTip  remindTray;    // tray reminder
 
     private boolean   isModified;
     private int       mode;         // MODE_LIST and MODE_SEARCH for different events
@@ -90,7 +99,7 @@ public class TaskMeter extends Shell {
             getResourceString("table.duration"),
             getResourceString("table.status")
     };
-    private int[] columnWidths = { 25, 200, 70, 160, 80, 80, 85 };
+    private int[] columnWidths = { 25, 200, 70, 160, 120, 80, 85 };
     
     // 2 different modes
     private static final int MODE_LIST   = 0;
@@ -174,7 +183,11 @@ public class TaskMeter extends Shell {
         display.timerExec(300000, autoSave);
 
         // set application logo
-        setImage(new Image(display, "taskMeter.png"));
+        setLogoImage(display);
+        setImage(logo);
+        // set application tray
+        setTray(display);
+        // set minimum size
         setMinimumSize(new Point(750, 500));
 
         // create each components
@@ -185,6 +198,89 @@ public class TaskMeter extends Shell {
         createBottomButtons();
         createStatusBar();
         createContents();
+    }
+    
+    private void setLogoImage(Display display) {
+        try {
+            InputStream stream = TaskMeter.class.getResourceAsStream("taskMeter.gif");
+            ImageData source = new ImageData(stream);
+            ImageData mask = source.getTransparencyMask();
+            logo = new Image(display, source, mask);
+            try {
+                stream.close();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
+        } catch (Exception ex) {
+        }
+    }
+    
+    private void openTrayReminder(String title, String msg) {
+        remindTray.setText(title);
+        remindTray.setMessage(msg);
+        remindTray.setVisible(true);
+        remindTray.setAutoHide(true);
+        remindTray.addListener(SWT.Selection, new Listener() {
+            public void handleEvent(Event e) {
+                openTaskMeter();
+            }
+        });
+    }
+    
+    private void setTray(Display display) {
+        final Tray tray = display.getSystemTray();
+        
+        if (tray != null) {
+            remindTray = new ToolTip(this, SWT.BALLOON | SWT.ICON_INFORMATION);
+            remindTray.setVisible(false);
+            
+            trayItem = new TrayItem(tray, SWT.NONE);
+            trayItem.setImage(logo);
+            trayItem.setToolTip(remindTray);
+            trayItem.setToolTipText(getResourceString("app.title"));
+            
+            trayItem.addListener(SWT.Selection, new Listener() {
+              public void handleEvent(Event event) {
+                  openTaskMeter();
+              }
+            });
+            
+            final Menu menu = new Menu(this, SWT.POP_UP);
+            MenuItem menuItem = new MenuItem(menu, SWT.PUSH);
+            menuItem.setText("Open");
+            menuItem.addListener(SWT.Selection, new Listener() {
+                public void handleEvent(Event event) {
+                    openTaskMeter();
+                }
+            });
+            
+            menuItem = new MenuItem(menu, SWT.PUSH);
+            menuItem.setText("Save");
+            menuItem.addListener(SWT.Selection, new Listener() {
+                public void handleEvent(Event event) {
+                    saveTaskMeter();
+                    openTrayReminder(getResourceString("msg.save.title"), getResourceString("msg.saved"));
+                }
+            });
+
+            menuItem = new MenuItem(menu, SWT.PUSH);
+            menuItem.setText("Exit");
+            menuItem.addListener(SWT.Selection, new Listener() {
+                public void handleEvent(Event event) {
+                    if (closeTaskMeter()) {
+                        System.exit(0);
+                    }
+                }
+            });
+            
+            trayItem.addListener(SWT.MenuDetect, new Listener() {
+                public void handleEvent(Event event) {
+                    menu.setVisible(true);
+                }
+            });
+        } else {
+            //System.out.println("not supported");
+        }
     }
 
     /**
@@ -226,6 +322,9 @@ public class TaskMeter extends Shell {
         reminder.addRefreshListener(new RefreshListener() {
             public void refresh() {
                 displayTasks();
+            }
+            public void trayRemind(String title, String msg) {
+                openTrayReminder(title, msg);
             }
         });
     }
@@ -1394,44 +1493,6 @@ public class TaskMeter extends Shell {
         setStatusBar(feedback);
     }
 
-    private void addReminder(int index, Reminder parameter) {
-        String feedback = null;
-        
-        try {
-            Task task = getIndexedTask(index);
-            
-            Date remindTime = null;
-
-            switch (parameter) {
-                case START:
-                    remindTime = task.getStartDateTime();
-                    break;
-                case END:
-                    remindTime = task.getEndDateTime();
-                    break;
-                case DEADLINE:
-                    remindTime = task.getDeadline();
-                    break;
-                case CUSTOM:
-                    remindTime = logic.getReminderTime();
-                    break;
-            }
-
-            reminder.addReminder(remindTime, task);
-            
-            refreshTask(index, task);
-            isModified = true;
-            
-            feedback = String.format(getResourceString("msg.ADD_REMINDER"), task.getName(), DateFormat.dateToStrShort(remindTime));
-        } catch (NullPointerException e) {
-            feedback = e.getMessage();
-        } catch (IllegalArgumentException e) {
-            feedback = e.getMessage();
-        }
-        
-        setStatusBar(feedback);
-    }
-    
     private void removeReminder(int index) {
         String feedback = null;
         
@@ -1500,6 +1561,49 @@ public class TaskMeter extends Shell {
         return items[0].getText();
     }
     
+    private void addReminder(int index, Reminder parameter) {
+        String feedback = null;
+        
+        try {
+            Task task = getIndexedTask(index);
+            
+            Date remindTime = null;
+    
+            switch (parameter) {
+                case START:
+                    remindTime = task.getStartDateTime();
+                    break;
+                case END:
+                    remindTime = task.getEndDateTime();
+                    break;
+                case DEADLINE:
+                    remindTime = task.getDeadline();
+                    break;
+                case CUSTOM:
+                    remindTime = logic.getReminderTime();
+                    break;
+            }
+    
+            reminder.addReminder(remindTime, task);
+            
+            refreshTask(index, task);
+            isModified = true;
+            
+            feedback = String.format(getResourceString("msg.ADD_REMINDER"), task.getName(), DateFormat.dateToStrShort(remindTime));
+        } catch (NullPointerException e) {
+            feedback = e.getMessage();
+        } catch (IllegalArgumentException e) {
+            feedback = e.getMessage();
+        }
+        
+        setStatusBar(feedback);
+    }
+
+    private void openTaskMeter() {
+        this.setMinimized(false);
+        this.forceActive();
+    }
+
     /**
      * 
      * @return
@@ -1531,17 +1635,11 @@ public class TaskMeter extends Shell {
             } else if (choice == SWT.YES) {
                 if (!saveTaskMeter())
                     return false;
+                trayItem.dispose();
             }
         }
     
         return true;
-    }
-
-    private void displayError(String msg) {
-        MessageBox box = new MessageBox(this, SWT.ICON_ERROR);
-        box.setText("Error");
-        box.setMessage(msg);
-        box.open();
     }
 
     private void setStatusBar(String msg) {
@@ -1584,6 +1682,13 @@ public class TaskMeter extends Shell {
         }
     }
     
+    private void displayError(String msg) {
+        MessageBox box = new MessageBox(this, SWT.ICON_ERROR);
+        box.setText("Error");
+        box.setMessage(msg);
+        box.open();
+    }
+
     /**
      * change to and open quick add view
      */

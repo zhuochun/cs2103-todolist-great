@@ -12,6 +12,8 @@ public interface EventListener {
     
     public Task getTask(int index);
     
+    public String getEditList(String oldName);
+    
     public void setStatus(String msg);
     
     public void setModified();
@@ -24,9 +26,13 @@ public interface EventListener {
     
     public void refreshTasks();
     
+    public void refreshTask(int idx, Task task);
+    
     public void setSearch(TaskList result);
     
     public void switchTask(String list);
+    
+    public void switchList(String list);
     
     public void editTask(int idx);
     

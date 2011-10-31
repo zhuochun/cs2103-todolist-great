@@ -12,6 +12,7 @@ public class MoveTask extends Event {
     public void register(Object... objs) {
         int index   = (Integer) objs[0];
         newListName = (String) objs[2];
+        
         task        = eventHandler.getTask(index);
         oldListName = task.getList();
     }

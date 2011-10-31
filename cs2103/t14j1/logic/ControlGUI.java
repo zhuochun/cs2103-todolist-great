@@ -87,13 +87,13 @@ public class ControlGUI {
                     moveTask(logic.getTaskIdx(), logic.getListName());
                     break;
                 case EDIT_TASK:
-                    editTask(logic.getTaskIdx());
+                    editTask(getTaskIdx());
                     break;
                 case ADD_REMINDER:
                     addReminder(logic.getTaskIdx(), logic.getReminderParameter());
                     break;
                 case MARK_COMPLETE:
-                    toggleStatus(logic.getTaskIdx());
+                    toggleStatus(getTaskIdx(), Task.COMPLETED);
                     break;
                 case MARK_PRIORITY:
                     togglePriority(logic.getTaskIdx(), logic.getNewTaskPriority());
@@ -102,16 +102,16 @@ public class ControlGUI {
                     addList(getListName());
                     break;
                 case EDIT_LIST:
-                    editList(logic.extractNewListName(), null);
+                    editList(extractOldListName(), null);
                     break;
                 case RENAME_LIST:
-                    editList(logic.extractNewListName(), logic.extractNewListName());
+                    editList(extractOldListName(), extractNewListName());
                     break;
                 case DELETE_LIST:
                     deleteList(getListName());
                     break;
                 case SWITCH_LIST:
-                    switchList(logic.getListName());
+                    eventHandler.switchList(getListName());
                     break;
                 case SEARCH:
                     doSearch(getSearchResult());
@@ -126,6 +126,16 @@ public class ControlGUI {
     }
     
     
+    public void toggleStatus(int taskIdx, Boolean newStatus) {
+        Event newEvent = Event.generateEvent(Commands.MARK_COMPLETE);
+        registerEvent(newEvent, taskIdx, newStatus);
+    }
+
+    public void editList(String oldlist, String newlist) {
+        Event newEvent = Event.generateEvent(Commands.EDIT_LIST);
+        registerEvent(newEvent, oldlist, newlist);
+    }
+
     public void deleteTask(int taskIdx) {
         Event newEvent = Event.generateEvent(Commands.DELETE_TASK);
         registerEvent(newEvent, taskIdx);
@@ -169,7 +179,9 @@ public class ControlGUI {
         registerEvent(newEvent, task);
     }
     
-    public void editTask() {
+    public void editTask(int index) {
+        Event newEvent = Event.generateEvent(Commands.EDIT_TASK);
+        registerEvent(newEvent, index);
     }
     
     public void registerEvent(Event e, Object... objs) {

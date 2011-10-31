@@ -21,7 +21,7 @@ public interface EventListener {
     
     public void setModified();
     
-    public void displayNewList(String listname);
+    public void displayList(String listname);
     
     public void refreshDisplay();
     
@@ -31,9 +31,9 @@ public interface EventListener {
     
     public void setSearch(TaskList result);
     
-    public void switchTask(String list);
+    public void switchToTask(String list);
     
-    public void switchList(String list);
+    public void switchToList(String list);
     
     public void editTask(int idx);
 }

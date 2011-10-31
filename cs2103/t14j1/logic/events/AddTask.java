@@ -20,7 +20,7 @@ public class AddTask extends Event {
             feedback = String.format(eventHandler.getMsg("msg.ADD_TASK_SUCCESS"), task.getName(), task.getList());
             
             eventHandler.refreshLists();
-            eventHandler.switchTask(task.getList());
+            eventHandler.switchToTask(task.getList());
             
             eventHandler.setModified();
         } else {
@@ -35,6 +35,12 @@ public class AddTask extends Event {
     }
     
     public Event undo() {
+        Event undo = new DeleteTask();
+        undo.setEventLisnter(eventHandler);
+        
+        undo.register(task);
+        undo.execute();
+        
         return null;
     }
 

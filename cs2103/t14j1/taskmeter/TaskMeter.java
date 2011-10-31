@@ -368,7 +368,7 @@ public class TaskMeter extends Shell {
                 isModified = true;
             }
 
-            public void displayNewList(String listname) {
+            public void displayList(String listname) {
                 displayNewList(listname);
             }
 
@@ -389,11 +389,11 @@ public class TaskMeter extends Shell {
                 displaySearchResult();
             }
 
-            public void switchTask(String list) {
+            public void switchToTask(String list) {
                 switchTask(list);
             }
 
-            public void switchList(String list) {
+            public void switchToList(String list) {
                 switchList(list);
             }
 
@@ -964,7 +964,8 @@ public class TaskMeter extends Shell {
         btnWithoutDate.setLayoutData(new GridData(SWT.FILL, SWT.FILL, true, false, 1, 1));
         btnWithoutDate.setText(getResourceString("filter.nodate"));
         
-        setTabList(new Control[]{smartBar, taskList, taskTable, btnAll, btnImportant, btnCompleted, btnOverdue, btnToday, btnTomorrow, btnNextDays, btnWithoutDate});
+        setTabList(new Control[]{smartBar, taskList, taskTable, btnAll, btnImportant, btnCompleted,
+                btnOverdue, btnToday, btnTomorrow, btnNextDays, btnWithoutDate});
     }
     
     private void createStatusBar() {

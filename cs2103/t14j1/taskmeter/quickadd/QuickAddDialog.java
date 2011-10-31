@@ -190,7 +190,7 @@ public class QuickAddDialog extends Dialog {
         try {
             switch (logic.getCommand()) {
                 case ADD_TASK:
-                    Task newTask = logic.addTask();
+                    Task newTask = logic.quickAddTask();
                     if (newTask != null) {
                         isModified = true;
                         setStatus(MSG_SUCCESS);

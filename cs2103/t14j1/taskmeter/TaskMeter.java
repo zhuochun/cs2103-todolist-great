@@ -509,6 +509,28 @@ public class TaskMeter extends Shell {
             }
         });
         mntmAddTask.setText(getResourceString("newTask"));
+        
+        new MenuItem(menuUser, SWT.SEPARATOR);
+        
+        final MenuItem mntmClearCompleted = new MenuItem(menuUser, SWT.NONE);
+        mntmClearCompleted.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                logic.clearCompleted(currentList);
+                displayTasks();
+            }
+        });
+        mntmClearCompleted.setText(getResourceString("clearCompleted"));
+    
+        final MenuItem mntmClearTrash = new MenuItem(menuUser, SWT.NONE);
+        mntmClearTrash.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                logic.clearTrash();
+                displayTasks();
+            }
+        });
+        mntmClearTrash.setText(getResourceString("clearTrash"));
     
         new MenuItem(menuUser, SWT.SEPARATOR);
     
@@ -531,13 +553,17 @@ public class TaskMeter extends Shell {
         mntmExit.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                System.exit(0);
+                if (closeTaskMeter()) {
+                    System.exit(0);
+                }
             }
         });
         mntmExit.setText(getResourceString("exit"));
         
         menuUser.addMenuListener(new MenuAdapter() {
             public void menuShown(MenuEvent e) {
+                mntmClearCompleted.setEnabled(mode == MODE_LIST && !currentList.getName().equals(TaskLists.TRASH));
+                mntmClearTrash.setEnabled(!lists.getList(TaskLists.TRASH).isEmpty());
                 mntmSave.setEnabled(isModified == true);
             }
         });

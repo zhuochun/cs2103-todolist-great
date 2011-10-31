@@ -16,8 +16,9 @@ public class Search extends Event {
         searchResult = (TaskList) objs[0];
     }
 
-    public void execute() {
+    public boolean execute() {
         eventHandler.setSearch(searchResult);
+        return true;
     }
 
     public boolean hasUndo() {

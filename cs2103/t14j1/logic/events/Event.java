@@ -70,7 +70,8 @@ public abstract class Event {
     public void register(Object... objs) {
     }
 
-    public void execute() {
+    public boolean execute() {
+        return false;
     }
 
     public boolean hasUndo() {

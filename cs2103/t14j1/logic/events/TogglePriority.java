@@ -28,8 +28,9 @@ public class TogglePriority extends Event {
         newPriority = (Priority) objs[1];
     }
 
-    public void execute() {
+    public boolean execute() {
         String feedback = null;
+        boolean success = false;
 
         try {
             task = eventHandler.getTask(index);
@@ -40,12 +41,15 @@ public class TogglePriority extends Event {
             eventHandler.setModified();
             eventHandler.refreshTasks();
 
+            success  = true;
             feedback = String.format(eventHandler.getMsg("msg.TOGGLE"), task.getName(), newPriority);
         } catch (IndexOutOfBoundsException e) {
+            success  = false;
             feedback = e.getMessage();
         }
 
         eventHandler.setStatus(feedback);
+        return success;
     }
 
     public boolean hasUndo() {
@@ -57,9 +61,14 @@ public class TogglePriority extends Event {
         undo.setEventLisnter(eventHandler);
 
         undo.register(task, oldPriority);
-        undo.execute();
-
-        return undo;
+        
+        boolean success = undo.execute();
+        
+        if (success) {
+            return undo;
+        } else {
+            return null;
+        }
     }
 
 }

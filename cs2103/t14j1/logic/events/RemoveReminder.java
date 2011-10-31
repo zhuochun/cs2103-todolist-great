@@ -19,13 +19,14 @@ public class RemoveReminder extends Event {
         task = (Task) objs[0];
     }
 
-    public void execute() {
+    public boolean execute() {
         String feedback = null;
+        boolean success = false;
 
         try {
             remindTime = task.getReminder();
 
-            boolean success = eventHandler.getReminder().removeReminder(task);
+            success = eventHandler.getReminder().removeReminder(task);
 
             if (success) {
                 eventHandler.setModified();
@@ -37,11 +38,14 @@ public class RemoveReminder extends Event {
             }
         } catch (NullPointerException e) {
             feedback = e.getMessage();
+            success  = false;
         } catch (IllegalArgumentException e) {
             feedback = e.getMessage();
+            success  = false;
         }
 
         eventHandler.setStatus(feedback);
+        return success;
     }
 
     public boolean hasUndo() {
@@ -53,9 +57,14 @@ public class RemoveReminder extends Event {
         undo.setEventLisnter(eventHandler);
 
         undo.register(task, remindTime);
-        undo.execute();
-
-        return undo;
+        
+        boolean success = undo.execute();
+        
+        if (success) {
+            return undo;
+        } else {
+            return null;
+        }
     }
 
 }

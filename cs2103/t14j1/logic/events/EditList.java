@@ -21,15 +21,16 @@ public class EditList extends Event {
         newName = (String) objs[1];
     }
 
-    public void execute() {
+    public boolean execute() {
         String feedback = null;
+        boolean success = false;
 
         if (newName == null) {
             newName = eventHandler.getEditList(oldName);
         }
 
         try {
-            boolean success = renameList(oldName, newName);
+            success = renameList(oldName, newName);
 
             if (success) {
                 eventHandler.setModified();
@@ -41,9 +42,11 @@ public class EditList extends Event {
             }
         } catch (NullPointerException e) {
             feedback = e.getMessage();
+            success  = false;
         }
 
         eventHandler.setStatus(feedback);
+        return success;
     }
 
     private boolean renameList(String oldName, String newName) {
@@ -72,8 +75,13 @@ public class EditList extends Event {
         undo.setEventLisnter(eventHandler);
 
         undo.register(newName, oldName);
-        undo.execute();
-
-        return undo;
+        
+        boolean success = undo.execute();
+        
+        if (success) {
+            return undo;
+        } else {
+            return null;
+        }
     }
 }

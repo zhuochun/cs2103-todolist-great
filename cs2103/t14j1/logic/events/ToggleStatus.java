@@ -31,8 +31,9 @@ public class ToggleStatus extends Event {
         }
     }
 
-    public void execute() {
+    public boolean execute() {
         String feedback = null;
+        boolean success = false;
 
         try {
             if (index != -1) {
@@ -50,12 +51,15 @@ public class ToggleStatus extends Event {
             eventHandler.setModified();
             eventHandler.refreshTasks();
 
+            success  = true;
             feedback = String.format(eventHandler.getMsg("msg.TOGGLE"), task.getName(), task.getStatusStr());
         } catch (IndexOutOfBoundsException e) {
             feedback = e.getMessage();
+            success  = false;
         }
 
         eventHandler.setStatus(feedback);
+        return success;
     }
 
     public boolean hasUndo() {
@@ -67,8 +71,13 @@ public class ToggleStatus extends Event {
         undo.setEventLisnter(eventHandler);
 
         undo.register(task, oldStatus);
-        undo.execute();
-
-        return null;
+        
+        boolean success = undo.execute();
+        
+        if (success) {
+            return undo;
+        } else {
+            return null;
+        }
     }
 }

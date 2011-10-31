@@ -25,8 +25,9 @@ public class DeleteTask extends Event {
         }
     }
 
-    public void execute() {
+    public boolean execute() {
         String feedback = null;
+        boolean success = false;
 
         try {
             if (index != -1) {
@@ -34,7 +35,7 @@ public class DeleteTask extends Event {
             }
             oldListName = task.getList();
             
-            boolean success = false;
+            success = false;
 
             // move task to trash, if task is in trash, delete it
             if (task.getList().equals(TaskLists.TRASH)) {
@@ -53,11 +54,14 @@ public class DeleteTask extends Event {
             }
         } catch (IndexOutOfBoundsException e) {
             feedback = e.getMessage();
+            success  = false;
         } catch (Exception e) {
             feedback = e.getMessage();
+            success  = false;
         }
 
         eventHandler.setStatus(feedback);
+        return success;
     }
 
     public boolean hasUndo() {
@@ -71,9 +75,14 @@ public class DeleteTask extends Event {
         undo.setEventLisnter(eventHandler);
 
         undo.register(task);
-        undo.execute();
-
-        return undo;
+        
+        boolean success = undo.execute();
+        
+        if (success) {
+            return undo;
+        } else {
+            return null;
+        }
     }
 
 }

@@ -5,7 +5,18 @@ import cs2103.t14j1.storage.TaskLists;
 
 public class DeleteTask extends Event {
     
+    Task   task;
+    String oldListName;
+    
     public void register(Object... objs) {
+        if (objs[0] instanceof Integer) {
+            int index = (Integer) objs[0];
+            task = eventHandler.getTask(index);
+        } else {
+            task = (Task) objs[0];
+        }
+        
+        oldListName = task.getName();
     }
     
     public void execute() {
@@ -13,23 +24,22 @@ public class DeleteTask extends Event {
         
         
         try {
-            Task delTask = getIndexedTask(index);
-            
             boolean success = false;
             
             // move task to trash, if task is in trash, delete it
-            if (delTask.getList().equals(TaskLists.TRASH)) {
-                success = lists.removeTask(delTask.getList(), delTask);
+            if (task.getList().equals(TaskLists.TRASH)) {
+                success = eventHandler.getLists().removeTask(task.getList(), task);
             } else {
-                success = lists.moveTask(TaskLists.TRASH, delTask);
-            }
+                success = eventHandler.getLists().moveTask(TaskLists.TRASH, task);
+            } 
             
             if (success) {
-                feedback = String.format(getResourceString("msg.DELETE_SUCCESS"), "TASK", delTask.getName());
-                isModified = true;
-                displayTasks();
+                eventHandler.setModified();
+                eventHandler.refreshTasks();
+                
+                feedback = String.format(eventHandler.getMsg("msg.DELETE_SUCCESS"), "TASK", task.getName());
             } else {
-                feedback = String.format(getResourceString("msg.DELETE_FAIL"), "TASK");
+                feedback = String.format(eventHandler.getMsg("msg.DELETE_FAIL"), "TASK");
             }
         } catch (IndexOutOfBoundsException e) {
             feedback = e.getMessage();
@@ -37,16 +47,23 @@ public class DeleteTask extends Event {
             feedback = e.getMessage();
         }
         
-        setStatusBar(feedback);
-
+        eventHandler.setStatus(feedback);
     }
     
     public boolean hasUndo() {
-        return false;
+        return true;
     }
     
     public Event undo() {
-        return null;
+        task.setName(oldListName);
+        
+        Event undo = new AddTask();
+        undo.setEventLisnter(eventHandler);
+        
+        undo.register(task);
+        undo.execute();
+        
+        return undo;
     }
     
 }

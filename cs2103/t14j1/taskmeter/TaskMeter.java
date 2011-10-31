@@ -1118,30 +1118,7 @@ public class TaskMeter extends Shell {
         
         String newList = dialog.open();
         
-        addList(newList);
-    }
-    
-    /**
-     * add the newList into lists and display result
-     * 
-     * @param newList
-     */
-    private void addList(String newList) {
-        String feedback;
-        
-        try {
-            if (lists.addList(newList)) {
-                feedback = String.format(getResourceString("msg.ADD_SUCCESS"), "LIST", newList);
-                displayNewList(newList);
-                isModified = true;
-            } else {
-                feedback = String.format(getResourceString("msg.LIST_EXIST"), newList);
-            }
-        } catch (NullPointerException e) {
-            feedback = e.getMessage();
-        }
-        
-        setStatusBar(feedback);
+        logic.addList(newList);
     }
     
     /**
@@ -1219,7 +1196,7 @@ public class TaskMeter extends Shell {
     
             int choice = box.open();
             if (choice == SWT.YES) {
-                addList(name);
+                logic.addList(name);
             } else {
                 setStatusBar(getResourceString("msg.switch.null.list"));
                 return ;
@@ -1251,10 +1228,7 @@ public class TaskMeter extends Shell {
     }
     
     private void switchTask(String listname) {
-        if (!listname.equals(currentList.getName())) {
-            switchList(listname);
-        }
-        
+        switchList(listname);
         taskTable.setSelection(taskTable.getItemCount()-1);
     }
 
@@ -1283,6 +1257,7 @@ public class TaskMeter extends Shell {
     }
     
     private void deleteTask(int index) {
+        logic.deleteTask(index);
     }
     
     private void toggleStatus(int index) {

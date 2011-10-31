@@ -74,62 +74,68 @@ public class ControlGUI {
      * @param input         user's input string
      */
     public void executeCommand() {
-        Event newEvent = Event.generateEvent(getCommand());
-        
-        if (newEvent != null) {
-            // register event
-            try {
-                switch (getCommand()) {
-                    case ADD_TASK:
-                        registerEvent(newEvent, addTask());
-                        break;
-                    case DELETE_TASK:
-                        deleteTask(getTaskIdx());
-                        break;
-                    case MOVE_TASK:
-                        moveTask(logic.getTaskIdx(), logic.getListName());
-                        break;
-                    case EDIT_TASK:
-                        editTask(logic.getTaskIdx());
-                        break;
-                    case ADD_REMINDER:
-                        addReminder(logic.getTaskIdx(), logic.getReminderParameter());
-                        break;
-                    case MARK_COMPLETE:
-                        toggleStatus(logic.getTaskIdx());
-                        break;
-                    case MARK_PRIORITY:
-                        togglePriority(logic.getTaskIdx(), logic.getNewTaskPriority());
-                        break;
-                    case ADD_LIST:
-                        addList(logic.getListName());
-                        break;
-                    case EDIT_LIST:
-                        editList(logic.extractNewListName(), null);
-                        break;
-                    case RENAME_LIST:
-                        editList(logic.extractNewListName(), logic.extractNewListName());
-                        break;
-                    case DELETE_LIST:
-                        deleteList(logic.getListName());
-                        break;
-                    case SWITCH_LIST:
-                        switchList(logic.getListName());
-                        break;
-                    case SEARCH:
-                        registerEvent(newEvent, getSearchResult());
-                        break;
-                    default:
-                        eventHandler.setStatus(eventHandler.getMsg("msg.invalid.command"));
-                        break;
-                }
-            } catch (Exception e) {
-                eventHandler.setStatus(eventHandler.getMsg("error.logic.command"));
+        // register event
+        try {
+            switch (getCommand()) {
+                case ADD_TASK:
+                    addTask(addTask());
+                    break;
+                case DELETE_TASK:
+                    deleteTask(getTaskIdx());
+                    break;
+                case MOVE_TASK:
+                    moveTask(logic.getTaskIdx(), logic.getListName());
+                    break;
+                case EDIT_TASK:
+                    editTask(logic.getTaskIdx());
+                    break;
+                case ADD_REMINDER:
+                    addReminder(logic.getTaskIdx(), logic.getReminderParameter());
+                    break;
+                case MARK_COMPLETE:
+                    toggleStatus(logic.getTaskIdx());
+                    break;
+                case MARK_PRIORITY:
+                    togglePriority(logic.getTaskIdx(), logic.getNewTaskPriority());
+                    break;
+                case ADD_LIST:
+                    addList(getListName());
+                    break;
+                case EDIT_LIST:
+                    editList(logic.extractNewListName(), null);
+                    break;
+                case RENAME_LIST:
+                    editList(logic.extractNewListName(), logic.extractNewListName());
+                    break;
+                case DELETE_LIST:
+                    deleteList(logic.getListName());
+                    break;
+                case SWITCH_LIST:
+                    switchList(logic.getListName());
+                    break;
+                case SEARCH:
+                    doSearch(getSearchResult());
+                    break;
+                default:
+                    eventHandler.setStatus(eventHandler.getMsg("msg.invalid.command"));
+                    break;
             }
+        } catch (Exception e) {
+            eventHandler.setStatus(eventHandler.getMsg("error.logic.command"));
         }
     }
     
     
+    public void deleteTask(int taskIdx) {
+        Event newEvent = Event.generateEvent(Commands.DELETE_TASK);
+        registerEvent(newEvent, taskIdx);
+    }
+
+    public void doSearch(TaskList searchResult) {
+        Event newEvent = Event.generateEvent(Commands.SEARCH);
+        registerEvent(newEvent, searchResult);
+    }
+
     /**
      * if the user's command is ADD_TASK, GUI will call this method to perform the actual addTask
      * 
@@ -228,16 +234,11 @@ public class ControlGUI {
      * 
      * @return the new TaskList if successfully added or null if failed
      */
-    public TaskList addList() {
-        String name = parseCommand.extractListName();
+    public void addList(String name) {
+        Event newEvent = Event.generateEvent(Commands.ADD_LIST);
         
-        try {
-            lists.addList(name);
-        } catch (NullPointerException e) {
-            return null;
-        }
-        
-        return lists.getList(name);
+        newEvent.register(name);
+        newEvent.execute();
     }
     
     /**

@@ -16,9 +16,13 @@ public interface EventListener {
     
     public void setModified();
     
+    public void displayNewList(String listname);
+    
     public void refreshDisplay();
     
     public void refreshLists();
+    
+    public void refreshTasks();
     
     public void setSearch(TaskList result);
     

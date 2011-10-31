@@ -16,18 +16,19 @@ public class DeleteList extends Event {
 
     public void register(Object... objs) {
         name = (String) objs[0];
-        list = eventHandler.getLists().getList(name);
     }
 
     public void execute() {
         String feedback = null;
 
         try {
+            list = eventHandler.getLists().getList(name);
+            
             boolean success = deleteList(name);
 
             if (success) {
                 eventHandler.setModified();
-                eventHandler.refreshDisplay();
+                eventHandler.refreshAll();
 
                 feedback = String.format(eventHandler.getMsg("msg.DELETE_SUCCESS"), "List", name);
             } else {

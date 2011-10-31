@@ -42,7 +42,7 @@ public class MoveTask extends Event {
             lists.moveTask(newListName, task);
 
             eventHandler.setModified();
-            eventHandler.refreshDisplay();
+            eventHandler.refreshAll();
 
             feedback = String.format(eventHandler.getMsg("msg.MOVE"), task.getName(), newListName);
         } catch (IllegalArgumentException e) {

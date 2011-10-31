@@ -19,6 +19,7 @@ public class AddList extends Event {
             list = null;
         } else if (objs[0] instanceof TaskList) {
             list = (TaskList) objs[0];
+            listname = list.getName();
         } else {
             throw new IllegalArgumentException();
         }
@@ -56,6 +57,7 @@ public class AddList extends Event {
 
     public Event undo() {
         Event undo = new DeleteList();
+        undo.setEventLisnter(eventHandler);
 
         undo.register(listname);
         undo.execute();

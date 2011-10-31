@@ -372,7 +372,7 @@ public class TaskMeter extends Shell {
                 displayNewList(listname);
             }
 
-            public void refreshDisplay() {
+            public void refreshAll() {
                 refreshDisplay();
             }
 

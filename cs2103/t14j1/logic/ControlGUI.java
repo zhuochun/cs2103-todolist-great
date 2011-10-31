@@ -88,7 +88,7 @@ public class ControlGUI {
                     deleteTask(getTaskIdx());
                     break;
                 case MOVE_TASK:
-                    //moveTask(logic.getTaskIdx(), logic.getListName());
+                    moveTask(getTaskIdx(), getListName());
                     break;
                 case EDIT_TASK:
                     editTask(getTaskIdx());
@@ -139,6 +139,11 @@ public class ControlGUI {
     }
     
     
+    public void moveTask(int index, String listName) {
+        Event newEvent = Event.generateEvent(Commands.MOVE_TASK);
+        registerEvent(newEvent, index, listName);
+    }
+
     public void addReminder(int index, Reminder parameter) {
         Task task = eventHandler.getTask(index);
         

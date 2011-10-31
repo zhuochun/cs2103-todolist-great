@@ -22,9 +22,6 @@ public class SearchEngine {
     private String   place;             // define the place of task
     private String   list;              // belong to which list
     private Priority priority;          // priority of the task
-    private Date     startDateTime;     // start date and time
-    private Date     endDateTime;       // end date and time
-    private Date     deadline;          // deadline date and time
     private Long     duration;          // duration of task
     private Boolean  status;            // completed or not
     private Date afterDateTime;			// If afterDateTime is specified, only tasks having date and time after afterDateTime will be included in the search results
@@ -48,9 +45,6 @@ public class SearchEngine {
         place         = null;
         list          = null;
         priority      = null;
-        startDateTime = null;
-        endDateTime   = null;
-        deadline      = null;
         duration      = null;
         status        = Task.INCOMPLETE;
     }
@@ -270,15 +264,6 @@ public class SearchEngine {
             	break;
             case PRIORITY:
             	this.priority = (Priority)value;
-            	break;
-            case STARTDATETIME:
-            	this.startDateTime = (Date)value;
-            	break;
-            case ENDDATETIME:
-            	this.endDateTime = (Date)value;
-            	break;
-            case DEADLINE:
-            	this.deadline = (Date)value;
             	break;
             case DURATION:
             	this.duration = (Long)value;

@@ -9,12 +9,6 @@ public enum Search {
     
     PRIORITY,
     
-    STARTDATETIME,
-    
-    ENDDATETIME,
-    
-    DEADLINE,
-    
     DURATION,
     
     STATUS,

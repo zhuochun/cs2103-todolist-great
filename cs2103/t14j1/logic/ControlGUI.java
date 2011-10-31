@@ -254,34 +254,15 @@ public class ControlGUI {
 		String list        = parseCommand.extractListName();
 		Priority priority  = parseCommand.extractPriority();
 		String place 	   = parseCommand.extractPlace();
-		Date startDateTime = parseCommand.extractStartDate();
-		Date endDateTime   = parseCommand.extractEndDate();
-		Long startTime     = parseCommand.extractStartTime();
-		Long endTime       = parseCommand.extractEndTime();
-		Date deadline 	   = parseCommand.extractDeadlineDate();
-		Long deadlineTime  = parseCommand.extractDeadlineTime();
 		Long duration      = parseCommand.extractDuration();
 		Boolean status     = parseCommand.extractStatus();
-		
-		convertLongTimeToDate(startDateTime, startTime);
-		convertLongTimeToDate(endDateTime, endTime);
-		convertLongTimeToDate(deadline, deadlineTime);
-		
 		Date afterDateTime = parseCommand.extractSearchAfterDate();
-		Long afterTime = parseCommand.extractSearchAfterTime();
-		convertLongTimeToDate(afterDateTime, afterTime);
-		
 		Date beforeDateTime = parseCommand.extractSearchBeforeDate();
-		Long beforeTime = parseCommand.extractSearchBeforeTime();
-		convertLongTimeToDate(beforeDateTime, beforeTime);
 		
 		searchEngine.setProperty(Search.NAME, name);
 		searchEngine.setProperty(Search.LIST, list);
 		searchEngine.setProperty(Search.PRIORITY, priority);
 		searchEngine.setProperty(Search.PLACE, place);
-		searchEngine.setProperty(Search.STARTDATETIME, startDateTime);
-		searchEngine.setProperty(Search.ENDDATETIME, endDateTime);
-		searchEngine.setProperty(Search.DEADLINE, deadline);
 		searchEngine.setProperty(Search.DURATION, duration);
 		searchEngine.setProperty(Search.STATUS, status);
 		searchEngine.setProperty(Search.AFTERDATETIME, afterDateTime);

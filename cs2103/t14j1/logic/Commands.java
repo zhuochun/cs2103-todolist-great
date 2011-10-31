@@ -43,6 +43,11 @@ public enum Commands {
      *  -> date/time format: a specific date/time point
      */
     ADD_REMINDER,
+    
+    /**
+     * Syntax: remind [id] cancel
+     */
+    REMOVE_REMINDER,
 
     /**
      * Syntax: add [#list]

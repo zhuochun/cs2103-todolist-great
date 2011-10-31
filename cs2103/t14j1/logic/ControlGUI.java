@@ -30,6 +30,7 @@ public class ControlGUI {
     public ControlGUI(TaskLists lists) {
         this.lists        = lists;
         this.searchEngine = new SearchEngine(lists);
+        this.eventHandler = null;
     }
     
     /**
@@ -84,19 +85,22 @@ public class ControlGUI {
                     deleteTask(getTaskIdx());
                     break;
                 case MOVE_TASK:
-                    moveTask(logic.getTaskIdx(), logic.getListName());
+                    //moveTask(logic.getTaskIdx(), logic.getListName());
                     break;
                 case EDIT_TASK:
                     editTask(getTaskIdx());
                     break;
                 case ADD_REMINDER:
-                    addReminder(logic.getTaskIdx(), logic.getReminderParameter());
+                    addReminder(getTaskIdx(), getReminderParameter());
+                    break;
+                case REMOVE_REMINDER:
+                    removeReminder(getTaskIdx());
                     break;
                 case MARK_COMPLETE:
                     toggleStatus(getTaskIdx(), Task.COMPLETED);
                     break;
                 case MARK_PRIORITY:
-                    togglePriority(logic.getTaskIdx(), logic.getNewTaskPriority());
+                    togglePriority(getTaskIdx(), getNewTaskPriority());
                     break;
                 case ADD_LIST:
                     addList(getListName());
@@ -126,9 +130,44 @@ public class ControlGUI {
     }
     
     
-    public void toggleStatus(int taskIdx, Boolean newStatus) {
+    public void addReminder(int index, Reminder parameter) {
+        Task task = eventHandler.getTask(index);
+        
+        Date remindTime = null;
+
+        switch (parameter) {
+            case START:
+                remindTime = task.getStartDateTime();
+                break;
+            case END:
+                remindTime = task.getEndDateTime();
+                break;
+            case DEADLINE:
+                remindTime = task.getDeadline();
+                break;
+            case CUSTOM:
+                remindTime = getReminderTime();
+                break;
+        }
+        
+        Event newEvent = Event.generateEvent(Commands.ADD_REMINDER);
+        registerEvent(newEvent, task, remindTime);
+    }
+
+    public void removeReminder(int index) {
+        Task task = eventHandler.getTask(index);
+        Event newEvent = Event.generateEvent(Commands.REMOVE_REMINDER);
+        registerEvent(newEvent, task);
+    }
+
+    public void toggleStatus(int index, Boolean newStatus) {
         Event newEvent = Event.generateEvent(Commands.MARK_COMPLETE);
-        registerEvent(newEvent, taskIdx, newStatus);
+        registerEvent(newEvent, index, newStatus);
+    }
+
+    public void togglePriority(int index, Priority newPriority) {
+        Event newEvent = Event.generateEvent(Commands.MARK_PRIORITY);
+        registerEvent(newEvent, index, newPriority);
     }
 
     public void editList(String oldlist, String newlist) {
@@ -191,18 +230,15 @@ public class ControlGUI {
     }
     
     private void convertLongTimeToDate (Date d, Long secondsFromStartOfDay) {
-		if(d == null)
+		if(d == null) {
 			return;
-		else if(secondsFromStartOfDay == null) {
+		} else if(secondsFromStartOfDay == null) {
 			/*A value of null indicates that the user did not specify any time and
 			so, we assume the time to be 00:00:00*/
-			
 			d.setHours(0);
 			d.setMinutes(0);
 			d.setSeconds(0);
-		}
-		
-		else {
+		} else {
 			int hours     = secondsFromStartOfDay.intValue() / 3600;
 			int minutes   = (secondsFromStartOfDay.intValue() - hours * 60*60)/60;
 			int seconds   = secondsFromStartOfDay.intValue() - hours * 3600 - minutes * 60;
@@ -219,7 +255,6 @@ public class ControlGUI {
      * @return the index the user entered
      */
     public int getTaskIdx() {
-        
         int taskNum = parseCommand.extractTaskNum();
         
         return taskNum;
@@ -329,7 +364,7 @@ public class ControlGUI {
 		Priority priority   = parseCommand.extractPriority();
 		String place 	    = parseCommand.extractPlace();
 		Long duration       = parseCommand.extractDuration();
-		Boolean status      = parseCommand.extractStatus();
+		//Boolean status      = parseCommand.extractStatus();
 		Date afterDateTime  = parseCommand.extractSearchAfterDate();
 		Date beforeDateTime = parseCommand.extractSearchBeforeDate();
 		
@@ -378,6 +413,10 @@ public class ControlGUI {
     	Date reminderTime = parseCommand.getRemindTime();
     	
         return reminderTime;
+    }
+    
+    public void setEventListener(EventListener e) {
+        eventHandler = e;
     }
     
 }

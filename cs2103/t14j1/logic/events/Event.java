@@ -5,7 +5,7 @@ import cs2103.t14j1.taskmeter.EventListener;
 
 public abstract class Event {
     
-    EventListener eventHandler;
+    protected EventListener eventHandler;
     
     public Event() {
     }

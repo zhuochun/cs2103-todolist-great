@@ -307,6 +307,7 @@ public class TaskMeter extends Shell {
         FilterTask.setFilter(Filter.FILTER_ALL);
         logic        = new ControlGUI(lists);
         autoComplete = new AutoComplete(lists);
+        setEventListener();
         smartBar.setFocus();
         
         // initial quick Add View
@@ -335,6 +336,71 @@ public class TaskMeter extends Shell {
         // display tasks and lists
         displayCurrentList(TaskLists.INBOX);
         displayLists();
+    }
+    
+    private void setEventListener() {
+        logic.setEventListener(new EventListener() {
+            public String getMsg(String m) {
+                return getResourceString(m);
+            }
+
+            public TaskLists getLists() {
+                return lists;
+            }
+
+            public Task getTask(int index) {
+                return getIndexedTask(index);
+            }
+
+            public ReminderDialog getReminder() {
+                return reminder;
+            }
+
+            public String getEditList(String oldName) {
+                return editList(oldName);
+            }
+
+            public void setStatus(String msg) {
+                setStatusBar(msg);
+            }
+
+            public void setModified() {
+                isModified = true;
+            }
+
+            public void displayNewList(String listname) {
+                displayNewList(listname);
+            }
+
+            public void refreshDisplay() {
+                refreshDisplay();
+            }
+
+            public void refreshLists() {
+                displayLists();
+            }
+
+            public void refreshTasks() {
+                displayTasks();
+            }
+
+            public void setSearch(TaskList result) {
+                searchResult = result;
+                displaySearchResult();
+            }
+
+            public void switchTask(String list) {
+                switchTask(list);
+            }
+
+            public void switchList(String list) {
+                switchList(list);
+            }
+
+            public void editTask(int idx) {
+                editTask(idx);
+            }
+        });
     }
 
     /**
@@ -1216,85 +1282,15 @@ public class TaskMeter extends Shell {
     }
     
     private void togglePriority(int index, Priority newPriority) {
-        String feedback = null;
-        
-        try {
-            Task task = getIndexedTask(index);
-            
-            task.setPriority(newPriority);
-            feedback = String.format(getResourceString("msg.TOGGLE"), task.getName(), task.getPriorityStr());
-            
-            isModified = true;
-            refreshTask(index, task);
-        } catch (IndexOutOfBoundsException e) {
-            feedback = e.getMessage();
-        }
-        
-        setStatusBar(feedback);
+        logic.togglePriority(index, newPriority);
     }
 
     private void addReminder(int index, Reminder parameter) {
-        String feedback = null;
-        
-        try {
-            Task task = getIndexedTask(index);
-            
-            Date remindTime = null;
-    
-            switch (parameter) {
-                case START:
-                    remindTime = task.getStartDateTime();
-                    break;
-                case END:
-                    remindTime = task.getEndDateTime();
-                    break;
-                case DEADLINE:
-                    remindTime = task.getDeadline();
-                    break;
-                case CUSTOM:
-                    remindTime = logic.getReminderTime();
-                    break;
-            }
-    
-            reminder.addReminder(remindTime, task);
-            
-            refreshTask(index, task);
-            isModified = true;
-            
-            feedback = String.format(getResourceString("msg.ADD_REMINDER"), task.getName(), DateFormat.dateToStrShort(remindTime));
-        } catch (NullPointerException e) {
-            feedback = e.getMessage();
-        } catch (IllegalArgumentException e) {
-            feedback = e.getMessage();
-        }
-        
-        setStatusBar(feedback);
+        logic.addReminder(index, parameter);
     }
 
     private void removeReminder(int index) {
-        String feedback = null;
-        
-        try {
-            Task task = getIndexedTask(index);
-            
-            boolean success = reminder.removeReminder(task);
-            
-            if (success) {
-                isModified = true;
-                
-                refreshTask(index, task);
-                
-                feedback = String.format("Reminder for task \"%1$s\" is successfully removed", task.getName());
-            } else {
-                feedback = "Failed to remove reminder";
-            }
-        } catch (NullPointerException e) {
-            feedback = e.getMessage();
-        } catch (IllegalArgumentException e) {
-            feedback = e.getMessage();
-        }
-        
-        setStatusBar(feedback);
+        logic.removeReminder(index);
     }
     
     /**
@@ -1344,10 +1340,6 @@ public class TaskMeter extends Shell {
         this.forceActive();
     }
 
-    /**
-     * 
-     * @return
-     */
     private boolean saveTaskMeter() {
         if (isModified) {
             FileHandler.saveAll(lists);

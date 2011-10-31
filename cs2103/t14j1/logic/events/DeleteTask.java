@@ -69,19 +69,33 @@ public class DeleteTask extends Event {
     }
 
     public Event undo() {
-        task.setList(oldListName);
+        // If the task is deleted to Trash, we just move it back to oldList
+        if (!oldListName.equals(TaskLists.TRASH)) {
+            Event undo = new MoveTask();
+            undo.setEventLisnter(eventHandler);
+            
+            undo.register(task, oldListName);
+            
+            boolean success = undo.execute();
 
-        Event undo = new AddTask();
-        undo.setEventLisnter(eventHandler);
+            if (success) {
+                return undo;
+            } else {
+                return null;
+            }
+        } else { // If the task is deleted from Trash, move it back to Trash
+            Event undo = new AddTask();
+            undo.setEventLisnter(eventHandler);
 
-        undo.register(task);
-        
-        boolean success = undo.execute();
-        
-        if (success) {
-            return undo;
-        } else {
-            return null;
+            undo.register(task);
+
+            boolean success = undo.execute();
+
+            if (success) {
+                return undo;
+            } else {
+                return null;
+            }
         }
     }
 

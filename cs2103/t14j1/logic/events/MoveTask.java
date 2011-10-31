@@ -25,7 +25,7 @@ public class MoveTask extends Event {
             index = -1;
         }
 
-        newListName = (String) objs[2];
+        newListName = (String) objs[1];
         oldListName = task.getList();
     }
 

@@ -23,7 +23,7 @@ public interface EventListener {
     
     public void displayList(String listname);
     
-    public void refreshDisplay();
+    public void refreshAll();
     
     public void refreshLists();
     

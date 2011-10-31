@@ -111,6 +111,7 @@ public class TaskMeter extends Shell {
      */
     public static void main(String args[]) {
         final Display display = Display.getDefault();
+        User.initial();
 
         try {
             TaskMeter application = new TaskMeter(display);
@@ -126,6 +127,7 @@ public class TaskMeter extends Shell {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        User.save();
     }
 
     /**
@@ -176,10 +178,10 @@ public class TaskMeter extends Shell {
         Runnable autoSave = new Runnable() {
             public void run() {
                 saveTaskMeter();
-                display.timerExec(300000, this);
+                display.timerExec(User.autoSaveTime, this);
             }
         };
-        display.timerExec(300000, autoSave);
+        display.timerExec(User.autoSaveTime, autoSave);
 
         // set application logo
         setLogoImage(display);
@@ -774,10 +776,16 @@ public class TaskMeter extends Shell {
         Menu menuSetting = new Menu(mntmSettings);
         mntmSettings.setMenu(menuSetting);
     
-        MenuItem mntmUserSettings = new MenuItem(menuSetting, SWT.NONE);
+        final MenuItem mntmUserSettings = new MenuItem(menuSetting, SWT.NONE);
+        mntmUserSettings.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                openUserSetting();
+            }
+        });
         mntmUserSettings.setText(getResourceString("setting"));
         
-        MenuItem mntmAutoComplete = new MenuItem(menuSetting, SWT.CHECK);
+        final MenuItem mntmAutoComplete = new MenuItem(menuSetting, SWT.CHECK);
         mntmAutoComplete.setAccelerator(SWT.MOD1 + '0');
         mntmAutoComplete.addSelectionListener(new SelectionAdapter() {
             @Override
@@ -785,8 +793,19 @@ public class TaskMeter extends Shell {
                 User.performAutoComplete = User.performAutoComplete ? false : true;
             }
         });
-        mntmAutoComplete.setSelection(true);
+        mntmAutoComplete.setSelection(User.performAutoComplete);
         mntmAutoComplete.setText(getResourceString("autocomplete"));
+        
+        menuSetting.addMenuListener(new MenuAdapter() {
+            public void menuShown(MenuEvent e) {
+                mntmAutoComplete.setSelection(User.performAutoComplete);
+            }
+        });
+    }
+    
+    private void openUserSetting() {
+        UserSettingDialog dialog = new UserSettingDialog(this);
+        dialog.open();
     }
 
     /**

@@ -4,6 +4,7 @@ import java.util.Date;
 
 import cs2103.t14j1.logic.DateFormat;
 import cs2103.t14j1.storage.gCal.GCalSyn;
+import cs2103.t14j1.storage.user.User;
 
 /**
  * a basic Task and its properties
@@ -459,19 +460,28 @@ public class Task implements Comparable<Object> {
         Task other = (Task) o;
         int result = 0;
         
-        // early deadline fist
-        if (result == 0) {
-            result = compareDeadline(other.getDeadline());
-        }
-        
-        // early startDate first
-        if (result == 0) {
-            result = compareStartDateTime(other.getStartDateTime());
-        }
-        
-        // higher priority first
-        if (result == 0) {
-            result = comparePriority(other.getPriority());
+        for (int method : User.sortingMethod) {
+            switch (method) {
+                case TaskList.SORT_DEADLINE:
+                    result = compareDeadline(other.getDeadline());
+                    break;
+                case TaskList.SORT_DATE:
+                    result = compareStartDateTime(other.getStartDateTime());
+                    break;
+                case TaskList.SORT_PRIORITY:
+                    result = comparePriority(other.getPriority());
+                    break;
+                case TaskList.SORT_DURATION:
+                    result = compareDuration(other.getDuration());
+                    break;
+                case TaskList.SORT_STATUS:
+                    result = compareStatus(other.getStatus());
+                    break;
+            }
+            
+            if (result != 0) {
+                break;
+            }
         }
         
         return result;

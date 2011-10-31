@@ -513,16 +513,9 @@ public class ParseCommand {
 						outputErr("Problem with parsing search time period");
 					}
 				}
+				
 				command = removeMatchedString(command, matchedStr);
 				matchedStr = null;
-			} else if((matchedStr = matcherMatched(regWeekText, command, false)) != null){
-				int param = dateParseGetDayOfWeekFromText(matchedStr);
-				if(param == -1) outputErr("Problem when parse week text in search");
-				setSearchParamBasedOnFields(param,false,Calendar.DAY_OF_WEEK);
-			} else if((matchedStr = matcherMatched(regWeekText, command, false)) != null){
-				int param = dateParseGetMonthFromText(matchedStr);
-				if(param == -1) outputErr("Problem when parse month text in search");
-				setSearchParamBasedOnFields(param,false,Calendar.MONTH);
 			}
 		}
 		
@@ -1301,7 +1294,7 @@ public class ParseCommand {
 			return null;
 		}
 		
-		Long definedTime = (time==null?null:time.getTime());
+		Long definedTime = time==null?null:time.getTime();
 		int setHour = 0;
 		int setMinute = 0;
 		int setSecond = 0;
@@ -1318,11 +1311,16 @@ public class ParseCommand {
 			setHour = 23;
 			setMinute = 59;
 			setSecond = 59;
-		} else if(defaultTimeOnNull == CURRENT_TIME){
-			Calendar current = Calendar.getInstance();
-			setHour = current.get(Calendar.HOUR_OF_DAY);
-			setMinute = current.get(Calendar.MINUTE);
-			setSecond = current.get(Calendar.SECOND);
+		} else if(defaultTimeOnNull == NO_CHANGE){
+			Long timeLong = time.getTime();
+			
+			if(timeLong == null){
+				return date.getTime();
+			} else{	// set the date to the time's date
+				setHour = (int) (timeLong/3600);
+				setMinute = (int)(timeLong%3600)%60;
+				setSecond =(int) (timeLong%60);
+			}
 		}
 		
 		date.set(Calendar.HOUR_OF_DAY, setHour);
@@ -1333,30 +1331,21 @@ public class ParseCommand {
 	
 	/**
 	 * @return
-	 * 	When it's add task: The start date and time for a task
-	 *  When it's in search: The very first second of the search time
+	 * 	The start date and time for a task
 	 */
 	public Date extractStartDate() {
-		if(this.commandType == Commands.SEARCH){
-			// when the time is specified
-			if(this.searchAfterDate != null || this.searchAfterTime.getTime() != null){
-				return this.searchAfterDate.getTime();
-			}
-			
-			// if a period of time is specified in user's input
-			if(this.startDate != null){
-				if(this.startTime.getTime() != null){	// when everything is clear
-					return _extractDateHelper(this.startDate, this.startTime, this.NO_CHANGE);
-				} else{
-					return _extractDateHelper(this.startDate, this.startTime, this.EARLIEST_TIME);
-				}
-			}
-			
-			// when there's no start date
-			return new Date();
-		} else{
-			return _extractDateHelper(startDate,startTime, CURRENT_TIME);
-		}
+		/* Zhuochun: use DateFormat.strToDate(str) or DateFormat.strToDateLong(str) 
+		 * Yangyu's reply: this would not work because: 
+		 *   1. the date string may following different format; simply using that would cause Exception
+		 *     (for example, we also consider 'tomorrow' as a date, but this cannot be parsed using strToDate)
+		 *   2. the date can be extracted in the constructor; no point of using this again 
+		 */
+		
+		/* Because zhuochun don't want the return type to be change to (Long 
+		 *   we've discussed --), nor does Calendar... do I have to use the 
+		 *   seemingly depreciated "Date" class here.
+		 */
+		return _extractDateHelper(startDate,startTime, CURRENT_TIME);
 	}
 	
 	/**
@@ -1418,26 +1407,7 @@ public class ParseCommand {
 	 * 	The end date and time as a Date class 
 	 */
 	public Date extractEndDate() {
-		if(this.commandType == Commands.SEARCH){
-			// when the time is specified
-			if(this.searchBeforeDate != null || this.searchBeforeTime.getTime() != null){
-				return this.searchBeforeDate.getTime();
-			}
-			
-			// if a period of time is specified in user's input
-			if(this.endDate != null){
-				if(this.endTime.getTime() != null){	// when everything is clear
-					return _extractDateHelper(this.endDate, this.endTime, this.NO_CHANGE);
-				} else{
-					return _extractDateHelper(this.endDate, this.endTime, this.LATEST_TIME);
-				}
-			}
-			
-			// when there's no end date
-			return null;
-		} else{
-			return _extractDateHelper(endDate, endTime,CURRENT_TIME);
-		}
+		return _extractDateHelper(endDate, endTime,CURRENT_TIME);
 	}
 	
 	public Long extractEndTime() {
@@ -1484,7 +1454,7 @@ public class ParseCommand {
 	}
 	
 	/* These four method are for search command only */
-	private Date extractSearchBeforeDate() {
+	public Date extractSearchBeforeDate() {
 		
 		// when the time is specified
 		if(this.searchBeforeDate != null || this.searchBeforeTime.getTime() != null){
@@ -1522,8 +1492,13 @@ public class ParseCommand {
 		
 		// if a period of time is specified in user's input
 		if(this.startDate != null){
+			if(this.startTime.getTime() != null){	// when everything is clear
+				return _extractDateHelper(this.startDate, this.startTime, this.NO_CHANGE);
+			} else{
 				return _extractDateHelper(this.startDate, this.startTime, this.EARLIEST_TIME);
+			}
 		}
+		
 		// when there's no end date
 		return new Date();
 		

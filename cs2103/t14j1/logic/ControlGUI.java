@@ -115,7 +115,7 @@ public class ControlGUI {
                     deleteList(getListName());
                     break;
                 case SWITCH_LIST:
-                    eventHandler.switchList(getListName());
+                    eventHandler.switchToList(getListName());
                     break;
                 case SEARCH:
                     doSearch(getSearchResult());

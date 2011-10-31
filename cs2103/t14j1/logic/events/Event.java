@@ -18,49 +18,43 @@ public abstract class Event {
                 case ADD_TASK:
                     newEvent = new AddTask();
                     break;
-//                case DELETE_TASK:
-//                    deleteTask(logic.getTaskIdx());
-//                    break;
-//                case MOVE_TASK:
-//                    moveTask(logic.getTaskIdx(), logic.getListName());
-//                    break;
-//                case EDIT_TASK:
-//                    editTask(logic.getTaskIdx());
-//                    break;
-//                case ADD_REMINDER:
-//                    addReminder(logic.getTaskIdx(), logic.getReminderParameter());
-//                    break;
-//                case MARK_COMPLETE:
-//                    toggleStatus(logic.getTaskIdx());
-//                    break;
-//                case MARK_PRIORITY:
-//                    togglePriority(logic.getTaskIdx(), logic.getNewTaskPriority());
-//                    break;
-//                case ADD_LIST:
-//                    addList(logic.getListName());
-//                    break;
-//                case EDIT_LIST:
-//                    editList(logic.extractNewListName(), null);
-//                    break;
-//                case RENAME_LIST:
-//                    editList(logic.extractNewListName(), logic.extractNewListName());
-//                    break;
-//                case DELETE_LIST:
-//                    deleteList(logic.getListName());
-//                    break;
-//                case SWITCH_LIST:
-//                    switchList(logic.getListName());
-//                    break;
-//                case SEARCH:
-//                    searchResult = logic.getSearchResult();
-//                    displaySearchResult();
-//                    break;
+                case DELETE_TASK:
+                    newEvent = new DeleteTask();
+                    break;
+                case MOVE_TASK:
+                    newEvent = new MoveTask();
+                    break;
+                case EDIT_TASK:
+                    newEvent = new EditTask();
+                    break;
+                case ADD_REMINDER:
+                    newEvent = new AddReminder();
+                    break;
+                case MARK_COMPLETE:
+                    newEvent = new ToggleStatus();
+                    break;
+                case MARK_PRIORITY:
+                    newEvent = new TogglePriority();
+                    break;
+                case ADD_LIST:
+                    newEvent = new AddList();
+                    break;
+                case EDIT_LIST:
+                    newEvent = new EditList();
+                    break;
+                case RENAME_LIST:
+                    newEvent = new EditList();
+                    break;
+                case DELETE_LIST:
+                    newEvent = new DeleteList();
+                    break;
+                case SEARCH:
+                    newEvent = new Search();
+                    break;
                 default:
-                    //setStatusBar(getResourceString("msg.invalid.command"));
                     break;
             }
         } catch (Exception e) {
-            //setStatusBar(getResourceString("error.logic.command"));
         }
         
         return newEvent;

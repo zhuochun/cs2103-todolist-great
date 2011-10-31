@@ -5,15 +5,17 @@ import cs2103.t14j1.storage.TaskLists;
 
 public class DeleteTask extends Event {
     
+    int    index;
     Task   task;
     String oldListName;
     
     public void register(Object... objs) {
         if (objs[0] instanceof Integer) {
-            int index = (Integer) objs[0];
-            task = eventHandler.getTask(index);
-        } else {
+            index = (Integer) objs[0];
+            task  = null;
+        } else if (objs[0] instanceof Task){
             task = (Task) objs[0];
+            index = -1;
         }
         
         oldListName = task.getName();
@@ -22,8 +24,11 @@ public class DeleteTask extends Event {
     public void execute() {
         String feedback = null;
         
-        
         try {
+            if (index != -1) {
+                task = eventHandler.getTask(index);
+            }
+            
             boolean success = false;
             
             // move task to trash, if task is in trash, delete it

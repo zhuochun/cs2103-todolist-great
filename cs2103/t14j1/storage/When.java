@@ -45,6 +45,20 @@ public class When implements Comparable<Object> {
     }
     
     /**
+     * clone a When object
+     */
+    public Object clone() {
+        When cloneWhen = new When();
+        
+        cloneWhen.setType(isAllDay);
+        cloneWhen.setStartDateTime(startDateTime.getTime());
+        cloneWhen.setEndDateTime(endDateTime.getTime());
+        cloneWhen.setDeadline(deadline.getTime());
+        
+        return cloneWhen;
+    }
+    
+    /**
      * set whether it is an All-Day task (Date - Date) or DateTime task (DateTime - DateTime)
      * 
      * Use parameter:

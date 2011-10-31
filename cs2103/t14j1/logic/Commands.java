@@ -88,6 +88,16 @@ public enum Commands {
      * Syntax: dis/display + [num]
      */
     DISPLAY_TASK,
+    
+    /**
+     * Syntax: undo
+     */
+    UNDO,
+    
+    /**
+     * Syntax: redo
+     */
+    REDO,
 
     EXIT,
 

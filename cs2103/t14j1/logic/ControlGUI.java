@@ -6,6 +6,7 @@ import cs2103.t14j1.logic.events.Event;
 import cs2103.t14j1.logic.search.Search;
 import cs2103.t14j1.logic.search.SearchEngine;
 import cs2103.t14j1.logic.smartbar.ParseCommand;
+import cs2103.t14j1.logic.undo.UndoManager;
 import cs2103.t14j1.storage.Priority;
 import cs2103.t14j1.storage.Task;
 import cs2103.t14j1.storage.TaskList;
@@ -18,6 +19,7 @@ public class ControlGUI {
     private EventListener eventHandler;
     private TaskLists     lists;         // stores a copy of all the lists
     private Commands      userCommand;   // stores the last user command
+    private UndoManager   undoManager;   // UndoManager
     private ParseCommand  parseCommand;  // smartBar parseCommand
     private SearchEngine  searchEngine;  // search engine
     
@@ -29,6 +31,7 @@ public class ControlGUI {
      */
     public ControlGUI(TaskLists lists) {
         this.lists        = lists;
+        this.undoManager  = new UndoManager();
         this.searchEngine = new SearchEngine(lists);
         this.eventHandler = null;
     }
@@ -119,6 +122,12 @@ public class ControlGUI {
                     break;
                 case SEARCH:
                     doSearch(getSearchResult());
+                    break;
+                case UNDO:
+                    undo();
+                    break;
+                case REDO:
+                    redo();
                     break;
                 default:
                     eventHandler.setStatus(eventHandler.getMsg("msg.invalid.command"));
@@ -227,6 +236,10 @@ public class ControlGUI {
         e.setEventLisnter(eventHandler);
         e.register(objs);
         e.execute();
+        
+        if (e.hasUndo()) {
+            undoManager.addUndo(e);
+        }
     }
     
     private void convertLongTimeToDate (Date d, Long secondsFromStartOfDay) {
@@ -283,34 +296,7 @@ public class ControlGUI {
      */
     public void addList(String name) {
         Event newEvent = Event.generateEvent(Commands.ADD_LIST);
-        
-        newEvent.register(name);
-        newEvent.execute();
-    }
-    
-    /**
-     * if the user's command is EDIT_LIST, GUI will call this method to perform the actual editList
-     * 
-     * @param oldListName
-     * @param newListName
-     * @return true is editing is successful
-     * @throws Exception 
-     */
-    public boolean renameList(String oldListName, String newListName) throws Exception {
-    	TaskList oldList = lists.getList(oldListName);
-    	
-    	//If no list with the name oldListname exists
-    	if(oldList == null) {
-    		throw new Exception(oldListName + " does not exist");
-    	}
-    	
-    	oldList.setName(newListName);
-    	
-    	// remove oldList from lists because lists use treeMap
-    	lists.removeList(oldListName);
-    	lists.addList(oldList);
-    	
-    	return true;
+        registerEvent(newEvent, name);
     }
     
     /**
@@ -330,7 +316,6 @@ public class ControlGUI {
      * @return the list name user enterd
      */
     public String getListName() {
-        
     	String listName = parseCommand.extractListName();
         return listName;
     }
@@ -344,7 +329,6 @@ public class ControlGUI {
      * @return the list of search results, empty list if nothing is found
      */
     public TaskList getSearchResult() {
-        
     	assert (userCommand == Commands.SEARCH);
     	
     	setSearchProperties();
@@ -358,7 +342,6 @@ public class ControlGUI {
      * get the user inputs from parseCommand, and set all the properties
      */
     private void setSearchProperties() {
-        
     	String name         = parseCommand.extractTaskName();
 		String list         = parseCommand.extractListName();
 		Priority priority   = parseCommand.extractPriority();
@@ -373,7 +356,7 @@ public class ControlGUI {
 		searchEngine.setProperty(Search.PRIORITY, priority);
 		searchEngine.setProperty(Search.PLACE, place);
 		searchEngine.setProperty(Search.DURATION, duration);
-		searchEngine.setProperty(Search.STATUS, status);
+		//searchEngine.setProperty(Search.STATUS, status);
 		searchEngine.setProperty(Search.AFTERDATETIME, afterDateTime);
 		searchEngine.setProperty(Search.BEFOREDATETIME, beforeDateTime);
     }
@@ -413,6 +396,34 @@ public class ControlGUI {
     	Date reminderTime = parseCommand.getRemindTime();
     	
         return reminderTime;
+    }
+    
+    public boolean hasUndo() {
+        return undoManager.hasUndo();
+    }
+    
+    public boolean hasRedo() {
+        return undoManager.hasRedo();
+    }
+    
+    public void undo() {
+        Event lastEvent = undoManager.getUndo();
+        
+        assert(lastEvent.hasUndo());
+        
+        Event redo = lastEvent.undo();
+        
+        undoManager.addRedo(redo);
+    }
+    
+    public void redo() {
+        Event lastEvent = undoManager.getRedo();
+        
+        assert(lastEvent.hasUndo());
+        
+        Event undo = lastEvent.undo();
+        
+        undoManager.addUndo(undo);
     }
     
     public void setEventListener(EventListener e) {

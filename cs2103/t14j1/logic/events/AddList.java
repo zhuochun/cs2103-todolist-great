@@ -1,5 +1,7 @@
 package cs2103.t14j1.logic.events;
 
+import cs2103.t14j1.storage.TaskList;
+
 /**
  * a Add List event
  * 
@@ -9,9 +11,15 @@ package cs2103.t14j1.logic.events;
 public class AddList extends Event {
     
     String listname;
+    TaskList list;
 
     public void register(Object... objs) {
-        listname = (String) objs[0];
+        if (objs[0] instanceof String) {
+            listname = (String) objs[0];
+            list = null;
+        } else if (objs[0] instanceof TaskList) {
+            list = (TaskList) objs[0];
+        }
     }
     
     public void execute() {
@@ -19,7 +27,11 @@ public class AddList extends Event {
         boolean success;
         
         try {
-            success = eventHandler.getLists().addList(listname);
+            if (list == null) {
+                list = new TaskList(listname);
+            }
+            
+            success = eventHandler.getLists().addList(list);
             
             if (success) {
                 eventHandler.displayNewList(listname);

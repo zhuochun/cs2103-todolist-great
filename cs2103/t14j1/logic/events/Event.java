@@ -3,16 +3,22 @@ package cs2103.t14j1.logic.events;
 import cs2103.t14j1.logic.Commands;
 import cs2103.t14j1.taskmeter.EventListener;
 
+/**
+ * an abstract class for events
+ * 
+ * @author Zhuochun
+ * 
+ */
 public abstract class Event {
-    
+
     protected EventListener eventHandler;
-    
+
     public Event() {
     }
-    
+
     public static Event generateEvent(Commands type) {
         Event newEvent = null;
-        
+
         try {
             switch (type) {
                 case ADD_TASK:
@@ -56,24 +62,24 @@ public abstract class Event {
             }
         } catch (Exception e) {
         }
-        
+
         return newEvent;
     }
-    
+
     public void setEventLisnter(EventListener e) {
         eventHandler = e;
     }
-    
+
     public void register(Object... objs) {
     }
-    
+
     public void execute() {
     }
-    
+
     public boolean hasUndo() {
         return false;
     }
-    
+
     public Event undo() {
         return null;
     }

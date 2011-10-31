@@ -250,13 +250,13 @@ public class ControlGUI {
      */
     private void setSearchProperties() {
         
-    	String name        = parseCommand.extractTaskName();
-		String list        = parseCommand.extractListName();
-		Priority priority  = parseCommand.extractPriority();
-		String place 	   = parseCommand.extractPlace();
-		Long duration      = parseCommand.extractDuration();
-		Boolean status     = parseCommand.extractStatus();
-		Date afterDateTime = parseCommand.extractSearchAfterDate();
+    	String name         = parseCommand.extractTaskName();
+		String list         = parseCommand.extractListName();
+		Priority priority   = parseCommand.extractPriority();
+		String place 	    = parseCommand.extractPlace();
+		Long duration       = parseCommand.extractDuration();
+		Boolean status      = parseCommand.extractStatus();
+		Date afterDateTime  = parseCommand.extractSearchAfterDate();
 		Date beforeDateTime = parseCommand.extractSearchBeforeDate();
 		
 		searchEngine.setProperty(Search.NAME, name);

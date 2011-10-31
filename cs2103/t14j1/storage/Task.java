@@ -102,7 +102,9 @@ public class Task implements Comparable<Object> {
         cloneTask.setList(list);
         cloneTask.setPriority(priority);
         cloneTask.setWhen((When) when.clone());
-        cloneTask.setReminder((Date) reminder.clone());
+        if (reminder != null) {
+            cloneTask.setReminder((Date) reminder.clone());
+        }
         cloneTask.setStatus(status);
         
         return cloneTask;
@@ -114,7 +116,9 @@ public class Task implements Comparable<Object> {
         setList(from.getList());
         setPriority(from.getPriority());
         setWhen((When) from.getWhen().clone());
-        setReminder((Date) from.getReminder().clone());
+        if (from.getReminder() != null) {
+            setReminder((Date) from.getReminder().clone());
+        }
         setStatus(from.getStatus());
     }
 

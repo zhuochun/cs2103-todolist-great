@@ -35,5 +35,5 @@ public interface EventListener {
     
     public void switchToList(String list);
     
-    public void editTask(int idx);
+    public void editIdxTask(int idx);
 }

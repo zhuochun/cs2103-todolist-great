@@ -14,11 +14,15 @@ public class EditTask extends Event {
     Task oldTask;
     Task newTask;
 
+    /**
+     * edit: index
+     * undo edit: oldTask newTask
+     */
     public void register(Object... objs) {
         if (objs[0] instanceof Integer) {
             index = (Integer) objs[0];
-            newTask = eventHandler.getTask(index);
-            oldTask = (Task) newTask.clone();
+            oldTask = null;
+            newTask = null;
         } else if (objs[0] instanceof Task) {
             index = -1;
             oldTask = (Task) objs[0];
@@ -27,13 +31,28 @@ public class EditTask extends Event {
     }
 
     public void execute() {
-        if (index == -1) {
-            oldTask.copy(newTask);
-        } else {
-            eventHandler.editTask(index);
-        }
+        try {
+            if (index == -1) {
+                Task tempTask = (Task) oldTask.clone();
+                
+                oldTask.copy(newTask); // recover from oldTask
+                
+                // Swap oldTask, newTask
+                newTask = oldTask;
+                oldTask = tempTask;
+                
+                eventHandler.setStatus("Task edit is undo successfully");
+            } else {
+                newTask = eventHandler.getTask(index);
+                oldTask = (Task) newTask.clone();
 
-        eventHandler.refreshTasks();
+                eventHandler.editIdxTask(index);
+            }
+
+            eventHandler.refreshTasks();
+        } catch (IndexOutOfBoundsException e) {
+            eventHandler.setStatus(e.getMessage());
+        }
     }
 
     public boolean hasUndo() {
@@ -44,7 +63,7 @@ public class EditTask extends Event {
         Event undo = new EditTask();
         undo.setEventLisnter(eventHandler);
 
-        undo.register(newTask, oldTask);
+        undo.register(newTask, oldTask); // undo: recover oldTask
         undo.execute();
 
         return undo;

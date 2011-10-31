@@ -2,6 +2,7 @@ package cs2103.t14j1.logic;
 
 import java.util.Date;
 
+import cs2103.t14j1.logic.events.Event;
 import cs2103.t14j1.logic.search.Search;
 import cs2103.t14j1.logic.search.SearchEngine;
 import cs2103.t14j1.logic.smartbar.ParseCommand;
@@ -9,15 +10,16 @@ import cs2103.t14j1.storage.Priority;
 import cs2103.t14j1.storage.Task;
 import cs2103.t14j1.storage.TaskList;
 import cs2103.t14j1.storage.TaskLists;
+import cs2103.t14j1.taskmeter.EventListener;
 import cs2103.t14j1.taskmeter.reminder.Reminder;
 
 public class ControlGUI {
     
-    private TaskLists    lists;         // stores a copy of all the lists
-    private String       lastError;     // stores the last exception error
-    private Commands     userCommand;   // stores the last user command
-    private ParseCommand parseCommand;  // smartBar parseCommand
-    private SearchEngine searchEngine;  // search engine
+    private EventListener eventHandler;
+    private TaskLists     lists;         // stores a copy of all the lists
+    private Commands      userCommand;   // stores the last user command
+    private ParseCommand  parseCommand;  // smartBar parseCommand
+    private SearchEngine  searchEngine;  // search engine
     
     /**
      * in taskMeter GUI, it will create a instance a ControlGUI and interact with it in logic part
@@ -67,12 +69,73 @@ public class ControlGUI {
     }
     
     /**
+     * execute input command from user
+     * 
+     * @param input         user's input string
+     */
+    public void executeCommand() {
+        Event newEvent = Event.generateEvent(getCommand());
+        
+        if (newEvent != null) {
+            // register event
+            try {
+                switch (getCommand()) {
+                    case ADD_TASK:
+                        registerEvent(newEvent, addTask());
+                        break;
+                    case DELETE_TASK:
+                        deleteTask(getTaskIdx());
+                        break;
+                    case MOVE_TASK:
+                        moveTask(logic.getTaskIdx(), logic.getListName());
+                        break;
+                    case EDIT_TASK:
+                        editTask(logic.getTaskIdx());
+                        break;
+                    case ADD_REMINDER:
+                        addReminder(logic.getTaskIdx(), logic.getReminderParameter());
+                        break;
+                    case MARK_COMPLETE:
+                        toggleStatus(logic.getTaskIdx());
+                        break;
+                    case MARK_PRIORITY:
+                        togglePriority(logic.getTaskIdx(), logic.getNewTaskPriority());
+                        break;
+                    case ADD_LIST:
+                        addList(logic.getListName());
+                        break;
+                    case EDIT_LIST:
+                        editList(logic.extractNewListName(), null);
+                        break;
+                    case RENAME_LIST:
+                        editList(logic.extractNewListName(), logic.extractNewListName());
+                        break;
+                    case DELETE_LIST:
+                        deleteList(logic.getListName());
+                        break;
+                    case SWITCH_LIST:
+                        switchList(logic.getListName());
+                        break;
+                    case SEARCH:
+                        registerEvent(newEvent, getSearchResult());
+                        break;
+                    default:
+                        eventHandler.setStatus(eventHandler.getMsg("msg.invalid.command"));
+                        break;
+                }
+            } catch (Exception e) {
+                eventHandler.setStatus(eventHandler.getMsg("error.logic.command"));
+            }
+        }
+    }
+    
+    
+    /**
      * if the user's command is ADD_TASK, GUI will call this method to perform the actual addTask
      * 
      * @return the new task if successfully added or null if failed
      */
-    public Task addTask() {
-    	
+    private Task addTask() {
     	String name        = parseCommand.extractTaskName();
 		String list        = parseCommand.extractListName();
 		Priority priority  = parseCommand.extractPriority();
@@ -92,15 +155,21 @@ public class ControlGUI {
 		
 		Task newTask = new Task(name, place, list, priority, startDateTime, endDateTime, deadline, duration, status);
 		
-		boolean result = lists.addTask(newTask.getList(), newTask);
-		
-		/*If task is successfully added, this function returns the task object to the GUI
-		 * Otherwise, a null value is returned to denote that some error has occured*/
-		if(result)
-			return newTask;
-		else
-			return null;
-	
+		return newTask;
+    }
+    
+    public void addTask(Task task) {
+        Event newEvent = Event.generateEvent(Commands.ADD_TASK);
+        registerEvent(newEvent, task);
+    }
+    
+    public void editTask() {
+    }
+    
+    public void registerEvent(Event e, Object... objs) {
+        e.setEventLisnter(eventHandler);
+        e.register(objs);
+        e.execute();
     }
     
     private void convertLongTimeToDate (Date d, Long secondsFromStartOfDay) {
@@ -165,7 +234,6 @@ public class ControlGUI {
         try {
             lists.addList(name);
         } catch (NullPointerException e) {
-            lastError = e.getMessage();
             return null;
         }
         

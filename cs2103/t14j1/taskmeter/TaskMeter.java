@@ -392,6 +392,11 @@ public class TaskMeter extends Shell {
         smartBar.setFont(SWTResourceManager.getFont("Segoe UI", 12, SWT.NORMAL));
     }
     
+    protected void executeCommand(String input) {
+        logic.setUserInput(input.trim());
+        logic.executeCommand();
+    }
+
     /**
      * Creates the menu at the top of the shell where most of the programs
      * functionality is accessed.
@@ -907,64 +912,6 @@ public class TaskMeter extends Shell {
         setStatusBar(getResourceString("msg.welcome"));
     }
     
-    /**
-     * execute input command from user
-     * 
-     * @param input         user's input string
-     */
-    private void executeCommand(String input) {
-        logic.setUserInput(input.trim());
-        
-        try {
-            switch (logic.getCommand()) {
-                case ADD_TASK:
-                    addTask(logic.addTask());
-                    break;
-                case DELETE_TASK:
-                    deleteTask(logic.getTaskIdx());
-                    break;
-                case MOVE_TASK:
-                    moveTask(logic.getTaskIdx(), logic.getListName());
-                    break;
-                case EDIT_TASK:
-                    editTask(logic.getTaskIdx());
-                    break;
-                case ADD_REMINDER:
-                    addReminder(logic.getTaskIdx(), logic.getReminderParameter());
-                    break;
-                case MARK_COMPLETE:
-                    toggleStatus(logic.getTaskIdx());
-                    break;
-                case MARK_PRIORITY:
-                    togglePriority(logic.getTaskIdx(), logic.getNewTaskPriority());
-                    break;
-                case ADD_LIST:
-                    addList(logic.getListName());
-                    break;
-                case EDIT_LIST:
-                    editList(logic.extractNewListName(), null);
-                    break;
-                case RENAME_LIST:
-                    editList(logic.extractNewListName(), logic.extractNewListName());
-                    break;
-                case DELETE_LIST:
-                    deleteList(logic.getListName());
-                    break;
-                case SWITCH_LIST:
-                    switchList(logic.getListName());
-                    break;
-                case SEARCH:
-                    searchResult = logic.getSearchResult();
-                    displaySearchResult();
-                    break;
-                default:
-                    setStatusBar(getResourceString("msg.invalid.command"));
-                    break;
-            }
-        } catch (Exception e) {
-            setStatusBar(getResourceString("error.logic.command"));
-        }
-    }
 
     /**
      * refresh all lists and tasks in display
@@ -1298,35 +1245,9 @@ public class TaskMeter extends Shell {
         
         dialog.setTask(newTask);
         
-        if (dialog.open() && currentList.addTask(newTask)) {
-            addTask(newTask);
+        if (dialog.open()) {
+            logic.addTask(newTask);
         }
-    }
-    
-    /**
-     * set statusBar for addTask result
-     * 
-     * @param newTask           new task just added
-     */
-    private void addTask(Task newTask) {
-        String feedback;
-        
-        if (newTask != null) {
-            feedback = String.format(getResourceString("msg.ADD_TASK_SUCCESS"), newTask.getName(), newTask.getList());
-            isModified = true;
-
-            if (mode == MODE_LIST && newTask.getList().equals(currentList.getName())) {
-                displayNewTask(taskTable.getItemCount()+1, newTask);
-            }
-        } else {
-            feedback = String.format(getResourceString("msg.ADD_FAIL"), "TASK");
-        }
-
-        displayLists();
-        
-        switchTask(newTask.getList());
-        
-        setStatusBar(feedback);
     }
     
     private void switchTask(String listname) {
@@ -1335,30 +1256,6 @@ public class TaskMeter extends Shell {
         }
         
         taskTable.setSelection(taskTable.getItemCount()-1);
-    }
-
-    private void moveTask(int taskIdx, String listName) {
-        String feedback = null;
-        
-        try {
-            Task task = getIndexedTask(taskIdx);
-            
-            lists.removeTask(task.getName(), task);
-            lists.addTask(listName, task);
-            
-            isModified = true;
-            refreshDisplay();
-            
-            feedback = String.format(getResourceString("msg.MOVE"), task.getName(), listName);
-        } catch (IllegalArgumentException e) {
-            feedback = e.getMessage();
-        } catch (NullPointerException e) {
-            feedback = e.getMessage();
-        } catch (IndexOutOfBoundsException e) {
-            feedback = e.getMessage();
-        }
-        
-        setStatusBar(feedback);
     }
 
     private void editTask(int index) {
@@ -1386,34 +1283,6 @@ public class TaskMeter extends Shell {
     }
     
     private void deleteTask(int index) {
-        String feedback = null;
-        
-        try {
-            Task delTask = getIndexedTask(index);
-            
-            boolean success = false;
-            
-            // move task to trash, if task is in trash, delete it
-            if (delTask.getList().equals(TaskLists.TRASH)) {
-                success = lists.removeTask(delTask.getList(), delTask);
-            } else {
-                success = lists.moveTask(TaskLists.TRASH, delTask);
-            }
-            
-            if (success) {
-                feedback = String.format(getResourceString("msg.DELETE_SUCCESS"), "TASK", delTask.getName());
-                isModified = true;
-                displayTasks();
-            } else {
-                feedback = String.format(getResourceString("msg.DELETE_FAIL"), "TASK");
-            }
-        } catch (IndexOutOfBoundsException e) {
-            feedback = e.getMessage();
-        } catch (Exception e) {
-            feedback = e.getMessage();
-        }
-        
-        setStatusBar(feedback);
     }
     
     private void toggleStatus(int index) {

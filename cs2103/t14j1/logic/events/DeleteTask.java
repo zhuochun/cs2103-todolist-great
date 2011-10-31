@@ -23,8 +23,6 @@ public class DeleteTask extends Event {
             task = (Task) objs[0];
             index = -1;
         }
-
-        oldListName = task.getName();
     }
 
     public void execute() {
@@ -34,7 +32,8 @@ public class DeleteTask extends Event {
             if (index != -1) {
                 task = eventHandler.getTask(index);
             }
-
+            oldListName = task.getList();
+            
             boolean success = false;
 
             // move task to trash, if task is in trash, delete it
@@ -66,7 +65,7 @@ public class DeleteTask extends Event {
     }
 
     public Event undo() {
-        task.setName(oldListName);
+        task.setList(oldListName);
 
         Event undo = new AddTask();
         undo.setEventLisnter(eventHandler);

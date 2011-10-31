@@ -238,6 +238,8 @@ public class ControlGUI {
     }
     
     public void registerEvent(Event e, Object... objs) {
+        assert(e != null);
+        
         e.setEventLisnter(eventHandler);
         e.register(objs);
         e.execute();
@@ -378,28 +380,21 @@ public class ControlGUI {
     }
 
 	public String extractOldListName() {
-		
 		return parseCommand.extractListName();
 	}
 
 	public String extractNewListName() {
-		
 		return parseCommand.extractNewListName();
-		
 	}
 
     public Reminder getReminderParameter() {
-        
     	Reminder parameter = parseCommand.getRemindParamter();
-    	
     	return parameter;
     	
     }
 
     public Date getReminderTime() {
-    	
     	Date reminderTime = parseCommand.getRemindTime();
-    	
         return reminderTime;
     }
     
@@ -412,20 +407,18 @@ public class ControlGUI {
     }
     
     public void undo() {
+        assert(undoManager.hasUndo());
+        
         Event lastEvent = undoManager.getUndo();
-        
-        assert(lastEvent.hasUndo());
-        
         Event redo = lastEvent.undo();
         
         undoManager.addRedo(redo);
     }
     
     public void redo() {
+        assert(undoManager.hasRedo());
+        
         Event lastEvent = undoManager.getRedo();
-        
-        assert(lastEvent.hasUndo());
-        
         Event undo = lastEvent.undo();
         
         undoManager.addUndo(undo);

@@ -198,6 +198,27 @@ public class ControlGUI {
         Event newEvent = Event.generateEvent(Commands.SEARCH);
         registerEvent(newEvent, searchResult);
     }
+    
+    public void clearTrash() { // not undoable, not a individual event
+        lists.getList(TaskLists.TRASH).clear();
+        eventHandler.setStatus(eventHandler.getMsg("msg.CLEAR_TRASH"));
+    }
+    
+    public void clearCompleted(TaskList list) {
+        TaskList remove = new TaskList("Completed");
+        
+        // look through all completed tasks
+        for (Task t : list) {
+            if (t.isCompleted())
+                remove.addTask(t);
+        }
+        // move all completed tasks to Trash
+        for (Task t : remove) {
+            lists.moveTask(TaskLists.TRASH, t);
+        }
+        
+        eventHandler.setStatus(String.format(eventHandler.getMsg("msg.CLEAR_COMPLETED"), remove.getSize(), list.getName()));
+    }
 
     /**
      * if the user's command is ADD_TASK, GUI will call this method to perform the actual addTask

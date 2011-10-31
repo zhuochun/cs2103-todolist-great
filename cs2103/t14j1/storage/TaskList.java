@@ -61,6 +61,10 @@ public class TaskList implements Iterable<Task> {
     public String getName() {
         return listname;
     }
+    
+    public void clear() {
+        tasks.clear();
+    }
 
     /**
      * set the list name or rename the list name

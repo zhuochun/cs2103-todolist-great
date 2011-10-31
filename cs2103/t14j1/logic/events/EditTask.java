@@ -30,7 +30,9 @@ public class EditTask extends Event {
         }
     }
 
-    public void execute() {
+    public boolean execute() {
+        boolean success = true;
+        
         try {
             if (index == -1) {
                 Task tempTask = (Task) oldTask.clone();
@@ -52,7 +54,10 @@ public class EditTask extends Event {
             eventHandler.refreshTasks();
         } catch (IndexOutOfBoundsException e) {
             eventHandler.setStatus(e.getMessage());
+            success = false;
         }
+        
+        return success;
     }
 
     public boolean hasUndo() {
@@ -64,9 +69,14 @@ public class EditTask extends Event {
         undo.setEventLisnter(eventHandler);
 
         undo.register(newTask, oldTask); // undo: recover oldTask
-        undo.execute();
-
-        return undo;
+        
+        boolean success = undo.execute();
+        
+        if (success) {
+            return undo;
+        } else {
+            return null;
+        }
     }
 
 }

@@ -21,8 +21,9 @@ public class AddReminder extends Event {
         remindTime = (Date) objs[1];
     }
 
-    public void execute() {
-        String feedback = null;
+    public boolean execute() {
+        String feedback;
+        boolean success = false;
 
         try {
             eventHandler.getReminder().addReminder(remindTime, task);
@@ -30,15 +31,19 @@ public class AddReminder extends Event {
             eventHandler.refreshTasks();
             eventHandler.setModified();
 
+            success  = true;
             feedback = String.format(eventHandler.getMsg("msg.ADD_REMINDER"), task.getName(),
                     DateFormat.dateToStrShort(remindTime));
         } catch (NullPointerException e) {
             feedback = e.getMessage();
+            success  = false;
         } catch (IllegalArgumentException e) {
             feedback = e.getMessage();
+            success  = false;
         }
 
         eventHandler.setStatus(feedback);
+        return success;
     }
 
     public boolean hasUndo() {
@@ -50,9 +55,14 @@ public class AddReminder extends Event {
         undo.setEventLisnter(eventHandler);
 
         undo.register(task);
-        undo.execute();
-
-        return null;
+        
+        boolean success = undo.execute();
+        
+        if (success) {
+            return undo;
+        } else {
+            return null;
+        }
     }
 
 }

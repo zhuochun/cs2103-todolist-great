@@ -18,13 +18,14 @@ public class DeleteList extends Event {
         name = (String) objs[0];
     }
 
-    public void execute() {
+    public boolean execute() {
         String feedback = null;
+        boolean success = false;
 
         try {
             list = eventHandler.getLists().getList(name);
             
-            boolean success = deleteList(name);
+            success = deleteList(name);
 
             if (success) {
                 eventHandler.setModified();
@@ -36,9 +37,11 @@ public class DeleteList extends Event {
             }
         } catch (Exception e) {
             feedback = e.getMessage();
+            success  = false;
         }
 
         eventHandler.setStatus(feedback);
+        return success;
     }
 
     private boolean deleteList(String listName) {
@@ -62,9 +65,14 @@ public class DeleteList extends Event {
         undo.setEventLisnter(eventHandler);
 
         undo.register(list);
-        undo.execute();
-
-        return undo;
+        
+        boolean success = undo.execute();
+        
+        if (success) {
+            return undo;
+        } else {
+            return null;
+        }
     }
 
 }

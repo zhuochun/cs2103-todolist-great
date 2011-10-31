@@ -29,8 +29,9 @@ public class MoveTask extends Event {
         oldListName = task.getList();
     }
 
-    public void execute() {
+    public boolean execute() {
         String feedback = null;
+        boolean success = false;
 
         try {
             if (index != -1) {
@@ -44,16 +45,21 @@ public class MoveTask extends Event {
             eventHandler.setModified();
             eventHandler.refreshAll();
 
+            success  = true;
             feedback = String.format(eventHandler.getMsg("msg.MOVE"), task.getName(), newListName);
         } catch (IllegalArgumentException e) {
+            success  = false;
             feedback = e.getMessage();
         } catch (NullPointerException e) {
+            success  = false;
             feedback = e.getMessage();
         } catch (IndexOutOfBoundsException e) {
+            success  = false;
             feedback = e.getMessage();
         }
 
         eventHandler.setStatus(feedback);
+        return success;
     }
 
     public boolean hasUndo() {
@@ -65,9 +71,14 @@ public class MoveTask extends Event {
         undo.setEventLisnter(eventHandler);
 
         undo.register(task, oldListName);
-        undo.execute();
-
-        return null;
+        
+        boolean success = undo.execute();
+        
+        if (success) {
+            return undo;
+        } else {
+            return null;
+        }
     }
 
 }

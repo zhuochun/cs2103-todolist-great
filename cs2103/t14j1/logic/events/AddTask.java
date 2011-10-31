@@ -14,13 +14,15 @@ public class AddTask extends Event {
     String listname;
 
     public void register(Object... objs) {
+        assert(task != null);
+        
         task = (Task) objs[0];
         listname = null;
     }
 
-    public void execute() {
+    public boolean execute() {
         String feedback;
-        boolean success;
+        boolean success = false;
         
         if (!eventHandler.getLists().hasList(task.getList())) {
             listname = task.getList();
@@ -40,6 +42,7 @@ public class AddTask extends Event {
         }
 
         eventHandler.setStatus(feedback);
+        return success;
     }
 
     public boolean hasUndo() {
@@ -54,9 +57,14 @@ public class AddTask extends Event {
         undo.setEventLisnter(eventHandler);
 
         undo.register(task);
-        undo.execute();
-
-        return null;
+        
+        boolean success = undo.execute();
+        
+        if (success) {
+            return undo;
+        } else {
+            return null;
+        }
     }
 
 }

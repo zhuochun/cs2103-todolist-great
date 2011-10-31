@@ -242,9 +242,10 @@ public class ControlGUI {
         
         e.setEventLisnter(eventHandler);
         e.register(objs);
-        e.execute();
         
-        if (e.hasUndo()) {
+        boolean success = e.execute();
+        
+        if (success && e.hasUndo()) {
             undoManager.addUndo(e);
         }
     }
@@ -412,7 +413,9 @@ public class ControlGUI {
         Event lastEvent = undoManager.getUndo();
         Event redo = lastEvent.undo();
         
-        undoManager.addRedo(redo);
+        if (redo != null) {
+            undoManager.addRedo(redo);
+        }
     }
     
     public void redo() {
@@ -421,7 +424,9 @@ public class ControlGUI {
         Event lastEvent = undoManager.getRedo();
         Event undo = lastEvent.undo();
         
-        undoManager.addUndo(undo);
+        if (undo != null) {
+            undoManager.addUndo(undo);
+        }
     }
     
     public void setEventListener(EventListener e) {

@@ -25,9 +25,9 @@ public class AddList extends Event {
         }
     }
 
-    public void execute() {
+    public boolean execute() {
         String feedback;
-        boolean success;
+        boolean success = false;
 
         try {
             if (list == null) {
@@ -46,9 +46,11 @@ public class AddList extends Event {
             }
         } catch (NullPointerException e) {
             feedback = e.getMessage();
+            success  = false;
         }
 
         eventHandler.setStatus(feedback);
+        return success;
     }
 
     public boolean hasUndo() {
@@ -60,8 +62,13 @@ public class AddList extends Event {
         undo.setEventLisnter(eventHandler);
 
         undo.register(listname);
-        undo.execute();
-
-        return undo;
+        
+        boolean success = undo.execute();
+        
+        if (success) {
+            return undo;
+        } else {
+            return null;
+        }
     }
 }

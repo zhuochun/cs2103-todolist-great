@@ -554,9 +554,27 @@ public class TaskMeter extends Shell {
         mntmEdit.setMenu(menuEdit);
     
         final MenuItem mntmUndo = new MenuItem(menuEdit, SWT.NONE);
+        mntmUndo.setAccelerator(SWT.MOD1 + 'Z');
+        mntmUndo.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                if (logic.hasUndo()) {
+                    logic.undo();
+                }
+            }
+        });
         mntmUndo.setText(getResourceString("undo"));
     
         final MenuItem mntmRedo = new MenuItem(menuEdit, SWT.NONE);
+        mntmRedo.setAccelerator(SWT.MOD1 + 'Y');
+        mntmRedo.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                if (logic.hasRedo()) {
+                    logic.redo();
+                }
+            }
+        });
         mntmRedo.setText(getResourceString("redo"));
         
         new MenuItem(menuEdit, SWT.SEPARATOR);

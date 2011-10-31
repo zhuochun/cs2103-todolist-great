@@ -3,6 +3,7 @@ package cs2103.t14j1.taskmeter;
 import cs2103.t14j1.storage.Task;
 import cs2103.t14j1.storage.TaskList;
 import cs2103.t14j1.storage.TaskLists;
+import cs2103.t14j1.taskmeter.reminder.ReminderDialog;
 
 public interface EventListener {
     
@@ -11,6 +12,8 @@ public interface EventListener {
     public TaskLists getLists();
     
     public Task getTask(int index);
+    
+    public ReminderDialog getReminder();
     
     public String getEditList(String oldName);
     
@@ -26,8 +29,6 @@ public interface EventListener {
     
     public void refreshTasks();
     
-    public void refreshTask(int idx, Task task);
-    
     public void setSearch(TaskList result);
     
     public void switchTask(String list);
@@ -35,6 +36,4 @@ public interface EventListener {
     public void switchList(String list);
     
     public void editTask(int idx);
-    
-    
 }

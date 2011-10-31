@@ -16,6 +16,8 @@ public class RemoveReminder extends Event {
     Date remindTime;
 
     public void register(Object... objs) {
+        assert(task != null);
+        
         task = (Task) objs[0];
     }
 
@@ -25,7 +27,7 @@ public class RemoveReminder extends Event {
 
         try {
             remindTime = task.getReminder();
-
+            
             success = eventHandler.getReminder().removeReminder(task);
 
             if (success) {

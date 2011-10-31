@@ -227,9 +227,19 @@ public class ControlGUI {
 		return newTask;
     }
     
-    public void addTask(Task task) {
+    public Task quickAddTask() {
+        Task task = addTask();
+        
+        if (addTask(task)) {
+            return task;
+        } else {
+            return null;
+        }
+    }
+    
+    public boolean addTask(Task task) {
         Event newEvent = Event.generateEvent(Commands.ADD_TASK);
-        registerEvent(newEvent, task);
+        return registerEvent(newEvent, task);
     }
     
     public void editTask(int index) {
@@ -237,7 +247,7 @@ public class ControlGUI {
         registerEvent(newEvent, index);
     }
     
-    public void registerEvent(Event e, Object... objs) {
+    public boolean registerEvent(Event e, Object... objs) {
         assert(e != null);
         
         e.setEventLisnter(eventHandler);
@@ -248,6 +258,8 @@ public class ControlGUI {
         if (success && e.hasUndo()) {
             undoManager.addUndo(e);
         }
+        
+        return success;
     }
     
     private void convertLongTimeToDate (Date d, Long secondsFromStartOfDay) {

@@ -292,13 +292,18 @@ public class ControlGUI {
 	}
 
     public Reminder getReminderParameter() {
-        // TODO Auto-generated method stub
-        return Reminder.START; // be default return START, do not return null
+        
+    	Reminder parameter = parseCommand.getRemindParamter();
+    	
+    	return parameter;
+    	
     }
 
     public Date getReminderTime() {
-        // TODO Auto-generated method stub
-        return null;
+    	
+    	Date reminderTime = parseCommand.getRemindTime();
+    	
+        return reminderTime;
     }
     
 }

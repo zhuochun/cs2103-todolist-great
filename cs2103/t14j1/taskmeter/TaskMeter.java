@@ -964,6 +964,8 @@ public class TaskMeter extends Shell {
             currentList = lists.getList(name);
         } else if (currentList == null) {
             currentList = lists.getList(TaskLists.INBOX);
+        } else if (!lists.hasList(currentList.getName())) {
+            currentList = lists.getList(TaskLists.INBOX);
         }
         
         mode = MODE_LIST;
@@ -1158,29 +1160,7 @@ public class TaskMeter extends Shell {
     }
     
     private void deleteList(String name) {
-        String feedback = null;
-        
-        try {
-            boolean success = logic.deleteList(name);
-            
-            if (success) {
-                isModified = true;
-                
-                if (name.equals(currentList.getName())) {
-                    currentList = lists.getList(TaskLists.INBOX);
-                }
-                
-                refreshDisplay();
-                
-                feedback = String.format(getResourceString("msg.DELETE_SUCCESS"), "LIST", name);
-            } else {
-                feedback = String.format(getResourceString("msg.DELETE_FAIL"), "LIST");
-            }
-        } catch (Exception e) {
-            feedback = e.getMessage();
-        }
-        
-        setStatusBar(feedback);
+        logic.deleteList(name);
     }
 
     private void switchList(String name) {

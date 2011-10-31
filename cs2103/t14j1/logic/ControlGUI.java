@@ -108,7 +108,7 @@ public class ControlGUI {
                     editList(logic.extractNewListName(), logic.extractNewListName());
                     break;
                 case DELETE_LIST:
-                    deleteList(logic.getListName());
+                    deleteList(getListName());
                     break;
                 case SWITCH_LIST:
                     switchList(logic.getListName());
@@ -271,16 +271,9 @@ public class ControlGUI {
      * 
      * @return true is deleting is successful
      */
-    public boolean deleteList(String listName) {
-    	if(listName.equals("Inbox") || listName.equals("Trash"))
-    		return false;
-    	
-    	if(!lists.hasList(listName))
-    		return false;
-    	
-    	lists.removeList(listName);
-    	
-    	return true;
+    public void deleteList(String listName) {
+        Event newEvent = Event.generateEvent(Commands.DELETE_LIST);
+        registerEvent(newEvent, listName);
     }
     
     /**

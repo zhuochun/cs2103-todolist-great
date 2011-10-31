@@ -107,6 +107,16 @@ public class Task implements Comparable<Object> {
         
         return cloneTask;
     }
+    
+    public void copy(Task from) {
+        setName(from.getName());
+        setPlace(from.getPlace());
+        setList(from.getList());
+        setPriority(from.getPriority());
+        setWhen((When) from.getWhen().clone());
+        setReminder((Date) from.getReminder().clone());
+        setStatus(from.getStatus());
+    }
 
     public String getName() {
         return name;

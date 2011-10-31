@@ -90,6 +90,23 @@ public class Task implements Comparable<Object> {
         this.status        = INCOMPLETE;
         this.lastEditTime  = new Date();	// mark the last edit time to be the time when created
     }
+    
+    /**
+     * clone a duplicate of a Task object
+     */
+    public Object clone() {
+        Task cloneTask = new Task();
+        
+        cloneTask.setName(name);
+        cloneTask.setPlace(place);
+        cloneTask.setList(list);
+        cloneTask.setPriority(priority);
+        cloneTask.setWhen((When) when.clone());
+        cloneTask.setReminder((Date) reminder.clone());
+        cloneTask.setStatus(status);
+        
+        return cloneTask;
+    }
 
     public String getName() {
         return name;

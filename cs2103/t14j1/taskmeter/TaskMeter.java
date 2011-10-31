@@ -397,7 +397,7 @@ public class TaskMeter extends Shell {
                 switchList(list);
             }
 
-            public void editTask(int idx) {
+            public void editIdxTask(int idx) {
                 editTask(idx);
             }
         });
@@ -852,7 +852,7 @@ public class TaskMeter extends Shell {
         taskTable.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseDoubleClick(MouseEvent e) {
-                editTask(getSelectedIdx());
+                logic.editTask(getSelectedIdx());
             }
         });
         taskTable.setHeaderVisible(true);

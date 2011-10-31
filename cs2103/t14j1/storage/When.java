@@ -51,9 +51,13 @@ public class When implements Comparable<Object> {
         When cloneWhen = new When();
         
         cloneWhen.setType(isAllDay);
-        cloneWhen.setStartDateTime(startDateTime.getTime());
-        cloneWhen.setEndDateTime(endDateTime.getTime());
-        cloneWhen.setDeadline(deadline.getTime());
+        if (startDateTime != null) {
+            cloneWhen.setStartDateTime(startDateTime.getTime());
+            cloneWhen.setEndDateTime(endDateTime.getTime());
+        }
+        if (deadline != null) {
+            cloneWhen.setDeadline(deadline.getTime());
+        }
         
         return cloneWhen;
     }

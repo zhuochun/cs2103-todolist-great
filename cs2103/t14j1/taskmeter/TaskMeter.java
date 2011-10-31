@@ -458,7 +458,7 @@ public class TaskMeter extends Shell {
         smartBar.setFont(SWTResourceManager.getFont("Segoe UI", 12, SWT.NORMAL));
     }
     
-    protected void executeCommand(String input) {
+    private void executeCommand(String input) {
         logic.setUserInput(input.trim());
         logic.executeCommand();
     }
@@ -587,9 +587,9 @@ public class TaskMeter extends Shell {
                 if (isTasksFocus()) {
                     int index = getSelectedIdx();
                     if (getIndexedTask(index).getReminder() == null)
-                        addReminder(getSelectedIdx(), Reminder.START);
+                        logic.addReminder(getSelectedIdx(), Reminder.START);
                     else
-                        removeReminder(index);
+                        logic.removeReminder(index);
                 }
             }
         });
@@ -603,7 +603,7 @@ public class TaskMeter extends Shell {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 if (isTasksFocus()) {
-                    editTask(getSelectedIdx());
+                    logic.editTask(getSelectedIdx());
                 } else if (isListsFocus()) {
                     logic.editList(getSelectedListName(), null);
                 }
@@ -617,7 +617,7 @@ public class TaskMeter extends Shell {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 if (isTasksFocus()) {
-                    deleteTask(getSelectedIdx());
+                    logic.deleteTask(getSelectedIdx());
                 } else if (isListsFocus()) {
                     logic.deleteList(getSelectedListName());
                 }
@@ -631,7 +631,7 @@ public class TaskMeter extends Shell {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 if (taskTable.isFocusControl() && taskTable.getSelectionCount() != 0) {
-                    toggleStatus(getSelectedIdx());
+                    logic.toggleStatus(getSelectedIdx(), null);
                 }
             }
         });
@@ -645,7 +645,7 @@ public class TaskMeter extends Shell {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 if (taskTable.isFocusControl() && taskTable.getSelectionCount() != 0)
-                    togglePriority(getSelectedIdx(), Priority.IMPORTANT);
+                    logic.togglePriority(getSelectedIdx(), Priority.IMPORTANT);
             }
         });
         mntmMarkPriority1.setText(getResourceString("togglePriority1"));
@@ -656,7 +656,7 @@ public class TaskMeter extends Shell {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 if (taskTable.isFocusControl() && taskTable.getSelectionCount() != 0)
-                    togglePriority(getSelectedIdx(), Priority.NORMAL);
+                    logic.togglePriority(getSelectedIdx(), Priority.NORMAL);
             }
         });
         mntmMarkPriority2.setText(getResourceString("togglePriority2"));
@@ -667,7 +667,7 @@ public class TaskMeter extends Shell {
             @Override
             public void widgetSelected(SelectionEvent e) {
                 if (taskTable.isFocusControl() && taskTable.getSelectionCount() != 0)
-                    togglePriority(getSelectedIdx(), Priority.LOW);
+                    logic.togglePriority(getSelectedIdx(), Priority.LOW);
             }
         });
         mntmMarkPriority3.setText(getResourceString("togglePriority3"));
@@ -686,6 +686,8 @@ public class TaskMeter extends Shell {
         
         menuEdit.addMenuListener(new MenuAdapter() {
             public void menuShown(MenuEvent e) {
+                mntmUndo.setEnabled(logic.hasUndo());
+                mntmRedo.setEnabled(logic.hasRedo());
                 mntmRemind.setEnabled(isTasksFocus());
                 mntmEditTask.setEnabled(isTasksFocus() || isListsFocus());
                 mntmDeleteTask.setEnabled(isTasksFocus() || isListsFocus());
@@ -1279,9 +1281,9 @@ public class TaskMeter extends Shell {
             dialog.setTask(task);
             
             if (dialog.open()) {
-                refreshTask(index, task);
                 isModified = true;
-                feedback = String.format(getResourceString("msg.EDIT_SUCCESS"), "TASK", task.getName());
+                refreshTask(index, task);
+                feedback = String.format(getResourceString("msg.EDIT_SUCCESS"), "Task", task.getName());
             } else {
                 feedback = String.format(getResourceString("msg.VIEW_TASK"), task.getName());
             }
@@ -1290,26 +1292,6 @@ public class TaskMeter extends Shell {
         }
         
         setStatusBar(feedback);
-    }
-    
-    private void deleteTask(int index) {
-        logic.deleteTask(index);
-    }
-    
-    private void toggleStatus(int index) {
-        logic.toggleStatus(index, null);
-    }
-    
-    private void togglePriority(int index, Priority newPriority) {
-        logic.togglePriority(index, newPriority);
-    }
-
-    private void addReminder(int index, Reminder parameter) {
-        logic.addReminder(index, parameter);
-    }
-
-    private void removeReminder(int index) {
-        logic.removeReminder(index);
     }
     
     /**

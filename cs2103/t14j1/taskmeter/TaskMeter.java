@@ -521,7 +521,7 @@ public class TaskMeter extends Shell {
                 if (isTasksFocus()) {
                     editTask(getSelectedIdx());
                 } else if (isListsFocus()) {
-                    editList(getSelectedListName(), null);
+                    logic.editList(getSelectedListName(), null);
                 }
             }
         });
@@ -535,7 +535,7 @@ public class TaskMeter extends Shell {
                 if (isTasksFocus()) {
                     deleteTask(getSelectedIdx());
                 } else if (isListsFocus()) {
-                    deleteList(getSelectedListName());
+                    logic.deleteList(getSelectedListName());
                 }
             }
         });
@@ -1124,45 +1124,16 @@ public class TaskMeter extends Shell {
     }
     
     /**
-     * edit list name to a new list name
-     * 
-     * @param oldName
-     * @param newName
+     * open addListDialog to get new list name
      */
-    private void editList(String oldName, String newName) {
-        String feedback = null;
+    private String editList(String oldName) {
+        AddListDialog dialog = new AddListDialog(this);
         
-        if (newName == null) {
-            AddListDialog dialog = new AddListDialog(this);
-            dialog.setListName(oldName);
-            newName = dialog.open();
-        }
+        dialog.setListName(oldName);
         
-        try {
-            boolean success = logic.renameList(oldName, newName);
-            
-            if (success) {
-                isModified = true;
-                
-                displayLists();
-                
-                feedback = String.format(getResourceString("msg.RENAME_LIST"), oldName, newName);
-            } else {
-                feedback = String.format(getResourceString("msg.RENAME_LIST_FAIL"), oldName);
-            }
-        } catch (NullPointerException e) {
-            feedback = e.getMessage();
-        } catch (Exception e) {
-            feedback = e.getMessage();
-        }
-        
-        setStatusBar(feedback);
+        return dialog.open();
     }
     
-    private void deleteList(String name) {
-        logic.deleteList(name);
-    }
-
     private void switchList(String name) {
         if (name == null || name.trim().isEmpty()) {
             displayError(getResourceString("list.null"));
@@ -1241,26 +1212,7 @@ public class TaskMeter extends Shell {
     }
     
     private void toggleStatus(int index) {
-        String feedback = null;
-        
-        try {
-            Task task = getIndexedTask(index);
-            
-            if (task.isCompleted()) {
-                task.setStatus(Task.INCOMPLETE);
-                feedback = String.format(getResourceString("msg.TOGGLE"), task.getName(), task.getStatusStr());
-            } else {
-                task.setStatus(Task.COMPLETED);
-                feedback = String.format(getResourceString("msg.TOGGLE"), task.getName(), task.getStatusStr());
-            }
-            
-            isModified = true;
-            refreshTask(index, task);
-        } catch (IndexOutOfBoundsException e) {
-            feedback = e.getMessage();
-        }
-        
-        setStatusBar(feedback);
+        logic.toggleStatus(index, null);
     }
     
     private void togglePriority(int index, Priority newPriority) {

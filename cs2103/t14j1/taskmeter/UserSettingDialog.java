@@ -13,12 +13,12 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.wb.swt.SWTResourceManager;
 
 import cs2103.t14j1.storage.user.User;
+import cs2103.t14j1.taskmeter.reminder.Reminder;
 
 public class UserSettingDialog extends Dialog {
 
     protected Shell shlUserSettings;
     
-    private String[] SortMethods = { "Priority", "Start Date", "Deadline", "Duration", "Status" };
 
     /**
      * Create the dialog.
@@ -49,30 +49,57 @@ public class UserSettingDialog extends Dialog {
         }
     }
     
-    private String[] autoSaveOptions = {"2", "5 (Default)", "10", "15", "20"};
-    private int[]    autoSaveTime    = {120000, 300000, 600000, 900000, 1200000};
-
 
     /**
      * Create contents of the dialog.
      */
     private void createContents() {
         shlUserSettings = new Shell(getParent(), SWT.DIALOG_TRIM | SWT.PRIMARY_MODAL);
-        shlUserSettings.setSize(455, 185);
+        shlUserSettings.setSize(455, 230);
         shlUserSettings.setText("User Settings");
 
         sortMethod();
         
-        Label label = new Label(shlUserSettings, SWT.SEPARATOR | SWT.HORIZONTAL);
-        label.setBounds(5, 75, 435, 2);
+        Label label0 = new Label(shlUserSettings, SWT.SEPARATOR | SWT.HORIZONTAL);
+        label0.setBounds(5, 75, 435, 2);
         
         autoSave();;
         
-        Label label_1 = new Label(shlUserSettings, SWT.SEPARATOR | SWT.HORIZONTAL);
-        label_1.setBounds(5, 118, 435, 2);
+        Label label1 = new Label(shlUserSettings, SWT.SEPARATOR | SWT.HORIZONTAL);
+        label1.setBounds(5, 118, 435, 2);
         
         autoComplete();
+        
+        Label label = new Label(shlUserSettings, SWT.SEPARATOR | SWT.HORIZONTAL);
+        label.setBounds(5, 155, 435, 2);
+        
+        defaultReminder();
     }
+
+    private void defaultReminder() {
+        final String[] reminderOptions = {"Start Time", "End Time", "Deadline"};
+        final Reminder[] reminders = {Reminder.START, Reminder.END, Reminder.DEADLINE};
+        
+        final Label lblDefaultReminder = new Label(shlUserSettings, SWT.NONE);
+        lblDefaultReminder.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
+        lblDefaultReminder.setBounds(10, 165, 195, 20);
+        lblDefaultReminder.setText("Default Reminder Parameter");
+        
+        final Combo cbReminder = new Combo(shlUserSettings, SWT.READ_ONLY);
+        cbReminder.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                User.defaultRemind = reminders[cbReminder.getSelectionIndex()];
+            }
+        });
+        cbReminder.setItems(reminderOptions);
+        cbReminder.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
+        cbReminder.setBounds(215, 162, 180, 28);
+        cbReminder.select(User.defaultRemind.ordinal());
+    }
+    
+    private final String[] autoSaveOptions = {"2", "5 (Default)", "10", "15", "20"};
+    private final int[]    autoSaveTime    = {120000, 300000, 600000, 900000, 1200000};
 
     private void autoSave() {
         Label lblAutoSaveTasks = new Label(shlUserSettings, SWT.NONE);
@@ -121,6 +148,8 @@ public class UserSettingDialog extends Dialog {
     }
 
     private void sortMethod() {
+        final String[] SortMethods = { "Priority", "Start Date", "Deadline", "Duration", "Status" };
+        
         Label lblSort = new Label(shlUserSettings, SWT.NONE);
         lblSort.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
         lblSort.setBounds(10, 10, 205, 20);

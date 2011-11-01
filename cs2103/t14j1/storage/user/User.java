@@ -75,7 +75,7 @@ public class User {
                 while ((line = r.readLine()) != null) {
                     terms = line.split(" = ");
                     
-                    System.out.println(terms[0] + " -> " + terms[1]);
+                    //System.out.println(terms[0] + " -> " + terms[1]);
 
                     if (terms[0].equals(saveStrings[0])) {
                         performAutoComplete = terms[1].equals("true") ? true : false;

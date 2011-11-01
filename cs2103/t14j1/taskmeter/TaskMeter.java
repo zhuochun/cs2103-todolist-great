@@ -424,7 +424,7 @@ public class TaskMeter extends Shell {
                 // Only perform auto completion when user input characters
                 if (User.performAutoComplete && (e.character > 'A' && e.character < 'z')) {
                     String txt = smartBar.getText();
-                    if (autoComplete.setInput(txt)) {
+                    if (autoComplete.setInput(txt, smartBar.getSelectionCount() != 0)) {
                         smartBar.setText(autoComplete.getCompletedStr());
                         smartBar.setSelection(autoComplete.getStartIdx(), autoComplete.getEndIdx());
                     }
@@ -443,7 +443,7 @@ public class TaskMeter extends Shell {
                 } else if (e.keyCode == SWT.TAB) {      // Tab to complete words
                     e.doit = false;
                     String txt = smartBar.getText();
-                    if (autoComplete.setInput(txt)) {
+                    if (autoComplete.setInput(txt, smartBar.getSelectionCount() != 0)) {
                         smartBar.setText(autoComplete.getCompletedStr());
                         smartBar.setSelection(autoComplete.getStartIdx(), autoComplete.getEndIdx());
                     }

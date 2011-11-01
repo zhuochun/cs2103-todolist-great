@@ -27,7 +27,7 @@ public class AutoComplete {
     private int listIdx;
     
     private final String[] Commands = {
-            "add", "del", "move", "edit", "done", "rename", "remind"
+            "add", "del", "move", "edit", "done", "remind", "rename"
     };
     
     private final String[] Dictionary = {
@@ -205,7 +205,7 @@ public class AutoComplete {
     }
     
     private boolean completeCommand() {
-        if (lastInputLowerCase.matches("^([a-z]){0,3}$")) {
+        if (lastInputLowerCase.matches("^([a-z])*$")) {
             for (; commandIdx < Commands.length; commandIdx++) {
                 if (Commands[commandIdx].startsWith(lastInputLowerCase)) {
                     completedInput = formCompleteWord(Commands[commandIdx], lastInput);

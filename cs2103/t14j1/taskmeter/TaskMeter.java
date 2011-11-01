@@ -56,7 +56,6 @@ import cs2103.t14j1.storage.TaskLists;
 import cs2103.t14j1.storage.user.User;
 import cs2103.t14j1.taskmeter.autocomplete.AutoComplete;
 import cs2103.t14j1.taskmeter.quickadd.QuickAddDialog;
-import cs2103.t14j1.taskmeter.reminder.Reminder;
 import cs2103.t14j1.taskmeter.reminder.ReminderDialog;
 
 /**
@@ -615,7 +614,7 @@ public class TaskMeter extends Shell {
                 if (isTasksFocus()) {
                     int index = getSelectedIdx();
                     if (getIndexedTask(index).getReminder() == null)
-                        logic.addReminder(getSelectedIdx(), Reminder.START);
+                        logic.addReminder(getSelectedIdx(), User.defaultRemind);
                     else
                         logic.removeReminder(index);
                 }

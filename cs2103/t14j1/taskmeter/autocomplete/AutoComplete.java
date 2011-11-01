@@ -312,7 +312,7 @@ public class AutoComplete {
             timeUnitIdx++;
 
             return true;
-        } else if (lastInputLowerCase.matches("^.*\\sfor\\s(\\d+\\s?[a-z]+\\s?)*\\d+\\s?[a-z]{1,3}$")) {
+        } else if (lastInputLowerCase.matches("^.*\\sfor\\s(\\d+\\s?[a-z]+\\s?)*\\d+\\s?[a-z]+$")) {
             String[] tokens = lastInputLowerCase.split("\\d+\\s?");
             
             String keyword = tokens[tokens.length-1];
@@ -334,7 +334,7 @@ public class AutoComplete {
     }
     
     private boolean completeDictionary() {
-        if (lastInputLowerCase.matches("^.*\\s[a-z]+$")) {
+        if (lastInputLowerCase.matches("^.*\\s[a-z]{2,}$")) {
             String[] tokens = lastInputLowerCase.split("\\s");
             
             String keyword = tokens[tokens.length-1];

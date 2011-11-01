@@ -72,6 +72,7 @@ public class TaskMeter extends Shell {
     private Table taskList;         // task list lists all the lists of tasks
     private Text  smartBar;         // smart bar
     private Image logo;             // logo image
+    private Tray  tray;             // system tray
     private TrayItem trayItem;      // tray item
     private ToolTip  remindTray;    // tray reminder
 
@@ -218,6 +219,10 @@ public class TaskMeter extends Shell {
     }
     
     private void openTrayReminder(String title, String msg) {
+        if (remindTray == null) { // in case tray is not supported
+            return ;
+        }
+        
         remindTray.setText(title);
         remindTray.setMessage(msg);
         remindTray.setVisible(true);
@@ -230,7 +235,7 @@ public class TaskMeter extends Shell {
     }
     
     private void setTray(Display display) {
-        final Tray tray = display.getSystemTray();
+        tray = display.getSystemTray();
         
         if (tray != null) {
             remindTray = new ToolTip(this, SWT.BALLOON | SWT.ICON_INFORMATION);
@@ -428,6 +433,8 @@ public class TaskMeter extends Shell {
                         smartBar.setSelection(autoComplete.getStartIdx(), autoComplete.getEndIdx());
                     }
                     smartBar.setFocus();
+                } else if (e.character == SWT.BS && smartBar.getText().isEmpty()) {
+                    autoComplete.reset();
                 }
             }
         });
@@ -1410,9 +1417,12 @@ public class TaskMeter extends Shell {
             if (choice == SWT.CANCEL) {
                 return false;
             } else if (choice == SWT.YES) {
-                if (!saveTaskMeter())
+                if (!saveTaskMeter()) {
                     return false;
+                }
+                
                 trayItem.dispose();
+                tray.dispose();
             }
         }
     

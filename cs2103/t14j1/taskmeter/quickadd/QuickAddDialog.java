@@ -113,7 +113,7 @@ public class QuickAddDialog extends Dialog {
                 // Only perform auto completion when user input characters
                 if (User.performAutoComplete && (e.character > 'A' && e.character < 'z')) {
                     String txt = quickAddBar.getText();
-                    if (autoComplete.setInput(txt)) {
+                    if (autoComplete.setInput(txt, quickAddBar.getSelectionCount() != 0)) {
                         quickAddBar.setText(autoComplete.getCompletedStr());
                         quickAddBar.setSelection(autoComplete.getStartIdx(), autoComplete.getEndIdx());
                     }
@@ -129,7 +129,7 @@ public class QuickAddDialog extends Dialog {
                 } else if (e.keyCode == SWT.TAB) { // Tab to complete words
                     e.doit = false;
                     String txt = quickAddBar.getText();
-                    if (autoComplete.setInput(txt)) {
+                    if (autoComplete.setInput(txt, quickAddBar.getSelectionCount() != 0)) {
                         quickAddBar.setText(autoComplete.getCompletedStr());
                         quickAddBar.setSelection(autoComplete.getStartIdx(), autoComplete.getEndIdx());
                     }

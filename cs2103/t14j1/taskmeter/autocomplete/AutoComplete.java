@@ -50,13 +50,15 @@ public class AutoComplete {
      * @param ls        pass a copy of the taskLists
      */
     public AutoComplete(TaskLists ls) {
-        lists = ls;
+        lists     = ls;
+        listNames = lists.getListNames();
     }
     
     /**
      * reset all the AutoComplete Indexes to default
      */
     public void reset() {
+        listNames          = lists.getListNames();
         lastInput          = null;
         lastInputLowerCase = null;
         completedInput     = null;
@@ -78,7 +80,6 @@ public class AutoComplete {
         lastInput          = str;
         lastInputLowerCase = str.toLowerCase();
         completedInput     = null;
-        listNames          = lists.getListNames();
         commandIdx         = 0;
         dictionaryIdx      = 0;
         listIdx            = 0;
@@ -94,7 +95,7 @@ public class AutoComplete {
      * @param str           the user input
      * @return true         if a valid completion is generated
      */
-    public boolean setInput(String str) {
+    public boolean setInput(String str, boolean selected) {
         if (str == null) { // in case str is null
             str = "";
         } else {
@@ -102,7 +103,7 @@ public class AutoComplete {
         }
         
         try {
-            if (str.equals(completedInput) || str.equals(lastInput)) {
+            if (str.equals(lastInput) || (str.equals(completedInput) && selected)) {
                 completedInput = null;
                 startIdx = endIdx = lastInput.length();
                 

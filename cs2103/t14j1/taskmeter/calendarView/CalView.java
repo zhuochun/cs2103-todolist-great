@@ -40,8 +40,8 @@ class TaskItem extends Composite{
 public class CalView extends Composite{
 	
 	// for drawing
-	private Calendar time;
-	private List<String> viewTimeStr;
+	private Calendar currentTime;
+	private Calendar calStartTime;
 	
 	private int dayNum = 7;
 	private int timeInterval = 30;	// time interval, should be a divider of 60
@@ -70,6 +70,7 @@ public class CalView extends Composite{
 	private static final int calTimeTextFontFormat = SWT.BOLD;
 	private static final int calTimeTextFontSize = 14;
 	private static final String calTimeTextFontName = "Arial";
+	private static final int calStartDay = Calendar.SUNDAY;
 	
 	// for colour scheme
 	private static Color calColorBackGround;
@@ -91,8 +92,8 @@ public class CalView extends Composite{
 		return true;
 	}
 	
-	private void timeReset(boolean resetDate){
-		if(resetDate){
+	private static void timeReset(Calendar time){
+		if(time == null){
 			time = Calendar.getInstance();
 		}
 		
@@ -100,16 +101,23 @@ public class CalView extends Composite{
 		time.set(Calendar.HOUR_OF_DAY, 0);
 		time.set(Calendar.MINUTE, 0);
 		time.set(Calendar.SECOND, 0);
+		time.set(Calendar.MILLISECOND, 0);
 	}
 	
-	private void initializeStartingDate(){
-		this.time= Calendar.getInstance();
-		int dayOfAWeek = time.get(Calendar.DAY_OF_WEEK);
-		if(dayOfAWeek - dayNum != 0){
-			time.set(Calendar.DAY_OF_WEEK, 0);
+	
+	private Calendar getCalStartTime(){
+		if(this.calStartTime != null){
+			return (Calendar) this.calStartTime.clone();
+		} else{	// initialize the cal
+			this.calStartTime= Calendar.getInstance();
+			int dayOfWeek = this.calStartTime.get(Calendar.DAY_OF_WEEK);
+			if(dayOfWeek - dayNum != 0){
+				calStartTime.set(Calendar.DAY_OF_WEEK,calStartDay);
+			}
+			
+			timeReset(this.calStartTime);
+			return (Calendar) this.calStartTime.clone();
 		}
-		
-		timeReset(false);
 	}
 	
 	CalView(Composite parent, int style) {
@@ -119,8 +127,10 @@ public class CalView extends Composite{
 		calColorBackGround = this.getDisplay().getSystemColor(SWT.COLOR_CYAN);
 		calColorLineColor = this.getDisplay().getSystemColor(SWT.COLOR_BLACK);
 		calColorTask = this.getDisplay().getSystemColor(SWT.COLOR_DARK_BLUE);
+		
 		tasks = new LinkedList<T>();
-		time = Calendar.getInstance();
+		currentTime = Calendar.getInstance();
+		
 		// end of initialization
 		
 		
@@ -174,7 +184,8 @@ public class CalView extends Composite{
 			gc.drawLine((int)dayPosX[i], startY, (int)dayPosX[i], endY);
 		}
 			// the horizontal date information
-		initializeStartingDate(); SimpleDateFormat dateFormat = new SimpleDateFormat("MMM,dd,EEE");
+		SimpleDateFormat dateFormat = new SimpleDateFormat("MMM,dd,EEE");
+		Calendar startCalTime = this.getCalStartTime();
 		for(int i=0;i<dayNum;i++){
 			int posX = (int)(dayPosX[i]);// + intervalX/2);
 			int posY = calTopTextSize;	//TODO: decide this later
@@ -184,14 +195,16 @@ public class CalView extends Composite{
 //					time.get(GregorianCalendar.DAY_OF_MONTH),
 //					time.get(GregorianCalendar.MONTH),
 //					time.get(GregorianCalendar.DAY_OF_WEEK)),
-					dateFormat.format(time.getTime()),
+					dateFormat.format(startCalTime.getTime()),
 					posX,posY);
-			time.add(Calendar.DAY_OF_YEAR, 1);
+			startCalTime.add(Calendar.DAY_OF_YEAR, 1);
 		}
 		
 			// horizontal line
 		hourPosY = new double[verticalPartNum];
-		gc.setLineWidth(calDayVSlicerLineWidth);timeReset(false);
+		gc.setLineWidth(calDayVSlicerLineWidth);
+		startCalTime = this.getCalStartTime();
+		startCalTime.set(Calendar.DATE, currentTime.get(Calendar.DATE));
 		
 		// create a list of labels for drawing
 		double tempY = startY;
@@ -202,10 +215,10 @@ public class CalView extends Composite{
 
 			gc.drawString(String.format(
 					timeFormat, 
-					time.get(Calendar.HOUR_OF_DAY),
-					time.get(Calendar.MINUTE)),
+					startCalTime.get(Calendar.HOUR_OF_DAY),
+					startCalTime.get(Calendar.MINUTE)),
 					calTimeStartPosX,(int)((double)tempY - ((double)calTimeTextFontSize)/2));
-			time.add(Calendar.MINUTE, this.timeInterval);
+			startCalTime.add(Calendar.MINUTE, this.timeInterval);
 			
 			tempY += intervalY;
 		}
@@ -221,7 +234,6 @@ public class CalView extends Composite{
 		}
 		
 		// then put in the task
-		initializeStartingDate();
 		for(T task:tasks){
 			// assume there's no multi-day task
 			Date startTime = task.startTime;
@@ -230,12 +242,10 @@ public class CalView extends Composite{
 			
 			if(timeOutOfScope(startTime,endTime)){
 				// TODO: deleted later
-				System.out.println("Out of range\n\t" + title + ": " + startTime + ", " + endTime);
+				System.err.println("Out of range\n\t" + title + ": " + startTime + ", " + endTime);
 				continue;
 			}
 			
-			// TODO: delete later
-			System.out.println("In range.");
 			
 			// dayPosX
 			// hourPosY
@@ -244,25 +254,24 @@ public class CalView extends Composite{
 				// first decide on the date
 			long startTimeStamp = startTime.getTime();
 			long endTimeStamp = endTime.getTime();
-			timeReset(true);	long calStartTimeStampOfAll = time.getTimeInMillis();
+			long calStartTimeStampOfAll = getCalStartTime().getTimeInMillis();
 			int dayIndex = (int)((startTimeStamp - calStartTimeStampOfAll)/1000/3600/24);
 			
 				// then on the exact time
 			long calStartTimeStampOfThatDay = calStartTimeStampOfAll + 1000*3600*24*dayIndex;
 			long diff = (startTimeStamp - calStartTimeStampOfThatDay)/1000;
-			int yStartIndex = (int) (diff/60/timeInterval);
 			
-			int taskStartTimeYShift = (int) ((double)(diff - hourPosY[yStartIndex])/60/timeInterval * intervalY);
-			diff = (endTimeStamp - startTimeStamp)/1000;
-			int startYPos = (int) (hourPosY[yStartIndex] + taskStartTimeYShift);
 			int startXPos = (int) dayPosX[dayIndex];
+			int startYPos = startY + (int) ((double)diff/60/timeInterval * intervalY);
+			
+			diff = (endTimeStamp - startTimeStamp)/1000;
 			int taskDurationPix = (int) (diff/60/timeInterval * intervalY);
 			
 			gc.setBackground(calColorTask);
 			gc.fillRectangle(startXPos, startYPos, (int)intervalX, taskDurationPix);
 			
 			// then write the task title
-			int textYPos = startYPos + taskStartTimeYShift/2;
+			int textYPos = startYPos;
 			gc.setForeground(calColorLineColor);
 			gc.setBackground(calColorBackGround);
 			gc.drawText(title, startXPos + 10, textYPos);	// TODO: resolve here.. a bit of hacking
@@ -271,10 +280,15 @@ public class CalView extends Composite{
 	}
 	
 	private boolean timeOutOfScope(Date startTime, Date endTime) {
-		timeReset(true);
-		Calendar endDate = (Calendar) time.clone();
-		endDate.add(Calendar.DATE, dayNum);
-		if(startTime.before(time.getTime()) || endTime.after(endDate.getTime())
+		Calendar startDate = getCalStartTime();
+		Date dStartDate = startDate.getTime();
+		
+		// try to get the end date here
+		startDate.add(Calendar.DATE, dayNum +1);
+		startDate.add(Calendar.SECOND, -1);
+		Date dEndDate = startDate.getTime();
+		
+		if(startTime.before(dStartDate) || endTime.after(dEndDate)
 			|| endTime.getDate() != startTime.getDate() || endTime.before(startTime)){
 			return true;
 		}

@@ -1,8 +1,8 @@
 package cs2103.t14j1.taskmeter.calendarView;
 
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.LinkedList;
 import java.util.List;
 
@@ -12,7 +12,6 @@ import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
-import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
@@ -41,7 +40,7 @@ class TaskItem extends Composite{
 public class CalView extends Composite{
 	
 	// for drawing
-	private GregorianCalendar time;
+	private Calendar time;
 	private List<String> viewTimeStr;
 	
 	private int dayNum = 7;
@@ -94,20 +93,20 @@ public class CalView extends Composite{
 	
 	private void timeReset(boolean resetDate){
 		if(resetDate){
-			time = new GregorianCalendar();
+			time = Calendar.getInstance();
 		}
 		
 		// regenerate the set of time string
-		time.set(GregorianCalendar.HOUR_OF_DAY, 0);
-		time.set(GregorianCalendar.MINUTE, 0);
-		time.set(GregorianCalendar.SECOND, 0);
+		time.set(Calendar.HOUR_OF_DAY, 0);
+		time.set(Calendar.MINUTE, 0);
+		time.set(Calendar.SECOND, 0);
 	}
 	
 	private void initializeStartingDate(){
-		this.time= new GregorianCalendar();
-		int dayOfAWeek = time.get(GregorianCalendar.DAY_OF_WEEK);
+		this.time= Calendar.getInstance();
+		int dayOfAWeek = time.get(Calendar.DAY_OF_WEEK);
 		if(dayOfAWeek - dayNum != 0){
-			time.set(GregorianCalendar.DAY_OF_WEEK, 0);
+			time.set(Calendar.DAY_OF_WEEK, 0);
 		}
 		
 		timeReset(false);
@@ -121,7 +120,7 @@ public class CalView extends Composite{
 		calColorLineColor = this.getDisplay().getSystemColor(SWT.COLOR_BLACK);
 		calColorTask = this.getDisplay().getSystemColor(SWT.COLOR_DARK_BLUE);
 		tasks = new LinkedList<T>();
-		time = new GregorianCalendar();
+		time = Calendar.getInstance();
 		// end of initialization
 		
 		
@@ -151,7 +150,7 @@ public class CalView extends Composite{
 		double intervalX = ((double)spaceW)/dayNum;
 		double intervalY = ((double)spaceH)/verticalPartNum;
 		int smallIntervalY = 60/timeInterval;
-		int startX = calLeftSpaceSize;
+		int startX = calLeftSpaceSize;	// the relative coordinate
 		int startY = calTopSpaceSize;
 		int endX = startX + spaceW;
 		int endY = startY + spaceH;
@@ -187,7 +186,7 @@ public class CalView extends Composite{
 //					time.get(GregorianCalendar.DAY_OF_WEEK)),
 					dateFormat.format(time.getTime()),
 					posX,posY);
-			time.add(GregorianCalendar.DAY_OF_YEAR, 1);
+			time.add(Calendar.DAY_OF_YEAR, 1);
 		}
 		
 			// horizontal line
@@ -203,10 +202,10 @@ public class CalView extends Composite{
 
 			gc.drawString(String.format(
 					timeFormat, 
-					time.get(GregorianCalendar.HOUR_OF_DAY),
-					time.get(GregorianCalendar.MINUTE)),
+					time.get(Calendar.HOUR_OF_DAY),
+					time.get(Calendar.MINUTE)),
 					calTimeStartPosX,(int)((double)tempY - ((double)calTimeTextFontSize)/2));
-			time.add(GregorianCalendar.MINUTE, this.timeInterval);
+			time.add(Calendar.MINUTE, this.timeInterval);
 			
 			tempY += intervalY;
 		}
@@ -230,8 +229,13 @@ public class CalView extends Composite{
 			String title = task.name;
 			
 			if(timeOutOfScope(startTime,endTime)){
+				// TODO: deleted later
+				System.out.println("Out of range\n\t" + title + ": " + startTime + ", " + endTime);
 				continue;
 			}
+			
+			// TODO: delete later
+			System.out.println("In range.");
 			
 			// dayPosX
 			// hourPosY
@@ -240,24 +244,25 @@ public class CalView extends Composite{
 				// first decide on the date
 			long startTimeStamp = startTime.getTime();
 			long endTimeStamp = endTime.getTime();
-			long calStartTimeStamp = time.getTimeInMillis();
-			int dayIndex = (int)((startTimeStamp - endTimeStamp)/1000/3600/24);
-				// then on the exact time
-			calStartTimeStamp += 1000*3600*24*dayIndex;
-			long diff = (startTimeStamp - calStartTimeStamp)/1000;
-			int startIndex = (int) (diff/60/timeInterval);
-			int startYShift = (int) ((double)diff/60/timeInterval * intervalY);
-			diff = (endTimeStamp - calStartTimeStamp)/1000;
-			int endYShift = (int) ((double)diff/60/timeInterval * intervalY);
-			int startYPos = (int) (hourPosY[startIndex] + startYShift);
-			int startXPos = (int) dayPosX[dayIndex];
+			timeReset(true);	long calStartTimeStampOfAll = time.getTimeInMillis();
+			int dayIndex = (int)((startTimeStamp - calStartTimeStampOfAll)/1000/3600/24);
 			
-			// seriously... start drawing :)
+				// then on the exact time
+			long calStartTimeStampOfThatDay = calStartTimeStampOfAll + 1000*3600*24*dayIndex;
+			long diff = (startTimeStamp - calStartTimeStampOfThatDay)/1000;
+			int yStartIndex = (int) (diff/60/timeInterval);
+			
+			int taskStartTimeYShift = (int) ((double)(diff - hourPosY[yStartIndex])/60/timeInterval * intervalY);
+			diff = (endTimeStamp - startTimeStamp)/1000;
+			int startYPos = (int) (hourPosY[yStartIndex] + taskStartTimeYShift);
+			int startXPos = (int) dayPosX[dayIndex];
+			int taskDurationPix = (int) (diff/60/timeInterval * intervalY);
+			
 			gc.setBackground(calColorTask);
-			gc.fillRectangle(startXPos, startYPos, (int)intervalX, startYShift);
+			gc.fillRectangle(startXPos, startYPos, (int)intervalX, taskDurationPix);
 			
 			// then write the task title
-			int textYPos = startYPos + startYShift/2;
+			int textYPos = startYPos + taskStartTimeYShift/2;
 			gc.setForeground(calColorLineColor);
 			gc.setBackground(calColorBackGround);
 			gc.drawText(title, startXPos + 10, textYPos);	// TODO: resolve here.. a bit of hacking
@@ -266,8 +271,9 @@ public class CalView extends Composite{
 	}
 	
 	private boolean timeOutOfScope(Date startTime, Date endTime) {
-		GregorianCalendar endDate = (GregorianCalendar) time.clone();
-		endDate.add(GregorianCalendar.DATE, dayNum);
+		timeReset(true);
+		Calendar endDate = (Calendar) time.clone();
+		endDate.add(Calendar.DATE, dayNum);
 		if(startTime.before(time.getTime()) || endTime.after(endDate.getTime())
 			|| endTime.getDate() != startTime.getDate() || endTime.before(startTime)){
 			return true;
@@ -289,9 +295,9 @@ public class CalView extends Composite{
 		final Shell shell = new Shell(display);
 		
 		// generate basic T class for testing
-		GregorianCalendar now = new GregorianCalendar();
-		GregorianCalendar later = (GregorianCalendar) now.clone();
-		later.add(GregorianCalendar.HOUR, 1);
+		Calendar now = Calendar.getInstance();
+		Calendar later = (Calendar) now.clone();
+		later.add(Calendar.HOUR, 1);
 		T t1 = new T("Task 1", now.getTime(), later.getTime());
 		CalView view = new CalView(shell, SWT.NONE);
 		view.addTask(t1);
@@ -303,29 +309,7 @@ public class CalView extends Composite{
 
 		
 		shell.open();
-				
-		shell.addPaintListener(new PaintListener() {
-			
-			@Override
-			public void paintControl(PaintEvent e) {
-				Rectangle rect = shell.getClientArea();
-				
-				int edgeX = 5, edgeY = 5;
-				
-				int wordsX = edgeX + 20, wordsY = edgeY + 10;
-				int beforeViewY = wordsX + 30;
-				
-				int viewX = rect.x + wordsX;
-				int viewY = rect.y + wordsY + beforeViewY;
-				
-				int viewW = rect.width;
-				int viewH = rect.width;
-				
-				/*GC gc = e.gc;
-				gc.drawText("Lulla", wordsX, wordsY, SWT.DRAW_DELIMITER); */
-				
-			}
-		});
+		
 		
 		while(!shell.isDisposed()){
 			if(!display.readAndDispatch()){

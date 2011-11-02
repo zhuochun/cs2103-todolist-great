@@ -193,26 +193,47 @@ public class Task implements Comparable<Object> {
         priority = newValue;
     }
 
-    public String getStartEndDate() {
+    public String getStartEndDateStr() {
+        // Display Format:
+        // is same date and time: date + time
+        // is same day for start end date: date + [time] - [time]
         if (when.hasDateTime()) {
-            StringBuffer fullstr = new StringBuffer();
-
-            fullstr.append(getStartDate());
+            StringBuffer result = new StringBuffer();
             
-            if (!when.isAllDay()) {
-                fullstr.append(" ");
-                fullstr.append(getStartTime());
+            Date startDate = DateFormat.strToDate(getStartDate());
+            Date endDate   = DateFormat.strToDate(getEndDate());
+            
+            if (startDate.equals(endDate)) {
+                result.append(DateFormat.dateToStr(startDate));
+                
+                if (!when.isAllDay()) {
+                    result.append(" ");
+                    if (getStartTime().equals(getEndTime())) {
+                        result.append(getStartTime());
+                    } else {
+                        result.append(getStartTime());
+                        result.append(" - ");
+                        result.append(getEndTime());
+                    }
+                }
+            } else {
+                result.append(getStartDate());
+
+                if (!when.isAllDay()) {
+                    result.append(" ");
+                    result.append(getStartTime());
+                }
+
+                result.append(" - ");
+                result.append(getEndDate());
+
+                if (!when.isAllDay()) {
+                    result.append(" ");
+                    result.append(getEndTime());
+                }
             }
             
-            fullstr.append(" - ");
-            fullstr.append(getEndDate());
-            
-            if (!when.isAllDay()) {
-                fullstr.append(" ");
-                fullstr.append(getEndTime());
-            }
-
-            return fullstr.toString();
+            return result.toString();
         }
 
         return null;
@@ -374,6 +395,17 @@ public class Task implements Comparable<Object> {
         }
     }
     
+    /**
+     * @return eg. 3 Hours Later
+     */
+    public String getDeadlineStr() {
+        if (User.useDateDeadline) {
+            return getDeadlineShort();
+        }
+        
+        return when.getDeadlineStr();
+    }
+    
     public boolean isWithinPeriod(Date start, Date end) {
         boolean result = false;
         
@@ -435,7 +467,7 @@ public class Task implements Comparable<Object> {
         addOutput(str, "Task: "     + name,               name);
         addOutput(str, "Place: "    + place,              place);
         addOutput(str, "Priority: " + getPriorityStr(),   priority);
-        addOutput(str, "Date: "     + getStartEndDate(),  when.getStartDateTime());
+        addOutput(str, "Date: "     + getStartEndDateStr(),  when.getStartDateTime());
         addOutput(str, "Duration: " + getDurationStr(),   when.getDurationStr());
         addOutput(str, "Deadline: " + getDeadlineShort(), when.getDeadline());
         addOutput(str, "Status: "   + getStatusStr(),     getStatusStr());

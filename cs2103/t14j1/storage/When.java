@@ -3,6 +3,9 @@ package cs2103.t14j1.storage;
 import java.util.Calendar;
 import java.util.Date;
 
+import cs2103.t14j1.logic.DateFormat;
+import cs2103.t14j1.storage.user.User;
+
 /**
  * class deal with date and time properties in Task
  * 
@@ -536,35 +539,78 @@ public class When implements Comparable<Object> {
             return null;
         }
         
-        int d = duration.intValue();
-        int days = d / 86400;
-        d = d - days * 86400;
-        int hours = d / 3600;
-        d = d - hours * 3600;
-        int minutes = d / 60;
+        String result = buildTimeDecadeStr(duration.intValue(), User.useAbbreviate);
 
-        StringBuffer dStr = new StringBuffer();
-
-        if (days != 0) {
-            dStr.append(days + " Days ");
-        }
-
-        if (hours != 0) {
-            dStr.append(hours + " Hours ");
-        }
-
-        if (minutes != 0) {
-            dStr.append(minutes + " Minutes ");
-        }
-
-        if (dStr.length() == 0) {
+        if (result.length() == 0) {
             if (isAllDay) {
-                dStr.append("All Day");
+                result = "All Day";
             } else {
-                dStr.append("0 Minutes");
+                result = "0 Minutes";
             }
         }
 
+        return result;
+    }
+    
+    public String getDeadlineStr() {
+        if (deadline == null) {
+            return null;
+        }
+        
+        StringBuffer str = new StringBuffer();
+        
+        Long time = (deadline.getTimeInMillis() - DateFormat.getNow().getTime()) / 1000;
+        
+        String result = buildTimeDecadeStr(time.intValue(), User.useAbbreviate);
+        
+        if (result.isEmpty()) {
+            str.append("< 0 Minute ");
+        } else {
+            str.append(result);
+        }
+        
+        if (time == 0) {
+            str.append("Now");
+        } else if (time > 0) {
+            str.append("Later");
+        } else {
+            str.append("Ago");
+        }
+        
+        return str.toString();
+    }
+    
+    private String buildTimeDecadeStr(int time, boolean abbr) {
+        final String[] fullName = {"Day", "Hour", "Minute"};
+        final String[] abbrName = {"D", "H", "M"};
+        
+        if (time < 0) { time = -time; }
+        
+        int[] result = new int[3];
+        
+        result[0] = time / 86400;
+        time = time - result[0] * 86400;
+        result[1] = time / 3600;
+        time = time - result[1] * 3600;
+        result[2] = time / 60;
+
+        StringBuffer dStr = new StringBuffer();
+
+        for (int i = 0; i < 3; i++) {
+            if (result[i] != 0) {
+                dStr.append(result[i]);
+                dStr.append(" ");
+                
+                if (abbr) {
+                    dStr.append(abbrName[i]);
+                } else {
+                    dStr.append(fullName[i]);
+                }
+                
+                dStr.append(" ");
+            }
+        }
+        
         return dStr.toString();
     }
     

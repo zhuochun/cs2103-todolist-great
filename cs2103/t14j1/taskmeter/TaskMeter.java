@@ -99,7 +99,7 @@ public class TaskMeter extends Shell {
             getResourceString("table.duration"),
             getResourceString("table.status")
     };
-    private int[] columnWidths = { 25, 200, 70, 160, 120, 80, 85 };
+    private int[] columnWidths = { 25, 195, 75, 230, 115, 75, 85 };
     
     // 2 different modes
     private static final int MODE_LIST   = 0;
@@ -126,6 +126,7 @@ public class TaskMeter extends Shell {
         } catch (Exception e) {
             e.printStackTrace();
         }
+        
         User.save();
     }
 
@@ -189,8 +190,8 @@ public class TaskMeter extends Shell {
         setTray(display);
         // set minimum size
         setText(getResourceString("app.title.full"));
-        setMinimumSize(new Point(750, 500));
-        setSize(750, 500);
+        setMinimumSize(new Point(700, 500));
+        setSize(995, 600);
         
         // load global hotkey process
         try {
@@ -1188,8 +1189,8 @@ public class TaskMeter extends Shell {
                 Integer.toString(idx),
                 task.getName(),
                 task.getPriority().toString().toLowerCase(),
-                task.getStartEndDate() == null ? "" : task.getStartEndDate(),
-                task.getDeadlineShort() == null ? "" : task.getDeadlineShort(),
+                task.getStartEndDateStr() == null ? "" : task.getStartEndDateStr(),
+                task.getDeadlineStr() == null ? "" : task.getDeadlineStr(),
                 task.getDurationStr() == null ? "" : task.getDurationStr(),
                 task.getStatusStr()
                 });
@@ -1210,8 +1211,8 @@ public class TaskMeter extends Shell {
                 Integer.toString(idx),
                 task.getName(),
                 task.getPriority().toString().toLowerCase(),
-                task.getStartEndDate() == null ? "" : task.getStartEndDate(),
-                task.getDeadlineShort() == null ? "" : task.getDeadlineShort(),
+                task.getStartEndDateStr() == null ? "" : task.getStartEndDateStr(),
+                task.getDeadlineStr() == null ? "" : task.getDeadlineStr(),
                 task.getDurationStr() == null ? "" : task.getDurationStr(),
                 task.getStatusStr()
                 });

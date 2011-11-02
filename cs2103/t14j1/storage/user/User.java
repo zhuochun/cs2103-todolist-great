@@ -23,16 +23,20 @@ public class User {
     private static boolean isFirstTime = false;
 
     private static String[] saveStrings = {
-        "AutoComplete", "SortingMethod", "AutoSaveTime", "DefaultRemindType" };
+        "AutoComplete", "SortingMethod", "AutoSaveTime", "DefaultRemindType",
+        "useAbbreviate", "useDateDeadline"
+        };
 
     // Settings
-    public static boolean  performAutoComplete = true;
+    public static boolean  performAutoComplete = false; // default close auto completion
     public static int[]    sortingMethod       = { TaskList.SORT_DEADLINE,
                                                    TaskList.SORT_DATE,
                                                    TaskList.SORT_PRIORITY };
     public static int      autoSaveTime        = 300000; // default 5 mins
     public static Reminder defaultRemind       = Reminder.START; // default remind type
-
+    public static boolean  useAbbreviate       = false;
+    public static boolean  useDateDeadline     = true;
+    
     // Exception Strings
     private static final String EXCEPTION_EMPTY_NAME = "User name cannot be null or empty";
 
@@ -91,6 +95,10 @@ public class User {
                         autoSaveTime = Integer.parseInt(terms[1]);
                     } else if (terms[0].equals(saveStrings[3])) {
                         defaultRemind = Reminder.valueOf(terms[1]);
+                    } else if (terms[0].equals(saveStrings[4])) {
+                        useAbbreviate = terms[1].equals("true") ? true : false;
+                    } else if (terms[0].equals(saveStrings[5])) {
+                        useDateDeadline = terms[1].equals("true") ? true : false; 
                     }
                 }
             }
@@ -112,7 +120,7 @@ public class User {
             FileWriter w = new FileWriter(file);
 
             // write line by line
-            w.write("Settings for User : " + name + "\n");
+            w.write("[User Settings]\n");
             w.write(saveStrings[0] + " = " + performAutoComplete + "\n");
             w.write(saveStrings[1] + " = ");
             for (int i = 0; i < 2; i++) {
@@ -121,6 +129,8 @@ public class User {
             w.write(sortingMethod[2] + "\n");
             w.write(saveStrings[2] + " = " + autoSaveTime + "\n");
             w.write(saveStrings[3] + " = " + defaultRemind + "\n");
+            w.write(saveStrings[4] + " = " + useAbbreviate + "\n");
+            w.write(saveStrings[5] + " = " + useDateDeadline + "\n");
 
             w.close();
         } catch (IOException e) {

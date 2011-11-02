@@ -16,17 +16,20 @@ import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
-class T{
+import cs2103.t14j1.storage.Task;
+
+
+/*class Task{
 	String name;
 	Date startTime;
 	Date endTime;
 	
-	T(String name, Date startTime, Date endTime){
+	Task(String name, Date startTime, Date endTime){
 		this.name = name;
 		this.startTime = startTime;
 		this.endTime = endTime;
 	}
-}
+}*/
 
 class TaskItem extends Composite{
 
@@ -48,7 +51,7 @@ public class CalView extends Composite{
 	
 	
 	// internal data
-	private List<T> tasks;
+	private List<Task> tasks;
 	
 	// for formating
 	private static final String timeFormat = "%2d:%2d";
@@ -128,7 +131,7 @@ public class CalView extends Composite{
 		calColorLineColor = this.getDisplay().getSystemColor(SWT.COLOR_BLACK);
 		calColorTask = this.getDisplay().getSystemColor(SWT.COLOR_DARK_BLUE);
 		
-		tasks = new LinkedList<T>();
+		tasks = new LinkedList<Task>();
 		currentTime = Calendar.getInstance();
 		
 		// end of initialization
@@ -234,11 +237,11 @@ public class CalView extends Composite{
 		}
 		
 		// then put in the task
-		for(T task:tasks){
+		for(Task task:tasks){
 			// assume there's no multi-day task
-			Date startTime = task.startTime;
-			Date endTime = task.endTime;
-			String title = task.name;
+			Date startTime = task.getStartDateTime();
+			Date endTime = task.getEndDateTime();
+			String title = task.getName();
 			
 			if(timeOutOfScope(startTime,endTime)){
 				// TODO: deleted later
@@ -295,7 +298,7 @@ public class CalView extends Composite{
 		return false;
 	}
 
-	void addTask(T task){
+	void addTask(Task task){
 		tasks.add(task);
 	}
 	
@@ -312,7 +315,10 @@ public class CalView extends Composite{
 		Calendar now = Calendar.getInstance();
 		Calendar later = (Calendar) now.clone();
 		later.add(Calendar.HOUR, 1);
-		T t1 = new T("Task 1", now.getTime(), later.getTime());
+		Task t1 = new Task();
+		t1.setName("Task 1");
+		t1.setStartDateTime(now.getTime());
+		t1.setEndDateTime(later.getTime());
 		CalView view = new CalView(shell, SWT.NONE);
 		view.addTask(t1);
 		view.setSize(900, 700);

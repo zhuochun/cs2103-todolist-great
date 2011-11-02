@@ -5,6 +5,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Date;
 import java.util.Map.Entry;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
@@ -35,6 +37,8 @@ import cs2103.t14j1.storage.user.User;
  * 
  */
 public class FileHandler {
+    
+    private static final Logger LOGGER = Logger.getLogger(FileHandler.class.getName());
 
     private static final String fileFolder   = User.getUserPath();
     private static final String taskFileName = "tasks.xml";
@@ -46,20 +50,22 @@ public class FileHandler {
     private static final String xmlTaskTag   = "task";
     private static final String xmlUndefined = "undefine";
 
-    private static final String LOAD_SUCCESS = "All Lists and Tasks are Ready!";
-    private static final String SAVE_SUCCESS = "All Lists and Tasks are Saved!";
-
     /**
      * save lists and tasks from application to xml files
      * 
      * @param lists
      */
-    public static String saveAll(TaskLists lists) {
+    public static boolean saveAll(TaskLists lists) {
 
         saveLists(lists);
+        
+        LOGGER.log(Level.FINE, "All Lists are saved");
+        
         saveTasks(lists);
+        
+        LOGGER.log(Level.FINE, "All tasks are saved");
 
-        return SAVE_SUCCESS;
+        return true;
     }
 
     /**
@@ -67,16 +73,21 @@ public class FileHandler {
      * 
      * @param lists
      */
-    public static String loadAll(TaskLists lists, TaskList reminderList) {
+    public static boolean loadAll(TaskLists lists, TaskList reminderList) {
 
         loadLists(lists);
+        
+        LOGGER.log(Level.FINE, "All lists are loaded");
+        
         loadTasks(lists, reminderList);
+        
+        LOGGER.log(Level.FINE, "All tasks are loaded");
 
         for (Entry<String, TaskList> list : lists) {
             list.getValue().sort();
         }
 
-        return LOAD_SUCCESS;
+        return true;
     }
 
     private static boolean saveLists(TaskLists lists) {
@@ -102,7 +113,7 @@ public class FileHandler {
 
             result = saveXmlDocument(fileFolder, listFileName, doc);
         } catch (ParserConfigurationException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "saveLists", e);
         }
 
         return result;
@@ -164,7 +175,7 @@ public class FileHandler {
             }
             result = saveXmlDocument(fileFolder, taskFileName, doc);
         } catch (ParserConfigurationException e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "saveTasks", e);
         }
 
         return result;
@@ -256,11 +267,9 @@ public class FileHandler {
             StreamResult result = new StreamResult(new File(directory + fileName));
             transformer.transform(source, result);
         } catch (TransformerConfigurationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "saveXML", e);
         } catch (TransformerException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "saveXML", e);
         }
 
         return true;
@@ -287,14 +296,11 @@ public class FileHandler {
             dBuilder = dbFactory.newDocumentBuilder();
             document = dBuilder.parse(fXmlFile);
         } catch (ParserConfigurationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "openXML", e);
         } catch (SAXException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "openXML", e);
         } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "openXML", e);
         }
 
         return document;

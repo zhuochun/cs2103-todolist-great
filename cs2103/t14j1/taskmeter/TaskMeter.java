@@ -75,6 +75,7 @@ public class TaskMeter extends Shell {
     private Tray  tray;             // system tray
     private TrayItem trayItem;      // tray item
     private ToolTip  remindTray;    // tray reminder
+    private Process  globalHotKey;  // global hotkey (F6 in Windows operating System) process
 
     private boolean   isModified;
     private int       mode;         // MODE_LIST and MODE_SEARCH for different events
@@ -117,13 +118,11 @@ public class TaskMeter extends Shell {
             TaskMeter application = new TaskMeter(display);
             application.open();
             application.layout();
-            //Process p = Runtime.getRuntime().exec("TaskMeterHotKeys.exe");
             while (!application.isDisposed()) {
                 if (!display.readAndDispatch()) {
                     display.sleep();
                 }
             }
-            //p.destroy();
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -143,7 +142,7 @@ public class TaskMeter extends Shell {
         gridLayout.horizontalSpacing = 3;
         setLayout(gridLayout);
         
-        // global hotkey in whole application
+        // hotkey in whole application
         display.addFilter(SWT.KeyDown, new Listener() {
             @Override
             public void handleEvent(Event e) {
@@ -192,6 +191,16 @@ public class TaskMeter extends Shell {
         setText(getResourceString("app.title.full"));
         setMinimumSize(new Point(750, 500));
         setSize(750, 500);
+        
+        // load global hotkey process
+        try {
+            globalHotKey = Runtime.getRuntime().exec("resource/TaskMeterHotKey.exe");
+            
+            assert(globalHotKey != null);
+        } catch (IOException e) {
+            // TODO: log
+            displayError(getResourceString("error.global.hotkey"));
+        }
 
         // create each components
         createMenuBar();
@@ -254,12 +263,8 @@ public class TaskMeter extends Shell {
             
             final Menu menu = new Menu(this, SWT.POP_UP);
             MenuItem menuItem = new MenuItem(menu, SWT.PUSH);
-            menuItem.setText("Open");
-            menuItem.addListener(SWT.Selection, new Listener() {
-                public void handleEvent(Event event) {
-                    openTaskMeter();
-                }
-            });
+            menuItem.setText("Open (Press F6)");
+            menuItem.setEnabled(false);
             
             menuItem = new MenuItem(menu, SWT.PUSH);
             menuItem.setText("Save");
@@ -1392,6 +1397,25 @@ public class TaskMeter extends Shell {
         this.forceActive();
     }
 
+    /**
+     * change to and open quick add view
+     */
+    private void openQuickAddView() {
+        this.setVisible(false);
+        
+        String text = quickAddView.open();
+        
+        this.setVisible(true);
+        this.setActive();
+        
+        smartBar.setText(text);
+        
+        if (quickAddView.isModified()) {
+            isModified = true;
+            refreshDisplay();
+        }
+    }
+
     private boolean saveTaskMeter() {
         if (isModified) {
             FileHandler.saveAll(lists);
@@ -1408,7 +1432,7 @@ public class TaskMeter extends Shell {
      */
     private boolean closeTaskMeter() {
         if (isModified) {
-            // ask user if they want to save current address book
+            // ask user if they want to save taskMeter changes
             MessageBox box = new MessageBox(this, SWT.ICON_WARNING | SWT.YES | SWT.NO | SWT.CANCEL);
             box.setText(this.getText());
             box.setMessage(getResourceString("msg.close"));
@@ -1420,10 +1444,15 @@ public class TaskMeter extends Shell {
                 if (!saveTaskMeter()) {
                     return false;
                 }
-                
-                trayItem.dispose();
-                tray.dispose();
             }
+        }
+        
+        // Dispose Components
+        trayItem.dispose();
+        tray.dispose();
+
+        if (globalHotKey != null) {
+            globalHotKey.destroy();
         }
     
         return true;
@@ -1474,24 +1503,6 @@ public class TaskMeter extends Shell {
         box.setText("Error");
         box.setMessage(msg);
         box.open();
-    }
-
-    /**
-     * change to and open quick add view
-     */
-    private void openQuickAddView() {
-        this.setVisible(false);
-        
-        String text = quickAddView.open();
-        
-        this.setVisible(true);
-        this.setActive();
-        smartBar.setText(text);
-        
-        if (quickAddView.isModified()) {
-            isModified = true;
-            refreshDisplay();
-        }
     }
 
     /**

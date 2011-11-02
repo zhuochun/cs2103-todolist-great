@@ -104,25 +104,7 @@ public class AutoComplete {
         
         try {
             if (str.equals(lastInput) || (str.equals(completedInput) && selected)) {
-                completedInput = null;
                 startIdx = endIdx = lastInput.length();
-                
-                // clear indexes if they are out of range already
-                if (commandIdx >= Commands.length) {
-                    commandIdx = 0;
-                }
-                if (listIdx+1 >= lists.getSize()) {
-                    listIdx = 0;
-                }
-                if (priorityIdx >= PriorityNums.length) {
-                    priorityIdx = 0;
-                }
-                if (timeUnitIdx >= TimeUnits.length) {
-                    timeUnitIdx = 0;
-                }
-                if (dictionaryIdx >= Dictionary.length) {
-                    dictionaryIdx = 0;
-                }
             } else {
                 initial(str);
             }
@@ -158,7 +140,7 @@ public class AutoComplete {
         
         return result;
     }
-    
+
     /**
      * get the completed new input String
      * 
@@ -205,20 +187,38 @@ public class AutoComplete {
     }
     
     private boolean completeCommand() {
+        if (commandIdx >= Commands.length) {
+            commandIdx = 0;
+        }
+        
         if (lastInputLowerCase.matches("^([a-z])*$")) {
-            for (; commandIdx < Commands.length; commandIdx++) {
+            int oldIdx = commandIdx;
+            
+            do {
                 if (Commands[commandIdx].startsWith(lastInputLowerCase)) {
                     completedInput = formCompleteWord(Commands[commandIdx], lastInput);
+                    
                     commandIdx++;
+                    
                     return true;
                 }
-            }
+                
+                commandIdx++;
+                
+                if (commandIdx >= Commands.length) {
+                    commandIdx = 0;
+                }
+            } while (commandIdx != oldIdx);
         }
         
         return false;
     }
     
     private boolean completeList() {
+        if (listIdx >= lists.getSize()) {
+            listIdx = 0;
+        }
+        
         if (lastInputLowerCase.matches("^.*#[^\\)]*$")) {
             int hashIdx = lastInput.lastIndexOf("#");
             
@@ -233,9 +233,9 @@ public class AutoComplete {
             
             String keyword = lastInputLowerCase.substring(hashIdx+1);
             
-            for (; listIdx < listNames.length; listIdx++) {
-                //System.out.println(listNames[listIdx]);
-                
+            int oldIdx = listIdx;
+            
+            do {
                 if (listNames[listIdx].toLowerCase().startsWith(keyword)) {
                     StringBuilder result = new StringBuilder();
                     
@@ -260,13 +260,23 @@ public class AutoComplete {
                     
                     return true;
                 }
-            }
+                
+                listIdx++;
+                
+                if (listIdx >= lists.getSize()) {
+                    listIdx = 0;
+                }
+            } while (listIdx != oldIdx);
         }
         
         return false;
     }
     
     private boolean completePriority() {
+        if (priorityIdx >= PriorityNums.length) {
+            priorityIdx = 0;
+        }
+        
         if (lastInputLowerCase.matches("^.*!(\\d)*$")) {
             int expIdx = lastInput.lastIndexOf("!");
             
@@ -287,9 +297,11 @@ public class AutoComplete {
             StringBuilder result = new StringBuilder();
             
             result.append(lastInput.substring(0, expIdx+1));
-            result.append(PriorityNums[priorityIdx++]);
+            result.append(PriorityNums[priorityIdx]);
             
             completedInput = result.toString();
+            
+            priorityIdx++;
             
             return true;
         }
@@ -298,6 +310,10 @@ public class AutoComplete {
     }
 
     private boolean completeTimeUnit() {
+        if (timeUnitIdx >= TimeUnits.length) {
+            timeUnitIdx = 0;
+        }
+                
         if (lastInputLowerCase.matches("^.*\\sfor\\s(\\d+\\s?[a-z]+\\s?)*\\d+$")) {
             startIdx++;
             
@@ -313,34 +329,50 @@ public class AutoComplete {
 
             return true;
         } else if (lastInputLowerCase.matches("^.*\\sfor\\s(\\d+\\s?[a-z]+\\s?)*\\d+\\s?[a-z]+$")) {
-            String[] tokens = lastInputLowerCase.split("\\d+\\s?");
+            String[] tokens = lastInput.split("\\d+\\s?");
             
             String keyword = tokens[tokens.length-1];
             
-            for (; timeUnitIdx < TimeUnits.length; timeUnitIdx++) {
-                if (TimeUnits[timeUnitIdx].startsWith(keyword)) {
+            int oldIdx = timeUnitIdx;
+            
+            do {
+                if (TimeUnits[timeUnitIdx].startsWith(keyword.toLowerCase())) {
                     StringBuilder result = new StringBuilder();
                     
                     result.append(lastInput.substring(0, lastInput.length() - keyword.length()));
-                    result.append(TimeUnits[timeUnitIdx++]);
+                    result.append(formCompleteWord(TimeUnits[timeUnitIdx], keyword));
                     
                     completedInput = result.toString();
+                    
+                    timeUnitIdx++;
                     return true;
                 }
-            }
+                
+                timeUnitIdx++;
+                
+                if (timeUnitIdx >= TimeUnits.length) {
+                    timeUnitIdx = 0;
+                }
+            } while (timeUnitIdx != oldIdx);
         }
         
         return false;
     }
     
     private boolean completeDictionary() {
-        if (lastInputLowerCase.matches("^.*\\s[a-z]{2,}$")) {
-            String[] tokens = lastInputLowerCase.split("\\s");
+        if (dictionaryIdx >= Dictionary.length) {
+            dictionaryIdx = 0;
+        }
+        
+        if (lastInputLowerCase.matches("^.*\\s[a-z]+$")) {
+            String[] tokens = lastInput.split("\\s");
             
             String keyword = tokens[tokens.length-1];
             
-            for (; dictionaryIdx < Dictionary.length; dictionaryIdx++) {
-                if (Dictionary[dictionaryIdx].toLowerCase().startsWith(keyword)) {
+            int oldIdx = dictionaryIdx;
+            
+            do {
+                if (Dictionary[dictionaryIdx].toLowerCase().startsWith(keyword.toLowerCase())) {
                     StringBuilder result = new StringBuilder();
                     
                     result.append(lastInput.substring(0, lastInput.length() - keyword.length()));
@@ -351,7 +383,13 @@ public class AutoComplete {
                     dictionaryIdx++;
                     return true;
                 }
-            }
+                
+                dictionaryIdx++;
+                
+                if (dictionaryIdx >= Dictionary.length) {
+                    dictionaryIdx = 0;
+                }
+            } while (dictionaryIdx != oldIdx);
         }
         
         return false;

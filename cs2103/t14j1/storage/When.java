@@ -539,7 +539,7 @@ public class When implements Comparable<Object> {
             return null;
         }
         
-        String result = buildTimeDecadeStr(duration.intValue(), User.useAbbreviate);
+        String result = buildTimeDecadeStr(duration.intValue(), User.isUseAbbreviate());
 
         if (result.length() == 0) {
             if (isAllDay) {
@@ -561,7 +561,7 @@ public class When implements Comparable<Object> {
         
         Long time = (deadline.getTimeInMillis() - DateFormat.getNow().getTime()) / 1000;
         
-        String result = buildTimeDecadeStr(time.intValue(), User.useAbbreviate);
+        String result = buildTimeDecadeStr(time.intValue(), User.isUseAbbreviate());
         
         if (result.isEmpty()) {
             str.append("< 0 Minute ");

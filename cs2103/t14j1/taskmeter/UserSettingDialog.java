@@ -99,13 +99,13 @@ public class UserSettingDialog extends Dialog {
         cbReminder.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                User.defaultRemind = reminders[cbReminder.getSelectionIndex()];
+                User.setDefaultReminder(reminders[cbReminder.getSelectionIndex()]);
             }
         });
         cbReminder.setItems(reminderOptions);
         cbReminder.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
         cbReminder.setBounds(215, 162, 180, 28);
-        cbReminder.select(User.defaultRemind.ordinal());
+        cbReminder.select(User.getDefaultReminder().ordinal());
     }
 
     private void displayMethod() {
@@ -113,14 +113,14 @@ public class UserSettingDialog extends Dialog {
         btnDisplayDurationIn.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                User.useAbbreviate = btnDisplayDurationIn.getSelection();
+                User.setUseAbbreviate(btnDisplayDurationIn.getSelection());
                 result = true;
             }
         });
         btnDisplayDurationIn.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
         btnDisplayDurationIn.setBounds(10, 205, 225, 20);
         btnDisplayDurationIn.setText("Display Duration in Abbreviate");
-        btnDisplayDurationIn.setSelection(User.useAbbreviate);
+        btnDisplayDurationIn.setSelection(User.isUseAbbreviate());
         
         Label lbldDay = new Label(shlUserSettings, SWT.NONE);
         lbldDay.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_BORDER));
@@ -131,14 +131,14 @@ public class UserSettingDialog extends Dialog {
         btnDisplayDeadlineLike.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                User.useDurationLike = btnDisplayDeadlineLike.getSelection();
+                User.setDurationAlike(btnDisplayDeadlineLike.getSelection());
                 result = true;
             }
         });
         btnDisplayDeadlineLike.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
         btnDisplayDeadlineLike.setBounds(10, 230, 225, 20);
         btnDisplayDeadlineLike.setText("Display Deadline Like Duration");
-        btnDisplayDeadlineLike.setSelection(User.useDurationLike);
+        btnDisplayDeadlineLike.setSelection(User.isDurationAlike());
         
         Label lblegHour = new Label(shlUserSettings, SWT.NONE);
         lblegHour.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_BORDER));
@@ -156,7 +156,7 @@ public class UserSettingDialog extends Dialog {
         cbDate.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                User.userDateFormat = cbDate.getSelectionIndex();
+                User.setUserDateFormat(cbDate.getSelectionIndex());
                 result = true;
             }
         });
@@ -167,26 +167,26 @@ public class UserSettingDialog extends Dialog {
         cbDate.setItems(dates);
         cbDate.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
         cbDate.setBounds(10, 285, 185, 28);
-        cbDate.select(User.userDateFormat);
+        cbDate.select(User.getUserDateFormat());
         
         final Combo cbGap = new Combo(shlUserSettings, SWT.READ_ONLY);
         cbGap.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                User.gapBetweenDateTime = cbGap.getSelectionIndex();
+                User.setGapBetween(cbGap.getSelectionIndex());
                 result = true;
             }
         });
         cbGap.setItems(User.gapBetween);
         cbGap.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
         cbGap.setBounds(205, 285, 45, 28);
-        cbGap.select(User.gapBetweenDateTime);
+        cbGap.select(User.getGapBetween());
         
         final Combo cbTime = new Combo(shlUserSettings, SWT.READ_ONLY);
         cbTime.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                User.userTimeFormat = cbTime.getSelectionIndex();
+                User.setUserTimeFormat(cbTime.getSelectionIndex());
                 result = true;
             }
         });
@@ -197,7 +197,7 @@ public class UserSettingDialog extends Dialog {
         cbTime.setItems(times);
         cbTime.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
         cbTime.setBounds(260, 285, 181, 28);
-        cbTime.select(User.userTimeFormat);
+        cbTime.select(User.getUserTimeFormat());
     }
     
     private final String[] autoSaveOptions = {"2", "5 (Default)", "10", "15", "20"};
@@ -213,7 +213,7 @@ public class UserSettingDialog extends Dialog {
         cbAutoSave.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                User.autoSaveTime = autoSaveTime[cbAutoSave.getSelectionIndex()];
+                User.setAutoSaveTime(autoSaveTime[cbAutoSave.getSelectionIndex()]);
             }
         });
         cbAutoSave.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
@@ -232,18 +232,18 @@ public class UserSettingDialog extends Dialog {
         btnPerformAutoComplete.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                User.performAutoComplete = btnPerformAutoComplete.getSelection();
+                User.setPerformAutoComplete(btnPerformAutoComplete.getSelection());
             }
         });
         btnPerformAutoComplete.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
         btnPerformAutoComplete.setBounds(10, 126, 431, 20);
-        btnPerformAutoComplete.setSelection(User.performAutoComplete);
+        btnPerformAutoComplete.setSelection(User.performAutoComplete());
         btnPerformAutoComplete.setText("Perform Auto Complete in SmartBar");
     }
     
     private int getAutoSaveSelection() {
         for (int i = 0; i < autoSaveTime.length; i++) {
-            if (autoSaveTime[i] == User.autoSaveTime)
+            if (autoSaveTime[i] == User.getAutoSaveTime())
                 return i;
         }
         return 0;
@@ -272,13 +272,13 @@ public class UserSettingDialog extends Dialog {
         cbFirst.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                User.sortingMethod[0] = cbFirst.getSelectionIndex() + 2;
+                User.setSortingMethod(0, cbFirst.getSelectionIndex() + 2);
             }
         });
         cbFirst.setItems(SortMethods);
         cbFirst.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
         cbFirst.setBounds(48, 40, 96, 20);
-        cbFirst.select(User.sortingMethod[0] - 2);
+        cbFirst.select(User.getSortingMethod(0) - 2);
 
         Label lblSecond = new Label(shlUserSettings, SWT.NONE);
         lblSecond.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
@@ -289,13 +289,13 @@ public class UserSettingDialog extends Dialog {
         cbSecond.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                User.sortingMethod[1] = cbSecond.getSelectionIndex() + 2;
+                User.setSortingMethod(1, cbSecond.getSelectionIndex() + 2);
             }
         });
         cbSecond.setItems(SortMethods);
         cbSecond.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
         cbSecond.setBounds(205, 40, 96, 20);
-        cbSecond.select(User.sortingMethod[1] - 2);
+        cbSecond.select(User.getSortingMethod(1) - 2);
 
         Label lblLast = new Label(shlUserSettings, SWT.NONE);
         lblLast.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
@@ -306,13 +306,13 @@ public class UserSettingDialog extends Dialog {
         cbLast.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                User.sortingMethod[2] = cbLast.getSelectionIndex() + 2;
+                User.setSortingMethod(2, cbLast.getSelectionIndex() + 2);
             }
         });
         cbLast.setItems(SortMethods);
         cbLast.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
         cbLast.setBounds(345, 40, 96, 20);
-        cbLast.select(User.sortingMethod[2] - 2);
+        cbLast.select(User.getSortingMethod(2) - 2);
     }
     
     private void center() {

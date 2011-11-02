@@ -111,7 +111,7 @@ public class QuickAddDialog extends Dialog {
             @Override
             public void keyReleased(KeyEvent e) {
                 // Only perform auto completion when user input characters
-                if (User.performAutoComplete && (e.character > 'A' && e.character < 'z')) {
+                if (User.performAutoComplete() && (e.character > 'A' && e.character < 'z')) {
                     String txt = quickAddBar.getText();
                     if (autoComplete.setInput(txt, quickAddBar.getSelectionCount() != 0)) {
                         quickAddBar.setText(autoComplete.getCompletedStr());

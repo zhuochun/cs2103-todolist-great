@@ -7,6 +7,7 @@ import java.io.FileWriter;
 import java.io.IOException;
 
 import cs2103.t14j1.storage.TaskList;
+import cs2103.t14j1.taskmeter.reminder.Reminder;
 
 /**
  * a default User setting
@@ -21,14 +22,16 @@ public class User {
     private static String setting      = "setting.txt";
     private static boolean isFirstTime = false;
 
-    private static String[] saveStrings = { "AutoComplete", "SortingMethod", "AutoSaveTime" };
+    private static String[] saveStrings = {
+        "AutoComplete", "SortingMethod", "AutoSaveTime", "DefaultRemindType" };
 
     // Settings
-    public static boolean performAutoComplete = true;
-    public static int[]   sortingMethod       = { TaskList.SORT_DEADLINE,
-                                                  TaskList.SORT_DATE,
-                                                  TaskList.SORT_PRIORITY };
-    public static int     autoSaveTime        = 300000; // default 5 mins
+    public static boolean  performAutoComplete = true;
+    public static int[]    sortingMethod       = { TaskList.SORT_DEADLINE,
+                                                   TaskList.SORT_DATE,
+                                                   TaskList.SORT_PRIORITY };
+    public static int      autoSaveTime        = 300000; // default 5 mins
+    public static Reminder defaultRemind       = Reminder.START; // default remind type
 
     // Exception Strings
     private static final String EXCEPTION_EMPTY_NAME = "User name cannot be null or empty";
@@ -86,6 +89,8 @@ public class User {
                         }
                     } else if (terms[0].equals(saveStrings[2])) {
                         autoSaveTime = Integer.parseInt(terms[1]);
+                    } else if (terms[0].equals(saveStrings[3])) {
+                        defaultRemind = Reminder.valueOf(terms[1]);
                     }
                 }
             }
@@ -115,6 +120,7 @@ public class User {
             }
             w.write(sortingMethod[2] + "\n");
             w.write(saveStrings[2] + " = " + autoSaveTime + "\n");
+            w.write(saveStrings[3] + " = " + defaultRemind + "\n");
 
             w.close();
         } catch (IOException e) {

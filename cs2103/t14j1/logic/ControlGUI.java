@@ -71,18 +71,19 @@ public class ControlGUI {
         userCommand = null;
         searchEngine.resetProperties();
     }
-    
+
     /**
      * execute input command from user
      * 
-     * @param input         user's input string
+     * @param input
+     *            user's input string
      */
     public void executeCommand() {
         // register event
         try {
             switch (getCommand()) {
                 case ADD_TASK:
-                    addTask(addTask());
+                    addTask(createTask());
                     break;
                 case DELETE_TASK:
                     deleteTask(getTaskIdx());
@@ -137,8 +138,7 @@ public class ControlGUI {
             eventHandler.setStatus(eventHandler.getMsg("error.logic.command"));
         }
     }
-    
-    
+
     public void moveTask(int index, String listName) {
         Event newEvent = Event.generateEvent(Commands.MOVE_TASK);
         registerEvent(newEvent, index, listName);
@@ -146,7 +146,7 @@ public class ControlGUI {
 
     public void addReminder(int index, Reminder parameter) {
         Task task = eventHandler.getTask(index);
-        
+
         Date remindTime = null;
 
         switch (parameter) {
@@ -163,7 +163,7 @@ public class ControlGUI {
                 remindTime = getReminderTime();
                 break;
         }
-        
+
         Event newEvent = Event.generateEvent(Commands.ADD_REMINDER);
         registerEvent(newEvent, task, remindTime);
     }
@@ -198,15 +198,15 @@ public class ControlGUI {
         Event newEvent = Event.generateEvent(Commands.SEARCH);
         registerEvent(newEvent, searchResult);
     }
-    
+
     public void clearTrash() { // not undoable, not a individual event
         lists.getList(TaskLists.TRASH).clear();
         eventHandler.setStatus(eventHandler.getMsg("msg.CLEAR_TRASH"));
     }
-    
+
     public void clearCompleted(TaskList list) {
         TaskList remove = new TaskList("Completed");
-        
+
         // look through all completed tasks
         for (Task t : list) {
             if (t.isCompleted())
@@ -216,8 +216,9 @@ public class ControlGUI {
         for (Task t : remove) {
             lists.moveTask(TaskLists.TRASH, t);
         }
-        
-        eventHandler.setStatus(String.format(eventHandler.getMsg("msg.CLEAR_COMPLETED"), remove.getSize(), list.getName()));
+
+        eventHandler.setStatus(String.format(eventHandler.getMsg("msg.CLEAR_COMPLETED"), remove.getSize(),
+                list.getName()));
     }
 
     /**
@@ -225,83 +226,96 @@ public class ControlGUI {
      * 
      * @return the new task if successfully added or null if failed
      */
-    private Task addTask() {
-    	String name        = parseCommand.extractTaskName();
-		String list        = parseCommand.extractListName();
-		Priority priority  = parseCommand.extractPriority();
-		String place 	   = parseCommand.extractPlace();
-		Date startDateTime = parseCommand.extractStartDate();
-		Date endDateTime   = parseCommand.extractEndDate();
-		Long startTime     = parseCommand.extractStartTime();
-		Long endTime       = parseCommand.extractEndTime();
-		Date deadline 	   = parseCommand.extractDeadlineDate();
-		Long deadlineTime  = parseCommand.extractDeadlineTime();
-		Long duration      = parseCommand.extractDuration();
-		boolean status     = Task.INCOMPLETE;
-		
-		convertLongTimeToDate(startDateTime, startTime);
-		convertLongTimeToDate(endDateTime, endTime);
-		convertLongTimeToDate(deadline, deadlineTime);
-		
-		Task newTask = new Task(name, place, list, priority, startDateTime, endDateTime, deadline, duration, status);
-		
-		return newTask;
+    private Task createTask() {
+        Task newTask = null;
+
+        try {
+            String name = parseCommand.extractTaskName();
+            String list = parseCommand.extractListName();
+            Priority priority = parseCommand.extractPriority();
+            String place = parseCommand.extractPlace();
+            Date startDateTime = parseCommand.extractStartDate();
+            Date endDateTime = parseCommand.extractEndDate();
+            Long startTime = parseCommand.extractStartTime();
+            Long endTime = parseCommand.extractEndTime();
+            Date deadline = parseCommand.extractDeadlineDate();
+            Long deadlineTime = parseCommand.extractDeadlineTime();
+            Long duration = parseCommand.extractDuration();
+            boolean status = Task.INCOMPLETE;
+
+            convertLongTimeToDate(startDateTime, startTime);
+            convertLongTimeToDate(endDateTime, endTime);
+            convertLongTimeToDate(deadline, deadlineTime);
+
+            newTask = new Task(name, place, list, priority, startDateTime, endDateTime, deadline, duration, status);
+        } catch (IllegalArgumentException e) {
+            eventHandler.setStatus(e.getMessage()); // startDateTime > endDateTime
+        }
+
+        return newTask;
     }
-    
+
     public Task quickAddTask() {
-        Task task = addTask();
-        
+        Task task = createTask();
+
         if (addTask(task)) {
             return task;
         } else {
             return null;
         }
     }
-    
+
     public boolean addTask(Task task) {
+        if (task == null) {
+            return false;
+        }
+
         Event newEvent = Event.generateEvent(Commands.ADD_TASK);
         return registerEvent(newEvent, task);
     }
-    
+
     public void editTask(int index) {
         Event newEvent = Event.generateEvent(Commands.EDIT_TASK);
         registerEvent(newEvent, index);
     }
-    
+
     public boolean registerEvent(Event e, Object... objs) {
-        assert(e != null);
-        
+        assert (e != null);
+
         e.setEventLisnter(eventHandler);
         e.register(objs);
-        
+
         boolean success = e.execute();
-        
+
         if (success && e.hasUndo()) {
             undoManager.addUndo(e);
         }
-        
+
         return success;
     }
-    
-    private void convertLongTimeToDate (Date d, Long secondsFromStartOfDay) {
-		if(d == null) {
-			return;
-		} else if(secondsFromStartOfDay == null) {
-			/*A value of null indicates that the user did not specify any time and
-			so, we assume the time to be 00:00:00*/
-			d.setHours(0);
-			d.setMinutes(0);
-			d.setSeconds(0);
-		} else {
-			int hours     = secondsFromStartOfDay.intValue() / 3600;
-			int minutes   = (secondsFromStartOfDay.intValue() - hours * 60*60)/60;
-			int seconds   = secondsFromStartOfDay.intValue() - hours * 3600 - minutes * 60;
-			d.setHours(hours);
-			d.setMinutes(minutes);
-			d.setSeconds(seconds);
-		}
-	}
-    
+
+    @SuppressWarnings("deprecation")
+    private void convertLongTimeToDate(Date d, Long secondsFromStartOfDay) {
+        if (d == null) {
+            return;
+        } else if (secondsFromStartOfDay == null) {
+            /*
+             * A value of null indicates that the user did not specify any time and
+             * so, we assume the time to be 00:00:00
+             */
+            d.setHours(0);
+            d.setMinutes(0);
+            d.setSeconds(0);
+        } else {
+            int hours = secondsFromStartOfDay.intValue() / 3600;
+            int minutes = (secondsFromStartOfDay.intValue() - hours * 60 * 60) / 60;
+            int seconds = secondsFromStartOfDay.intValue() - hours * 3600 - minutes * 60;
+            d.setHours(hours);
+            d.setMinutes(minutes);
+            d.setSeconds(seconds);
+        }
+    }
+
     /**
      * if the user's command is DELETE_TASK/EDIT_TASK/MARK_COMPLETE/MARK_PRIORITY
      * GUI will call this method to get the index the user entered
@@ -310,7 +324,7 @@ public class ControlGUI {
      */
     public int getTaskIdx() {
         int taskNum = parseCommand.extractTaskNum();
-        
+
         return taskNum;
     }
 
@@ -321,12 +335,12 @@ public class ControlGUI {
      * @return the new priority user entered
      */
     public Priority getNewTaskPriority() {
-        
-    	Priority newPriority  = parseCommand.extractPriority();
-        
-        if((newPriority != Priority.IMPORTANT) && (newPriority != Priority.NORMAL) && (newPriority != Priority.LOW))
-        	newPriority = Priority.IMPORTANT;
-        
+
+        Priority newPriority = parseCommand.extractPriority();
+
+        if ((newPriority != Priority.IMPORTANT) && (newPriority != Priority.NORMAL) && (newPriority != Priority.LOW))
+            newPriority = Priority.IMPORTANT;
+
         return newPriority;
     }
 
@@ -339,7 +353,7 @@ public class ControlGUI {
         Event newEvent = Event.generateEvent(Commands.ADD_LIST);
         registerEvent(newEvent, name);
     }
-    
+
     /**
      * if the user's command is DELETE_LIST, GUI will call this method to perform the actual deleteList
      * 
@@ -349,7 +363,7 @@ public class ControlGUI {
         Event newEvent = Event.generateEvent(Commands.DELETE_LIST);
         registerEvent(newEvent, listName);
     }
-    
+
     /**
      * if the user's command is ADD_LIST/DELETE_LIST/SWTICH_LIST
      * GUI will call this method to get the list name the user entered
@@ -357,10 +371,10 @@ public class ControlGUI {
      * @return the list name user enterd
      */
     public String getListName() {
-    	String listName = parseCommand.extractListName();
+        String listName = parseCommand.extractListName();
         return listName;
     }
-    
+
     /**
      * GUI will call this method to get the search result
      * 
@@ -370,38 +384,38 @@ public class ControlGUI {
      * @return the list of search results, empty list if nothing is found
      */
     public TaskList getSearchResult() {
-    	assert (userCommand == Commands.SEARCH);
-    	
-    	setSearchProperties();
-        
+        assert (userCommand == Commands.SEARCH);
+
+        setSearchProperties();
+
         TaskList searchResult = searchEngine.performSearch();
-        
+
         return searchResult;
     }
-    
+
     /**
      * get the user inputs from parseCommand, and set all the properties
      */
     private void setSearchProperties() {
-    	String name         = parseCommand.extractTaskName();
-		String list         = parseCommand.extractListName();
-		Priority priority   = parseCommand.extractPriority();
-		String place 	    = parseCommand.extractPlace();
-		Long duration       = parseCommand.extractDuration();
-		//Boolean status      = parseCommand.extractStatus();
-		Date afterDateTime  = parseCommand.extractSearchAfterDate();
-		Date beforeDateTime = parseCommand.extractSearchBeforeDate();
-		
-		searchEngine.setProperty(Search.NAME, name);
-		searchEngine.setProperty(Search.LIST, list);
-		searchEngine.setProperty(Search.PRIORITY, priority);
-		searchEngine.setProperty(Search.PLACE, place);
-		searchEngine.setProperty(Search.DURATION, duration);
-		//searchEngine.setProperty(Search.STATUS, status);
-		searchEngine.setProperty(Search.AFTERDATETIME, afterDateTime);
-		searchEngine.setProperty(Search.BEFOREDATETIME, beforeDateTime);
+        String name = parseCommand.extractTaskName();
+        String list = parseCommand.extractListName();
+        Priority priority = parseCommand.extractPriority();
+        String place = parseCommand.extractPlace();
+        Long duration = parseCommand.extractDuration();
+        // Boolean status = parseCommand.extractStatus();
+        Date afterDateTime = parseCommand.extractSearchAfterDate();
+        Date beforeDateTime = parseCommand.extractSearchBeforeDate();
+
+        searchEngine.setProperty(Search.NAME, name);
+        searchEngine.setProperty(Search.LIST, list);
+        searchEngine.setProperty(Search.PRIORITY, priority);
+        searchEngine.setProperty(Search.PLACE, place);
+        searchEngine.setProperty(Search.DURATION, duration);
+        // searchEngine.setProperty(Search.STATUS, status);
+        searchEngine.setProperty(Search.AFTERDATETIME, afterDateTime);
+        searchEngine.setProperty(Search.BEFOREDATETIME, beforeDateTime);
     }
-    
+
     /**
      * GUI will call this method to set the search engine, because we have normal Ctrl + F to
      * search in GUI as well.
@@ -413,57 +427,57 @@ public class ControlGUI {
         searchEngine.setProperty(property, value);
     }
 
-	public String extractOldListName() {
-		return parseCommand.extractListName();
-	}
+    public String extractOldListName() {
+        return parseCommand.extractListName();
+    }
 
-	public String extractNewListName() {
-		return parseCommand.extractNewListName();
-	}
+    public String extractNewListName() {
+        return parseCommand.extractNewListName();
+    }
 
     public Reminder getReminderParameter() {
-    	Reminder parameter = parseCommand.getRemindParamter();
-    	return parameter;
-    	
+        Reminder parameter = parseCommand.getRemindParamter();
+        return parameter;
+
     }
 
     public Date getReminderTime() {
-    	Date reminderTime = parseCommand.getRemindTime();
+        Date reminderTime = parseCommand.getRemindTime();
         return reminderTime;
     }
-    
+
     public boolean hasUndo() {
         return undoManager.hasUndo();
     }
-    
+
     public boolean hasRedo() {
         return undoManager.hasRedo();
     }
-    
+
     public void undo() {
-        assert(undoManager.hasUndo());
-        
+        assert (undoManager.hasUndo());
+
         Event lastEvent = undoManager.getUndo();
         Event redo = lastEvent.undo();
-        
+
         if (redo != null) {
             undoManager.addRedo(redo);
         }
     }
-    
+
     public void redo() {
-        assert(undoManager.hasRedo());
-        
+        assert (undoManager.hasRedo());
+
         Event lastEvent = undoManager.getRedo();
         Event undo = lastEvent.undo();
-        
+
         if (undo != null) {
             undoManager.addUndo(undo);
         }
     }
-    
+
     public void setEventListener(EventListener e) {
         eventHandler = e;
     }
-    
+
 }

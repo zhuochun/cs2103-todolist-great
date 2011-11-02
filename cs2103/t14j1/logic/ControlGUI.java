@@ -1,6 +1,7 @@
 package cs2103.t14j1.logic;
 
 import java.util.Date;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import cs2103.t14j1.logic.events.Event;
@@ -34,13 +35,12 @@ public class ControlGUI {
      * @param lists
      */
     public ControlGUI(TaskLists lists) {
+        assert(lists != null);
+        
         this.lists        = lists;
         this.undoManager  = new UndoManager();
         this.searchEngine = new SearchEngine(lists);
         this.eventHandler = null;
-        
-        assert(lists != null);
-        LOGGER.finest("ControlGUI is successfully initialed");
     }
     
     /**
@@ -55,12 +55,9 @@ public class ControlGUI {
             userInput     = input;
             parseCommand  = new ParseCommand(input);
             userCommand   = parseCommand.extractCommand();
-            
-            LOGGER.fine("User Input: " + input + " -> " + userCommand);
         } catch (Exception e) {
             userCommand   = Commands.INVALID;
-            
-            LOGGER.severe("User Input: " + userInput);
+            LOGGER.log(Level.SEVERE, "setUserInput -> " + userInput, e);
         }
         
         return userCommand;
@@ -148,7 +145,7 @@ public class ControlGUI {
             }
         } catch (Exception e) {
             eventHandler.setStatus(eventHandler.getMsg("error.logic.command"));
-            LOGGER.severe("Command : " + userCommand + " <=> User Input : " + userInput);
+            LOGGER.log(Level.SEVERE, "executeCommand : " + userCommand, e);
         }
     }
 
@@ -295,18 +292,22 @@ public class ControlGUI {
     public boolean registerEvent(Event e, Object... objs) {
         assert (e != null);
         
-        LOGGER.info("Perform: " + e.getClass().getName());
-
-        e.setEventLisnter(eventHandler);
-        e.register(objs);
-
-        boolean success = e.execute();
-
-        if (success && e.hasUndo()) {
-            undoManager.addUndo(e);
-        }
+        boolean success = false;
         
-        LOGGER.info("Result: " + success);
+        try {
+            e.setEventLisnter(eventHandler);
+            e.register(objs);
+
+            success = e.execute();
+
+            if (success && e.hasUndo()) {
+                undoManager.addUndo(e);
+            } else {
+                LOGGER.info("Perform: " + e.getClass().getName() + " failed");
+            }
+        } catch (Exception ex) {
+            LOGGER.log(Level.SEVERE, e.getClass().getName(), ex);
+        }
 
         return success;
     }

@@ -11,13 +11,18 @@ public class Log {
     private static SimpleFormatter txtFormat;
     
     public static void setup() throws IOException {
-        // Create Logger
+        // create logger
         Logger logger = Logger.getLogger("");
         logger.setLevel(Level.FINE);
         
-        txtFile   = new FileHandler("Logging.txt");
+        // append to existing log
+        boolean append = true;
+        int sizeLimit  = 1000000; // 1MB
+        
+        txtFile   = new FileHandler("Logging.log", sizeLimit, 1, append);
         txtFormat = new SimpleFormatter();
         txtFile.setFormatter(txtFormat);
+        
         logger.addHandler(txtFile);
     }
 

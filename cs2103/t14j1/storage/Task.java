@@ -204,32 +204,27 @@ public class Task implements Comparable<Object> {
             Date endDate   = DateFormat.strToDate(getEndDate());
             
             if (startDate.equals(endDate)) {
-                result.append(DateFormat.dateToStr(startDate));
+                result.append(DateFormat.dateToStr(startDate, User.getDateFormat()));
                 
                 if (!when.isAllDay()) {
-                    result.append(" ");
+                    result.append(User.getGapBetweenDateTime());
                     if (getStartTime().equals(getEndTime())) {
-                        result.append(getStartTime());
+                        result.append(DateFormat.dateToStr(when.getStartDateTime(), User.getTimeFormat()));
                     } else {
-                        result.append(getStartTime());
+                        result.append(DateFormat.dateToStr(when.getStartDateTime(), User.getTimeFormat()));
                         result.append(" - ");
-                        result.append(getEndTime());
+                        result.append(DateFormat.dateToStr(when.getEndDateTime(), User.getTimeFormat()));
                     }
                 }
             } else {
-                result.append(getStartDate());
-
-                if (!when.isAllDay()) {
-                    result.append(" ");
-                    result.append(getStartTime());
-                }
-
-                result.append(" - ");
-                result.append(getEndDate());
-
-                if (!when.isAllDay()) {
-                    result.append(" ");
-                    result.append(getEndTime());
+                if (when.isAllDay()) {
+                    result.append(DateFormat.dateToStr(when.getStartDateTime(), User.getDateFormat()));
+                    result.append(" - ");
+                    result.append(DateFormat.dateToStr(when.getEndDateTime(), User.getDateFormat()));
+                } else {
+                    result.append(DateFormat.dateToStr(when.getStartDateTime(), User.getDateTimeFormat()));
+                    result.append(" - ");
+                    result.append(DateFormat.dateToStr(when.getEndDateTime(), User.getDateTimeFormat()));
                 }
             }
             
@@ -401,9 +396,11 @@ public class Task implements Comparable<Object> {
     public String getDeadlineStr() {
         if (User.useDurationLike) {
             return when.getDeadlineStr();
+        } else if (when.hasDeadline()) {
+            return DateFormat.dateToStr(when.getDeadline(), User.getDateTimeFormat());
+        } else {
+            return null;
         }
-
-        return getDeadlineShort();
     }
     
     public boolean isWithinPeriod(Date start, Date end) {

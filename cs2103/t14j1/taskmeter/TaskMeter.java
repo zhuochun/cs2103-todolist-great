@@ -99,7 +99,7 @@ public class TaskMeter extends Shell {
             getResourceString("table.duration"),
             getResourceString("table.status")
     };
-    private int[] columnWidths = { 25, 195, 75, 230, 115, 75, 85 };
+    private int[] columnWidths = { 25, 195, 75, 220, 115, 75, 85 };
     
     // 2 different modes
     private static final int MODE_LIST   = 0;

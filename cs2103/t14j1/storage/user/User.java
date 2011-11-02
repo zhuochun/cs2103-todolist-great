@@ -22,9 +22,9 @@ public class User {
     private static String setting      = "setting.txt";
     private static boolean isFirstTime = false;
 
-    private static String[] saveStrings = {
+    private static final String[] saveStrings = {
         "AutoComplete", "SortingMethod", "AutoSaveTime", "DefaultRemindType",
-        "useAbbreviate", "useDurationLike"
+        "useAbbreviate", "useDurationLike", "UserTimeFormat", "UserDateFormat"
         };
 
     // Settings
@@ -36,6 +36,14 @@ public class User {
     public static Reminder defaultRemind       = Reminder.START; // default remind type
     public static boolean  useAbbreviate       = false; // use abbreviate word for day,hour,minute
     public static boolean  useDurationLike     = false; // duration like display method
+    public static int      userTimeFormat      = 0; // default 0
+    public static int      userDateFormat      = 0; // default 0
+    public static int      gapBetweenDateTime  = 0; // default 0
+    
+    // Date and Time format
+    public static final String[] timeFormats = {"HH:mm", "h:mm a", "hh:mm a"};
+    public static final String[] gapBetween  = {", ", " "};
+    public static final String[] dateFormats = {"MMM dd", "EEE, MMM d", "MMMM dd", "YYYY, MMM d", "dd-MM-YYYY", "YYYY-MM-dd", "dd/MM/YYYY"};
     
     // Exception Strings
     private static final String EXCEPTION_EMPTY_NAME = "User name cannot be null or empty";
@@ -54,6 +62,28 @@ public class User {
 
     public static String getUserPath() {
         return folder + name + "/";
+    }
+    
+    public static String getTimeFormat() {
+        return timeFormats[userTimeFormat];
+    }
+    
+    public static String getDateFormat() {
+        return dateFormats[userDateFormat];
+    }
+    
+    public static String getGapBetweenDateTime() {
+        return gapBetween[gapBetweenDateTime];
+    }
+    
+    public static String getDateTimeFormat() {
+        StringBuilder result = new StringBuilder();
+        
+        result.append(getDateFormat());
+        result.append(gapBetween[gapBetweenDateTime]);
+        result.append(getTimeFormat());
+        
+        return result.toString();
     }
 
     public static boolean isFirstTimeUser() {
@@ -99,6 +129,10 @@ public class User {
                         useAbbreviate = terms[1].equals("true") ? true : false;
                     } else if (terms[0].equals(saveStrings[5])) {
                         useDurationLike = terms[1].equals("true") ? true : false; 
+                    } else if (terms[0].equals(saveStrings[6])) {
+                        userTimeFormat = Integer.parseInt(terms[1]);
+                    } else if (terms[0].equals(saveStrings[7])) {
+                        userDateFormat = Integer.parseInt(terms[1]);
                     }
                 }
             }
@@ -131,6 +165,8 @@ public class User {
             w.write(saveStrings[3] + " = " + defaultRemind + "\n");
             w.write(saveStrings[4] + " = " + useAbbreviate + "\n");
             w.write(saveStrings[5] + " = " + useDurationLike + "\n");
+            w.write(saveStrings[6] + " = " + userTimeFormat + "\n");
+            w.write(saveStrings[7] + " = " + userDateFormat + "\n");
 
             w.close();
         } catch (IOException e) {

@@ -134,7 +134,7 @@ public class TaskMeter extends Shell {
                 }
             }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOGGER.log(Level.SEVERE, "main", e);
         }
     }
 
@@ -186,10 +186,10 @@ public class TaskMeter extends Shell {
         Runnable autoSave = new Runnable() {
             public void run() {
                 saveTaskMeter();
-                display.timerExec(User.autoSaveTime, this);
+                display.timerExec(User.getAutoSaveTime(), this);
             }
         };
-        display.timerExec(User.autoSaveTime, autoSave);
+        display.timerExec(User.getAutoSaveTime(), autoSave);
 
         // set application logo
         setLogoImage(display);
@@ -441,7 +441,7 @@ public class TaskMeter extends Shell {
             @Override
             public void keyReleased(KeyEvent e) {
                 // Only perform auto completion when user input characters
-                if (User.performAutoComplete && (e.character > 'A' && e.character < 'z')) {
+                if (User.performAutoComplete() && (e.character > 'A' && e.character < 'z')) {
                     String txt = smartBar.getText();
                     if (autoComplete.setInput(txt, smartBar.getSelectionCount() != 0)) {
                         smartBar.setText(autoComplete.getCompletedStr());
@@ -636,7 +636,7 @@ public class TaskMeter extends Shell {
                 if (isTasksFocus()) {
                     int index = getSelectedIdx();
                     if (getIndexedTask(index).getReminder() == null)
-                        logic.addReminder(getSelectedIdx(), User.defaultRemind);
+                        logic.addReminder(getSelectedIdx(), User.getDefaultReminder());
                     else
                         logic.removeReminder(index);
                 }
@@ -811,15 +811,15 @@ public class TaskMeter extends Shell {
         mntmAutoComplete.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                User.performAutoComplete = User.performAutoComplete ? false : true;
+                User.setPerformAutoComplete(!User.performAutoComplete());
             }
         });
-        mntmAutoComplete.setSelection(User.performAutoComplete);
+        mntmAutoComplete.setSelection(User.performAutoComplete());
         mntmAutoComplete.setText(getResourceString("autocomplete"));
         
         menuSetting.addMenuListener(new MenuAdapter() {
             public void menuShown(MenuEvent e) {
-                mntmAutoComplete.setSelection(User.performAutoComplete);
+                mntmAutoComplete.setSelection(User.performAutoComplete());
             }
         });
     }
@@ -1281,31 +1281,31 @@ public class TaskMeter extends Shell {
         
         return dialog.open();
     }
-    
+
     private void switchList(String name) {
         if (name == null || name.trim().isEmpty()) {
             displayError(getResourceString("list.null"));
         } else if (mode == MODE_SEARCH && name.equals(searchResult.getName())) {
-            return ;
+            return;
         } else if (!lists.hasList(name)) {
             // if the list does not exists, ask whether to add it
             MessageBox box = new MessageBox(this, SWT.ICON_WARNING | SWT.YES | SWT.NO);
             box.setText(getResourceString("list.add"));
             box.setMessage(getResourceString("msg.new.list"));
-    
+
             int choice = box.open();
             if (choice == SWT.YES) {
                 logic.addList(name);
             } else {
                 setStatusBar(getResourceString("msg.switch.null.list"));
-                return ;
+                return;
             }
         }
-        
-        displayCurrentList(name);
-        displayLists();
 
         FilterTask.setFilter(Filter.FILTER_ALL);
+
+        displayCurrentList(name);
+        displayLists();
 
         setStatusBar(String.format(getResourceString("msg.SWITCH_LIST"), name));
     }
@@ -1436,7 +1436,6 @@ public class TaskMeter extends Shell {
             isModified = false;
         }
         
-        User.save();
         return true;
     }
 
@@ -1461,6 +1460,9 @@ public class TaskMeter extends Shell {
                 }
             }
         }
+        
+        // Save User Settings
+        User.save();
         
         // Dispose Components
         trayItem.dispose();

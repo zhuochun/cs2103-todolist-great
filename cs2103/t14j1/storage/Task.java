@@ -394,7 +394,7 @@ public class Task implements Comparable<Object> {
      * @return eg. 3 Hours Later
      */
     public String getDeadlineStr() {
-        if (User.useDurationLike) {
+        if (User.isDurationAlike()) {
             return when.getDeadlineStr();
         } else if (when.hasDeadline()) {
             return DateFormat.dateToStr(when.getDeadline(), User.getDateTimeFormat());
@@ -489,8 +489,8 @@ public class Task implements Comparable<Object> {
         Task other = (Task) o;
         int result = 0;
         
-        for (int method : User.sortingMethod) {
-            switch (method) {
+        for (int i = 0; i < User.defaultSortingNum; i++) {
+            switch (User.getSortingMethod(i)) {
                 case TaskList.SORT_DEADLINE:
                     result = compareDeadline(other.getDeadline());
                     break;

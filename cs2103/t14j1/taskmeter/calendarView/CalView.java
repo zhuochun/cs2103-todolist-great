@@ -17,6 +17,7 @@ import org.eclipse.swt.widgets.Display;
 import org.eclipse.swt.widgets.Shell;
 
 import cs2103.t14j1.storage.Task;
+import cs2103.t14j1.storage.TaskList;
 
 
 /*class Task{
@@ -40,6 +41,25 @@ class TaskItem extends Composite{
 	
 }
 
+/**
+ * The Calendar View -- to view the tasks graphically
+ * 
+ * To use it:
+ * 1. Create a view by calling 
+ *  <code> CalView view = new CalView(shell, SWT.NONE); </code>
+ * 2. Set appropriate size and location
+ * 	<code>	view.setSize(900, 700); view.setLocation(5,5); </code>
+ * 3. Add the task list you want to display
+ *  <code> view.addList(taskList); </code>
+ *  
+ *  TODO:
+ *  	1. Add the all-day event to the top of the day
+ *  	2. Display different list with different colour
+ *  	3. Allow user to set the day_num, time interval
+ *  
+ * @author SongYY
+ *
+ */
 public class CalView extends Composite{
 	
 	// for drawing
@@ -51,7 +71,7 @@ public class CalView extends Composite{
 	
 	
 	// internal data
-	private List<Task> tasks;
+	private List<TaskList> tasklist;
 	
 	// for formating
 	private static final String timeFormat = "%2d:%2d";
@@ -82,10 +102,11 @@ public class CalView extends Composite{
 	
 	/**
 	 * This would reset the time interval, and redraw
+	 * Still imperfect, so make it private first
 	 * @param newVal
 	 * @return true on succeed, false on not
 	 */
-	public boolean setTimeInterval(int newVal){
+	private boolean setTimeInterval(int newVal){
 		if(60%newVal != 0){
 			return false;
 		}
@@ -123,7 +144,7 @@ public class CalView extends Composite{
 		}
 	}
 	
-	CalView(Composite parent, int style) {
+	public CalView(Composite parent, int style) {
 		super(parent, style);
 		
 		// initialize the color scheme
@@ -131,7 +152,7 @@ public class CalView extends Composite{
 		calColorLineColor = this.getDisplay().getSystemColor(SWT.COLOR_BLACK);
 		calColorTask = this.getDisplay().getSystemColor(SWT.COLOR_DARK_BLUE);
 		
-		tasks = new LinkedList<Task>();
+		tasklist = new LinkedList<TaskList>();
 		currentTime = Calendar.getInstance();
 		
 		// end of initialization
@@ -237,7 +258,8 @@ public class CalView extends Composite{
 		}
 		
 		// then put in the task
-		for(Task task:tasks){
+		for(TaskList list:tasklist){
+			for(Task task:list.getTasks()){
 			// assume there's no multi-day task
 			Date startTime = task.getStartDateTime();
 			Date endTime = task.getEndDateTime();
@@ -278,6 +300,7 @@ public class CalView extends Composite{
 			gc.setForeground(calColorLineColor);
 			gc.setBackground(calColorBackGround);
 			gc.drawText(title, startXPos + 10, textYPos);	// TODO: resolve here.. a bit of hacking
+			}
 		}
 		
 	}
@@ -298,8 +321,8 @@ public class CalView extends Composite{
 		return false;
 	}
 
-	void addTask(Task task){
-		tasks.add(task);
+	public void addList(TaskList list){
+		tasklist.add(list);
 	}
 	
 
@@ -316,13 +339,18 @@ public class CalView extends Composite{
 		Calendar later = (Calendar) now.clone();
 		later.add(Calendar.HOUR, 1);
 		Task t1 = new Task();
+		TaskList l = new TaskList("test List");
 		t1.setName("Task 1");
 		t1.setStartDateTime(now.getTime());
 		t1.setEndDateTime(later.getTime());
+		l.addTask(t1);
+		
+		// create the calendar view
 		CalView view = new CalView(shell, SWT.NONE);
-		view.addTask(t1);
+		view.addList(l);
 		view.setSize(900, 700);
 		view.setLocation(5,5);
+		//view.setTimeInterval(360);
 		
 		shell.setSize(1024, 768);
 		shell.setAlpha(250);

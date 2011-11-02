@@ -18,6 +18,7 @@ import cs2103.t14j1.taskmeter.reminder.Reminder;
 public class UserSettingDialog extends Dialog {
 
     protected Shell shlUserSettings;
+    private boolean result;
     
 
     /**
@@ -28,7 +29,7 @@ public class UserSettingDialog extends Dialog {
      */
     public UserSettingDialog(Shell parent) {
         super(parent, SWT.NONE);
-        setText("SWT Dialog");
+        result = false;
     }
 
     /**
@@ -36,7 +37,7 @@ public class UserSettingDialog extends Dialog {
      * 
      * @return the result
      */
-    public void open() {
+    public boolean open() {
         createContents();
         center();
         shlUserSettings.open();
@@ -47,6 +48,7 @@ public class UserSettingDialog extends Dialog {
                 display.sleep();
             }
         }
+        return result;
     }
     
 
@@ -55,7 +57,7 @@ public class UserSettingDialog extends Dialog {
      */
     private void createContents() {
         shlUserSettings = new Shell(getParent(), SWT.DIALOG_TRIM | SWT.PRIMARY_MODAL);
-        shlUserSettings.setSize(455, 230);
+        shlUserSettings.setSize(455, 290);
         shlUserSettings.setText("User Settings");
 
         sortMethod();
@@ -70,10 +72,15 @@ public class UserSettingDialog extends Dialog {
         
         autoComplete();
         
-        Label label = new Label(shlUserSettings, SWT.SEPARATOR | SWT.HORIZONTAL);
-        label.setBounds(5, 155, 435, 2);
+        Label label2 = new Label(shlUserSettings, SWT.SEPARATOR | SWT.HORIZONTAL);
+        label2.setBounds(5, 155, 435, 2);
         
         defaultReminder();
+        
+        Label label3 = new Label(shlUserSettings, SWT.SEPARATOR | SWT.HORIZONTAL);
+        label3.setBounds(5, 195, 435, 2);
+        
+        displayMethod();
     }
 
     private void defaultReminder() {
@@ -96,6 +103,44 @@ public class UserSettingDialog extends Dialog {
         cbReminder.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
         cbReminder.setBounds(215, 162, 180, 28);
         cbReminder.select(User.defaultRemind.ordinal());
+    }
+
+    private void displayMethod() {
+        final Button btnDisplayDurationIn = new Button(shlUserSettings, SWT.CHECK);
+        btnDisplayDurationIn.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                User.useAbbreviate = btnDisplayDurationIn.getSelection();
+                result = true;
+            }
+        });
+        btnDisplayDurationIn.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
+        btnDisplayDurationIn.setBounds(10, 205, 225, 20);
+        btnDisplayDurationIn.setText("Display Duration in Abbreviate");
+        btnDisplayDurationIn.setSelection(User.useAbbreviate);
+        
+        Label lbldDay = new Label(shlUserSettings, SWT.NONE);
+        lbldDay.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_BORDER));
+        lbldDay.setBounds(240, 208, 194, 20);
+        lbldDay.setText("(D - Day, H - Hour, M - Minute)");
+        
+        final Button btnDisplayDeadlineLike = new Button(shlUserSettings, SWT.CHECK);
+        btnDisplayDeadlineLike.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                User.useDurationLike = btnDisplayDeadlineLike.getSelection();
+                result = true;
+            }
+        });
+        btnDisplayDeadlineLike.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
+        btnDisplayDeadlineLike.setBounds(10, 230, 225, 20);
+        btnDisplayDeadlineLike.setText("Display Deadline Like Duration");
+        btnDisplayDeadlineLike.setSelection(User.useDurationLike);
+        
+        Label lblegHour = new Label(shlUserSettings, SWT.NONE);
+        lblegHour.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_BORDER));
+        lblegHour.setBounds(240, 233, 98, 15);
+        lblegHour.setText("(eg. 1 Hour Ago)");
     }
     
     private final String[] autoSaveOptions = {"2", "5 (Default)", "10", "15", "20"};

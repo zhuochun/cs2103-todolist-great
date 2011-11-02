@@ -815,11 +815,6 @@ public class TaskMeter extends Shell {
         });
     }
     
-    private void openUserSetting() {
-        UserSettingDialog dialog = new UserSettingDialog(this);
-        dialog.open();
-    }
-
     /**
      * @param menuBar
      */
@@ -1413,6 +1408,15 @@ public class TaskMeter extends Shell {
         
         if (quickAddView.isModified()) {
             isModified = true;
+            refreshDisplay();
+        }
+    }
+
+    private void openUserSetting() {
+        UserSettingDialog dialog = new UserSettingDialog(this);
+        boolean refresh = dialog.open();
+        
+        if (refresh) {
             refreshDisplay();
         }
     }

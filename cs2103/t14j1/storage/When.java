@@ -599,12 +599,16 @@ public class When implements Comparable<Object> {
         for (int i = 0; i < 3; i++) {
             if (result[i] != 0) {
                 dStr.append(result[i]);
-                dStr.append(" ");
                 
                 if (abbr) {
                     dStr.append(abbrName[i]);
                 } else {
+                    dStr.append(" ");
                     dStr.append(fullName[i]);
+                }
+                
+                if (result[i] > 1) {
+                    dStr.append("s");
                 }
                 
                 dStr.append(" ");

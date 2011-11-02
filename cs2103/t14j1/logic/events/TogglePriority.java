@@ -33,7 +33,9 @@ public class TogglePriority extends Event {
         boolean success = false;
 
         try {
-            task = eventHandler.getTask(index);
+            if (task == null) {
+                task = eventHandler.getTask(index);
+            }
 
             oldPriority = task.getPriority();
             task.setPriority(newPriority);

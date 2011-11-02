@@ -26,7 +26,6 @@ public class MoveTask extends Event {
         }
 
         newListName = (String) objs[1];
-        oldListName = task.getList();
     }
 
     public boolean execute() {
@@ -37,6 +36,8 @@ public class MoveTask extends Event {
             if (index != -1) {
                 task = eventHandler.getTask(index);
             }
+            
+            oldListName = task.getList();
 
             TaskLists lists = eventHandler.getLists();
 

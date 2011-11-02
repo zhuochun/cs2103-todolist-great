@@ -32,7 +32,7 @@ public class AutoCompleteTest {
     public void testGetCompletedStr() {
         // test complete Commands
         TaskLists lists = new TaskLists();
-        
+        // has Inbox, Trash
         lists.addList("Inhex");
         lists.addList("hello world");
         lists.addList("helworld");
@@ -43,136 +43,78 @@ public class AutoCompleteTest {
         assertEquals(true, autoComplete.setInput("", true));
         assertEquals("add", autoComplete.getCompletedStr());
         
-        System.out.println("add ==> " + autoComplete.getCompletedStr());
-        System.out.println(autoComplete.getStartIdx());
-        System.out.println(autoComplete.getEndIdx());
-        
-        System.out.println("==========");
-        
         // test continue tab case 0
         assertEquals(true, autoComplete.setInput("", true));
         assertEquals("del", autoComplete.getCompletedStr());
         
-        System.out.println("del ==> " + autoComplete.getCompletedStr());
-        System.out.println(autoComplete.getStartIdx());
-        System.out.println(autoComplete.getEndIdx());
-        
-        System.out.println("==========");
-        
         // test continue tab case 1
         assertEquals(true, autoComplete.setInput("del ", true));
         assertEquals("move", autoComplete.getCompletedStr());
-        
-        System.out.println("move ==> " + autoComplete.getCompletedStr());
-        System.out.println(autoComplete.getStartIdx());
-        System.out.println(autoComplete.getEndIdx());
-        
-        System.out.println("==========");
 
         // test case 00
         assertEquals(true, autoComplete.setInput("a", true));
         assertEquals("add", autoComplete.getCompletedStr());
         
-        System.out.println("add ==> " + autoComplete.getCompletedStr());
-        System.out.println(autoComplete.getStartIdx());
-        System.out.println(autoComplete.getEndIdx());
-        
-        System.out.println("==========");
-
         // test case 01
         assertEquals(true, autoComplete.setInput("e", true));
         assertEquals("edit", autoComplete.getCompletedStr());
         
-        System.out.println("edit ==> " + autoComplete.getCompletedStr());
-        System.out.println(autoComplete.getStartIdx());
-        System.out.println(autoComplete.getEndIdx());
-        
-        System.out.println("==========");
-        
         // test list case 00
         assertEquals(true, autoComplete.setInput("#(In", true));
+        assertEquals("#(Inbox)", autoComplete.getCompletedStr());
         
-        System.out.println("# ==> " + autoComplete.getCompletedStr());
-        System.out.println(autoComplete.getStartIdx());
-        System.out.println(autoComplete.getEndIdx());
-        
-        System.out.println("==========");
-        
+        // test list case 00 tab
         assertEquals(true, autoComplete.setInput("#(In", true));
+        assertEquals("#(Inhex)", autoComplete.getCompletedStr());
         
-        System.out.println("# ==> " + autoComplete.getCompletedStr());
-        System.out.println(autoComplete.getStartIdx());
-        System.out.println(autoComplete.getEndIdx());
+        // continue tab to go back
+        assertEquals(true, autoComplete.setInput("#(Inhex)", true));
+        assertEquals("#(Inbox)", autoComplete.getCompletedStr());
         
-        System.out.println("==========");
+        // no completion
+        assertEquals(false, autoComplete.setInput("#(Inhex)", true));
         
-        assertEquals(true, autoComplete.setInput("#(Inhex", true));
+        // complete ( by it self
+        assertEquals(true, autoComplete.setInput("#He", true));
+        assertEquals("#(hello world)", autoComplete.getCompletedStr());
         
-        System.out.println("# ==> " + autoComplete.getCompletedStr());
-        System.out.println(autoComplete.getStartIdx());
-        System.out.println(autoComplete.getEndIdx());
-        
-        System.out.println("==========");
-        
-        assertEquals(true, autoComplete.setInput("#(In", true));
-        
-        System.out.println("# ==> " + autoComplete.getCompletedStr());
-        System.out.println(autoComplete.getStartIdx());
-        System.out.println(autoComplete.getEndIdx());
-        
-        System.out.println("==========");
+        assertEquals(true, autoComplete.setInput("#He", true));
+        assertEquals("#helworld", autoComplete.getCompletedStr());
         
         // test list case 01
         assertEquals(true, autoComplete.setInput("add something #h", true));
+        assertEquals("add something #(hello world)", autoComplete.getCompletedStr());
         
-        System.out.println("# ==> " + autoComplete.getCompletedStr());
-        System.out.println(autoComplete.getStartIdx());
-        System.out.println(autoComplete.getEndIdx());
-        
-        System.out.println("==========");
-        
-        // test list case 01
-        assertEquals(true, autoComplete.setInput("add something #he", true));
-        
-        System.out.println("# ==> " + autoComplete.getCompletedStr());
-        System.out.println(autoComplete.getStartIdx());
-        System.out.println(autoComplete.getEndIdx());
-        
-        System.out.println("==========");
-        
-        // test priority
+        // test priority 1
         assertEquals(true, autoComplete.setInput("add something !", true));
+        assertEquals("add something !1", autoComplete.getCompletedStr());
         
-        System.out.println("! ==> " + autoComplete.getCompletedStr());
-        System.out.println(autoComplete.getStartIdx());
-        System.out.println(autoComplete.getEndIdx());
-        
-        System.out.println("==========");
-        
+        // test priority 2
         assertEquals(true, autoComplete.setInput("add something !12", true));
+        assertEquals("add something !1", autoComplete.getCompletedStr());
         
-        System.out.println("! ==> " + autoComplete.getCompletedStr());
-        System.out.println(autoComplete.getStartIdx());
-        System.out.println(autoComplete.getEndIdx());
+        // test priority 3
+        assertEquals(true, autoComplete.setInput("add something !2", true));
+        assertEquals("add something !3", autoComplete.getCompletedStr());
         
-        System.out.println("==========");
-        
-        // test TimeUnit
+        // test TimeUnit 1
         assertEquals(true, autoComplete.setInput("add something for 12mi", true));
+        assertEquals("add something for 12minutes", autoComplete.getCompletedStr());
         
-        System.out.println("! ==> " + autoComplete.getCompletedStr());
-        System.out.println(autoComplete.getStartIdx());
-        System.out.println(autoComplete.getEndIdx());
-        
-        System.out.println("==========");
-        
+        // test TimeUnit 2
         assertEquals(true, autoComplete.setInput("add something for 12 h", true));
+        assertEquals("add something for 12 hours", autoComplete.getCompletedStr());
         
-        System.out.println("! ==> " + autoComplete.getCompletedStr());
-        System.out.println(autoComplete.getStartIdx());
-        System.out.println(autoComplete.getEndIdx());
+        // test dictionary
+        assertEquals(true, autoComplete.setInput("add sth, n", true));
+        assertEquals("add sth, next", autoComplete.getCompletedStr());
         
-        System.out.println("==========");
+        // tab next word
+        assertEquals(true, autoComplete.setInput("add sth, next", true));
+        assertEquals("add sth, november", autoComplete.getCompletedStr());
+        
+        // tab go back the first one
+        assertEquals(true, autoComplete.setInput("add sth, n", true));
+        assertEquals("add sth, next", autoComplete.getCompletedStr());
     }
-
 }

@@ -42,6 +42,12 @@ public class Beginner {
         lists.addTask(list, newTask);
         
         // add how to edit task
+        name  = "Press Ctrl + E to Edit a Task";
+        list  = TaskLists.INBOX;
+        place = "";
+        
+        newTask = new Task(name, place, list, priority, when, status);
+        lists.addTask(list, newTask);
         
         // add how to use smartBar
         

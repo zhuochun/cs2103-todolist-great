@@ -701,7 +701,7 @@ public class ParseCommand {
 		 *  4) next Mon ~ Sun, or Monday ~ Sunday --> indicates the day of next week 
 		 */
 		
-//		System.err.println("Time Str: " + timeDateStr);
+		System.err.println("Time Str: " + timeDateStr);
 		
 		Pattern regDateFormat_dd_mm_$yy$yy$$_Pattern = Pattern.compile(
 				regWordSpacer + regDateFormat_dd_$mm$M$_$yy$yy$$ + regWordSpacer,Pattern.CASE_INSENSITIVE);
@@ -958,9 +958,12 @@ public class ParseCommand {
 		weekDStr = dayInfo[dayInfo.length - 1];
 		
 		boolean nextWeek = false;
+		boolean hasThis = false;
 		
 		if(dayInfo.length > 1 && dayInfo[dayInfo.length - 2].matches("next")){
 			nextWeek = true;
+		} else if(dayInfo.length > 1 && dayInfo[dayInfo.length - 2].matches("this")){
+			hasThis = true;
 		}
 		
 		int dayOfTheWeek = dateParseGetDayOfWeekFromText(weekDStr);
@@ -971,8 +974,18 @@ public class ParseCommand {
 			return null;
 		}
 		
-		if(nextWeek || currentDay > dayOfTheWeek){	// indicating the day of next week
-			date.set(Calendar.DAY_OF_WEEK_IN_MONTH, date.get(Calendar.DAY_OF_WEEK_IN_MONTH)+1);
+		/* say today is Wednesday
+		 * 
+		 * Next Saturday: the Saturday of next week
+		 * This Saturday: the Saturday of this week
+		 * This Monday: the Monday of this week
+		 * Monday   => next Monday
+		 * Saturday => next Saturday
+		 * 
+		 */
+		
+		if(nextWeek || (!hasThis && currentDay > dayOfTheWeek)){	// indicating the day of next week
+			date.add(Calendar.DAY_OF_WEEK_IN_MONTH, 1);
 			date.set(Calendar.DAY_OF_WEEK, dayOfTheWeek);
 		} else{	// indicating this week. if on the same date, it's still this week
 			date.set(Calendar.DAY_OF_WEEK, dayOfTheWeek);
@@ -1151,7 +1164,7 @@ public class ParseCommand {
 	
 	public static void main(String[] args){
 		// test match here
-		String testStr = "/remind next Year";
+		String testStr = "add tennes Monday";
 			/* test cases to be added for Unit Test:
 			 * Reminder : 
 			 * 	"remind 3 4pm tomorrow";

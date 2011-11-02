@@ -18,6 +18,8 @@ import java.util.GregorianCalendar;
  * 
  */
 public class DateFormat {
+    
+    public static final Date todayDate = strToDate(getNowDate());
 
     /**
      * get current date and time without formatting
@@ -117,7 +119,6 @@ public class DateFormat {
      * @param str
      * @return Date
      */
-    @SuppressWarnings("deprecation")
     public static Date strToDateShort(String str) {
         if (str == null)
             return null;
@@ -125,7 +126,6 @@ public class DateFormat {
         SimpleDateFormat formatter = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         ParsePosition pos = new ParsePosition(0);
         Date strtodate = formatter.parse(str, pos);
-        strtodate.setSeconds(0);
 
         return strtodate;
     }

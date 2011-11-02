@@ -1,12 +1,10 @@
 package cs2103.t14j1.logic.filter;
 
-import java.util.Calendar;
 import java.util.Date;
 
 import cs2103.t14j1.logic.DateFormat;
 import cs2103.t14j1.storage.Priority;
 import cs2103.t14j1.storage.Task;
-import cs2103.t14j1.storage.When;
 
 /**
  * filter tasks according to parameter set
@@ -29,10 +27,9 @@ public class FilterTask {
     }
     
     private static Date[] getDate(int afterToday, int length) {
-        Calendar now = Calendar.getInstance();
-        When.clear(now, When.CLEAR_BELOW_HOUR);
+        Date today = DateFormat.todayDate;
 
-        Date start = DateFormat.getDateAfter(now.getTime(), afterToday);
+        Date start = DateFormat.getDateAfter(today, afterToday);
         Date end   = DateFormat.getDateAfter(start, length);
         
         Date[] result = {start, end};

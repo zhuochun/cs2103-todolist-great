@@ -399,11 +399,11 @@ public class Task implements Comparable<Object> {
      * @return eg. 3 Hours Later
      */
     public String getDeadlineStr() {
-        if (User.useDateDeadline) {
-            return getDeadlineShort();
+        if (User.useDurationLike) {
+            return when.getDeadlineStr();
         }
-        
-        return when.getDeadlineStr();
+
+        return getDeadlineShort();
     }
     
     public boolean isWithinPeriod(Date start, Date end) {

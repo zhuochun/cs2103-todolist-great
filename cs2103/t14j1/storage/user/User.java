@@ -24,7 +24,7 @@ public class User {
 
     private static String[] saveStrings = {
         "AutoComplete", "SortingMethod", "AutoSaveTime", "DefaultRemindType",
-        "useAbbreviate", "useDateDeadline"
+        "useAbbreviate", "useDurationLike"
         };
 
     // Settings
@@ -34,8 +34,8 @@ public class User {
                                                    TaskList.SORT_PRIORITY };
     public static int      autoSaveTime        = 300000; // default 5 mins
     public static Reminder defaultRemind       = Reminder.START; // default remind type
-    public static boolean  useAbbreviate       = false;
-    public static boolean  useDateDeadline     = true;
+    public static boolean  useAbbreviate       = false; // use abbreviate word for day,hour,minute
+    public static boolean  useDurationLike     = false; // duration like display method
     
     // Exception Strings
     private static final String EXCEPTION_EMPTY_NAME = "User name cannot be null or empty";
@@ -98,7 +98,7 @@ public class User {
                     } else if (terms[0].equals(saveStrings[4])) {
                         useAbbreviate = terms[1].equals("true") ? true : false;
                     } else if (terms[0].equals(saveStrings[5])) {
-                        useDateDeadline = terms[1].equals("true") ? true : false; 
+                        useDurationLike = terms[1].equals("true") ? true : false; 
                     }
                 }
             }
@@ -130,7 +130,7 @@ public class User {
             w.write(saveStrings[2] + " = " + autoSaveTime + "\n");
             w.write(saveStrings[3] + " = " + defaultRemind + "\n");
             w.write(saveStrings[4] + " = " + useAbbreviate + "\n");
-            w.write(saveStrings[5] + " = " + useDateDeadline + "\n");
+            w.write(saveStrings[5] + " = " + useDurationLike + "\n");
 
             w.close();
         } catch (IOException e) {

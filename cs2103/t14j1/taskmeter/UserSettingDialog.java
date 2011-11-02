@@ -1,5 +1,7 @@
 package cs2103.t14j1.taskmeter;
 
+import java.util.Date;
+
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.SelectionAdapter;
 import org.eclipse.swt.events.SelectionEvent;
@@ -12,6 +14,7 @@ import org.eclipse.swt.widgets.Label;
 import org.eclipse.swt.widgets.Shell;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import cs2103.t14j1.logic.DateFormat;
 import cs2103.t14j1.storage.user.User;
 import cs2103.t14j1.taskmeter.reminder.Reminder;
 
@@ -57,7 +60,7 @@ public class UserSettingDialog extends Dialog {
      */
     private void createContents() {
         shlUserSettings = new Shell(getParent(), SWT.DIALOG_TRIM | SWT.PRIMARY_MODAL);
-        shlUserSettings.setSize(455, 290);
+        shlUserSettings.setSize(455, 350);
         shlUserSettings.setText("User Settings");
 
         sortMethod();
@@ -141,6 +144,60 @@ public class UserSettingDialog extends Dialog {
         lblegHour.setForeground(SWTResourceManager.getColor(SWT.COLOR_WIDGET_BORDER));
         lblegHour.setBounds(240, 233, 98, 15);
         lblegHour.setText("(eg. 1 Hour Ago)");
+        
+        Label lblChooseDateAnd = new Label(shlUserSettings, SWT.NONE);
+        lblChooseDateAnd.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
+        lblChooseDateAnd.setBounds(10, 260, 404, 20);
+        lblChooseDateAnd.setText("Choose Date and Time Display:");
+        
+        final Date now = DateFormat.getNow();
+        
+        final Combo cbDate = new Combo(shlUserSettings, SWT.READ_ONLY);
+        cbDate.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                User.userDateFormat = cbDate.getSelectionIndex();
+                result = true;
+            }
+        });
+        String[] dates = new String[User.dateFormats.length];
+        for (int i = 0; i < dates.length; i++) {
+            dates[i] = DateFormat.dateToStr(now, User.dateFormats[i]);
+        }
+        cbDate.setItems(dates);
+        cbDate.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
+        cbDate.setBounds(10, 285, 185, 28);
+        cbDate.select(User.userDateFormat);
+        
+        final Combo cbGap = new Combo(shlUserSettings, SWT.READ_ONLY);
+        cbGap.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                User.gapBetweenDateTime = cbGap.getSelectionIndex();
+                result = true;
+            }
+        });
+        cbGap.setItems(User.gapBetween);
+        cbGap.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
+        cbGap.setBounds(205, 285, 45, 28);
+        cbGap.select(User.gapBetweenDateTime);
+        
+        final Combo cbTime = new Combo(shlUserSettings, SWT.READ_ONLY);
+        cbTime.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                User.userTimeFormat = cbTime.getSelectionIndex();
+                result = true;
+            }
+        });
+        String[] times = new String[User.timeFormats.length];
+        for (int i = 0; i < times.length; i++) {
+            times[i] = DateFormat.dateToStr(now, User.timeFormats[i]);
+        }
+        cbTime.setItems(times);
+        cbTime.setFont(SWTResourceManager.getFont("Segoe UI", 11, SWT.NORMAL));
+        cbTime.setBounds(260, 285, 181, 28);
+        cbTime.select(User.userTimeFormat);
     }
     
     private final String[] autoSaveOptions = {"2", "5 (Default)", "10", "15", "20"};

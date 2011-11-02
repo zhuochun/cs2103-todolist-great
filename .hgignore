@@ -1,0 +1,10 @@
+syntax: glob
+cs2103/t14j1/storage/TaskList.java.bak
+cs2103/t14j1/storage/TaskList.java.orig
+cs2103/t14j1/storage/TaskLists.java.orig
+cs2103/t14j1/logic/Control.java.orig
+cs2103/t14j1/storage/Task.java.bak
+cs2103/t14j1/storage/Task.java.orig
+syntax: regexp
+^.*java.bak
+^.*java.orig

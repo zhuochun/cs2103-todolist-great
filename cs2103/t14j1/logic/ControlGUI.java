@@ -302,8 +302,6 @@ public class ControlGUI {
 
             if (success && e.hasUndo()) {
                 undoManager.addUndo(e);
-            } else {
-                LOGGER.info("Perform: " + e.getClass().getName() + " failed");
             }
         } catch (Exception ex) {
             LOGGER.log(Level.SEVERE, e.getClass().getName(), ex);

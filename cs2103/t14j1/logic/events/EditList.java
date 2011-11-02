@@ -1,6 +1,7 @@
 package cs2103.t14j1.logic.events;
 
 import cs2103.t14j1.storage.TaskList;
+import cs2103.t14j1.storage.TaskLists;
 
 /**
  * a edit list event
@@ -43,6 +44,9 @@ public class EditList extends Event {
         } catch (NullPointerException e) {
             feedback = e.getMessage();
             success  = false;
+        } catch (IllegalArgumentException e) {
+            feedback = e.getMessage();
+            success  = false;
         }
 
         eventHandler.setStatus(feedback);
@@ -55,6 +59,10 @@ public class EditList extends Event {
         // If no list with the name oldListname exists
         if (list == null) {
             throw new NullPointerException(String.format(eventHandler.getMsg("msg.EDIT_NULL_LIST"), oldName));
+        } else if (oldName.equals(TaskLists.INBOX) || oldName.equals(TaskLists.TRASH)) {
+            throw new IllegalArgumentException(eventHandler.getMsg("msg.EDIT_DEFAULT_LIST"));
+        } else if (eventHandler.getLists().hasList(newName)) {
+            throw new IllegalArgumentException(String.format(eventHandler.getMsg("msg.LIST_EXIST"), newName));
         }
 
         list.setName(newName);

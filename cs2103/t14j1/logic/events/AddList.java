@@ -37,8 +37,9 @@ public class AddList extends Event {
             success = eventHandler.getLists().addList(list);
 
             if (success) {
-                eventHandler.displayList(listname);
                 eventHandler.setModified();
+                eventHandler.displayList(listname);
+                eventHandler.switchToList(listname);
 
                 feedback = String.format(eventHandler.getMsg("msg.ADD_SUCCESS"), "List", listname);
             } else {

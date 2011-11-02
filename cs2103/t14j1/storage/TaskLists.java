@@ -156,6 +156,10 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
      * @return the result of moving task
      */
     public boolean moveTask(String oldList, String newList, int index) {
+        if (oldList.equals(newList)) {
+            return true;
+        }
+        
         TaskList oldlist = getList(oldList);
         Task task = oldlist.getTask(index);
         
@@ -184,6 +188,10 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
             return false;
         }
         
+        if (task.getList().equals(newList)) {
+            return true;
+        }
+        
         TaskList oldlist = getList(task.getList());
         task.setList(newList);
         addTask(newList, task);
@@ -199,6 +207,10 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
      * @return the TaskList with the name provided
      */
     public TaskList getList(String name) {
+        if (name == null) {
+            return null;
+        }
+        
         return lists.get(name);
     }
 
@@ -219,6 +231,10 @@ public class TaskLists implements Iterable<Entry<String, TaskList>> {
      * @return the result shown to the user
      */
     public boolean hasList(String name) {
+        if (name == null) {
+            return false;
+        }
+        
         return lists.containsKey(name);
     }
 

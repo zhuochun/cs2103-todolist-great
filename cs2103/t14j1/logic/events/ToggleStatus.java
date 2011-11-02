@@ -36,7 +36,7 @@ public class ToggleStatus extends Event {
         boolean success = false;
 
         try {
-            if (index != -1) {
+            if (task == null) {
                 task = eventHandler.getTask(index);
             }
 

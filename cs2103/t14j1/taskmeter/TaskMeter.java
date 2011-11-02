@@ -645,6 +645,18 @@ public class TaskMeter extends Shell {
         mntmRemind.setText(getResourceString("remind"));
     
         new MenuItem(menuEdit, SWT.SEPARATOR);
+        
+        final MenuItem mntmMarkCompleted = new MenuItem(menuEdit, SWT.NONE);
+        mntmMarkCompleted.setAccelerator(SWT.MOD1 + 'D');
+        mntmMarkCompleted.addSelectionListener(new SelectionAdapter() {
+            @Override
+            public void widgetSelected(SelectionEvent e) {
+                if (taskTable.isFocusControl() && taskTable.getSelectionCount() != 0) {
+                    logic.toggleStatus(getSelectedIdx(), null);
+                }
+            }
+        });
+        mntmMarkCompleted.setText(getResourceString("toggleStatus"));
     
         final MenuItem mntmEditTask = new MenuItem(menuEdit, SWT.NONE);
         mntmEditTask.setAccelerator(SWT.MOD1 + 'E');
@@ -673,18 +685,6 @@ public class TaskMeter extends Shell {
             }
         });
         mntmDeleteTask.setText(getResourceString("delete"));
-    
-        final MenuItem mntmMarkCompleted = new MenuItem(menuEdit, SWT.NONE);
-        mntmMarkCompleted.setAccelerator(SWT.MOD1 + 'D');
-        mntmMarkCompleted.addSelectionListener(new SelectionAdapter() {
-            @Override
-            public void widgetSelected(SelectionEvent e) {
-                if (taskTable.isFocusControl() && taskTable.getSelectionCount() != 0) {
-                    logic.toggleStatus(getSelectedIdx(), null);
-                }
-            }
-        });
-        mntmMarkCompleted.setText(getResourceString("toggleStatus"));
     
         new MenuItem(menuEdit, SWT.SEPARATOR);
         

@@ -1,6 +1,7 @@
 package cs2103.t14j1.logic;
 
 import java.util.Date;
+import java.util.logging.Logger;
 
 import cs2103.t14j1.logic.events.Event;
 import cs2103.t14j1.logic.search.Search;
@@ -16,8 +17,11 @@ import cs2103.t14j1.taskmeter.reminder.Reminder;
 
 public class ControlGUI {
     
+    private static final Logger LOGGER = Logger.getLogger(ControlGUI.class.getName());
+    
     private EventListener eventHandler;
     private TaskLists     lists;         // stores a copy of all the lists
+    private String        userInput;     // stores the last user input
     private Commands      userCommand;   // stores the last user command
     private UndoManager   undoManager;   // UndoManager
     private ParseCommand  parseCommand;  // smartBar parseCommand
@@ -34,6 +38,9 @@ public class ControlGUI {
         this.undoManager  = new UndoManager();
         this.searchEngine = new SearchEngine(lists);
         this.eventHandler = null;
+        
+        assert(lists != null);
+        LOGGER.finest("ControlGUI is successfully initialed");
     }
     
     /**
@@ -45,10 +52,15 @@ public class ControlGUI {
      */
     public Commands setUserInput(String input) {
         try {
+            userInput     = input;
             parseCommand  = new ParseCommand(input);
             userCommand   = parseCommand.extractCommand();
+            
+            LOGGER.fine("User Input: " + input + " -> " + userCommand);
         } catch (Exception e) {
             userCommand   = Commands.INVALID;
+            
+            LOGGER.severe("User Input: " + userInput);
         }
         
         return userCommand;
@@ -136,6 +148,7 @@ public class ControlGUI {
             }
         } catch (Exception e) {
             eventHandler.setStatus(eventHandler.getMsg("error.logic.command"));
+            LOGGER.severe("Command : " + userCommand + " <=> User Input : " + userInput);
         }
     }
 
@@ -281,6 +294,8 @@ public class ControlGUI {
 
     public boolean registerEvent(Event e, Object... objs) {
         assert (e != null);
+        
+        LOGGER.info("Perform: " + e.getClass().getName());
 
         e.setEventLisnter(eventHandler);
         e.register(objs);
@@ -290,6 +305,8 @@ public class ControlGUI {
         if (success && e.hasUndo()) {
             undoManager.addUndo(e);
         }
+        
+        LOGGER.info("Result: " + success);
 
         return success;
     }
@@ -455,7 +472,7 @@ public class ControlGUI {
     }
 
     public void undo() {
-        assert (undoManager.hasUndo());
+        assert(undoManager.hasUndo());
 
         Event lastEvent = undoManager.getUndo();
         Event redo = lastEvent.undo();
@@ -466,7 +483,7 @@ public class ControlGUI {
     }
 
     public void redo() {
-        assert (undoManager.hasRedo());
+        assert(undoManager.hasRedo());
 
         Event lastEvent = undoManager.getRedo();
         Event undo = lastEvent.undo();

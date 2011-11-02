@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.Map.Entry;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.logging.Logger;
 
 import org.eclipse.swt.SWT;
 import org.eclipse.swt.events.KeyAdapter;
@@ -53,6 +54,7 @@ import cs2103.t14j1.storage.Priority;
 import cs2103.t14j1.storage.Task;
 import cs2103.t14j1.storage.TaskList;
 import cs2103.t14j1.storage.TaskLists;
+import cs2103.t14j1.storage.logging.Log;
 import cs2103.t14j1.storage.user.User;
 import cs2103.t14j1.taskmeter.autocomplete.AutoComplete;
 import cs2103.t14j1.taskmeter.quickadd.QuickAddDialog;
@@ -65,7 +67,8 @@ import cs2103.t14j1.taskmeter.reminder.ReminderDialog;
  * 
  */
 public class TaskMeter extends Shell {
-
+    private static final Logger LOGGER = Logger.getLogger(TaskMeter.class.getName());
+    
     private static final ResourceBundle resourceBundle = ResourceBundle.getBundle("taskmeter_res");
     private Label statusBar;        // status bar
     private Table taskTable;        // task table lists all the tasks
@@ -111,9 +114,15 @@ public class TaskMeter extends Shell {
      * @param args
      */
     public static void main(String args[]) {
-        final Display display = Display.getDefault();
+        try {
+            Log.setup();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        
         User.initial();
-
+        
+        final Display display = Display.getDefault();
         try {
             TaskMeter application = new TaskMeter(display);
             application.open();
@@ -198,9 +207,10 @@ public class TaskMeter extends Shell {
             globalHotKey = Runtime.getRuntime().exec("resource/TaskMeterHotKey.exe");
             
             assert(globalHotKey != null);
+            LOGGER.finest("Global Hotkey Loaded Successfully");
         } catch (IOException e) {
-            // TODO: log
             displayError(getResourceString("error.global.hotkey"));
+            LOGGER.warning("Global Hotkey Not Loaded");
         }
 
         // create each components
@@ -224,7 +234,9 @@ public class TaskMeter extends Shell {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        } catch (Exception ex) {
+        } catch (Exception e) {
+            e.printStackTrace();
+            LOGGER.warning("Fail to load icon for TaskMeter");
         }
     }
     
@@ -292,7 +304,7 @@ public class TaskMeter extends Shell {
                 }
             });
         } else {
-            //System.out.println("not supported");
+            LOGGER.warning("Minimize to Tray is Not Supported");
         }
     }
 
@@ -342,6 +354,7 @@ public class TaskMeter extends Shell {
                 t.setReminder(null);
                 reminder.addReminder(date, t);
             } catch (IllegalArgumentException e) {
+                // reminder already passed, so will be ignored
             }
         }
         

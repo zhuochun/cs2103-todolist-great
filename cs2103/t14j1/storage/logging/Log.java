@@ -6,6 +6,12 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 import java.util.logging.SimpleFormatter;
 
+/**
+ * java logger API setup
+ * 
+ * @author Zhuochun
+ *
+ */
 public class Log {
     private static FileHandler txtFile;
     private static SimpleFormatter txtFormat;

@@ -15,17 +15,19 @@ public class MoveTask extends Event {
     Task task;
     String oldListName;
     String newListName;
+    boolean newListAdded;
 
     public void register(Object... objs) {
         if (objs[0] instanceof Integer) {
             index = (Integer) objs[0];
-            task = null;
+            task  = null;
         } else if (objs[0] instanceof Task) {
-            task = (Task) objs[0];
+            task  = (Task) objs[0];
             index = -1;
         }
 
-        newListName = (String) objs[1];
+        newListName  = (String) objs[1];
+        newListAdded = false;
     }
 
     public boolean execute() {
@@ -33,18 +35,23 @@ public class MoveTask extends Event {
         boolean success = false;
 
         try {
-            if (index != -1) {
+            if (task == null) {
                 task = eventHandler.getTask(index);
             }
             
             oldListName = task.getList();
 
             TaskLists lists = eventHandler.getLists();
+            
+            if (!lists.hasList(newListName)) {
+                newListAdded = true;
+            }
 
             lists.moveTask(newListName, task);
 
             eventHandler.setModified();
             eventHandler.refreshAll();
+            eventHandler.switchToTask(task.getList());
 
             success  = true;
             feedback = String.format(eventHandler.getMsg("msg.MOVE"), task.getName(), newListName);
@@ -76,6 +83,14 @@ public class MoveTask extends Event {
         boolean success = undo.execute();
         
         if (success) {
+            // if a new list is added, delete it
+            if (newListAdded) {
+                Event del = new DeleteList();
+                del.setEventLisnter(eventHandler);
+                del.register(newListName);
+                del.execute();
+            }
+        
             return undo;
         } else {
             return null;

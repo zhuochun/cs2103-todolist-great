@@ -6,6 +6,7 @@ import java.util.Date;
 import java.util.Map.Entry;
 import java.util.MissingResourceException;
 import java.util.ResourceBundle;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import org.eclipse.swt.SWT;
@@ -135,8 +136,6 @@ public class TaskMeter extends Shell {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        
-        User.save();
     }
 
     /**
@@ -205,9 +204,7 @@ public class TaskMeter extends Shell {
         // load global hotkey process
         try {
             globalHotKey = Runtime.getRuntime().exec("resource/TaskMeterHotKey.exe");
-            
             assert(globalHotKey != null);
-            LOGGER.finest("Global Hotkey Loaded Successfully");
         } catch (IOException e) {
             displayError(getResourceString("error.global.hotkey"));
             LOGGER.warning("Global Hotkey Not Loaded");
@@ -235,8 +232,7 @@ public class TaskMeter extends Shell {
                 e.printStackTrace();
             }
         } catch (Exception e) {
-            e.printStackTrace();
-            LOGGER.warning("Fail to load icon for TaskMeter");
+            LOGGER.log(Level.WARNING, "setLogoImage", e);
         }
     }
     
@@ -1440,6 +1436,7 @@ public class TaskMeter extends Shell {
             isModified = false;
         }
         
+        User.save();
         return true;
     }
 

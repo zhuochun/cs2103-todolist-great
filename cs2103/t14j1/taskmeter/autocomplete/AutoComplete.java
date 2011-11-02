@@ -27,7 +27,7 @@ public class AutoComplete {
     private int listIdx;
     
     private final String[] Commands = {
-            "add", "del", "move", "edit", "done", "rename", "remind"
+            "add", "del", "move", "edit", "done", "remind", "rename"
     };
     
     private final String[] Dictionary = {
@@ -205,7 +205,7 @@ public class AutoComplete {
     }
     
     private boolean completeCommand() {
-        if (lastInputLowerCase.matches("^([a-z]){0,3}$")) {
+        if (lastInputLowerCase.matches("^([a-z])*$")) {
             for (; commandIdx < Commands.length; commandIdx++) {
                 if (Commands[commandIdx].startsWith(lastInputLowerCase)) {
                     completedInput = formCompleteWord(Commands[commandIdx], lastInput);
@@ -312,7 +312,7 @@ public class AutoComplete {
             timeUnitIdx++;
 
             return true;
-        } else if (lastInputLowerCase.matches("^.*\\sfor\\s(\\d+\\s?[a-z]+\\s?)*\\d+\\s?[a-z]{1,3}$")) {
+        } else if (lastInputLowerCase.matches("^.*\\sfor\\s(\\d+\\s?[a-z]+\\s?)*\\d+\\s?[a-z]+$")) {
             String[] tokens = lastInputLowerCase.split("\\d+\\s?");
             
             String keyword = tokens[tokens.length-1];
@@ -334,7 +334,7 @@ public class AutoComplete {
     }
     
     private boolean completeDictionary() {
-        if (lastInputLowerCase.matches("^.*\\s[a-z]+$")) {
+        if (lastInputLowerCase.matches("^.*\\s[a-z]{2,}$")) {
             String[] tokens = lastInputLowerCase.split("\\s");
             
             String keyword = tokens[tokens.length-1];

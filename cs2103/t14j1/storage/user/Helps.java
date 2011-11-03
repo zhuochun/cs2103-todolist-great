@@ -12,7 +12,7 @@ public class Helps {
     
     // TODO: try to write as many as tips)
     private static final String[] tips = {
-        "Welcome to TaskMeter, press global hotkey \"Ctrl + Alt + T\" to open or minimize TaskMeter window.",
+        "Welcome to TaskMeter, press global hotkey F6 to open or minimize TaskMeter window.",
         "Alternatively, typing \"add + spacebar + Task\" onto TaskMeter smartbar also works fine.",
         "In addition to Task, Location, Date/Time, Duration, List and Priority of a task can be specified.",
         "TaskMeter awares it's important to know the location of your appointment; An easy way to do so is provided (next tip).",

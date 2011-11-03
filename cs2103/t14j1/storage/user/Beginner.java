@@ -8,6 +8,8 @@ import cs2103.t14j1.storage.When;
 
 /**
  * create default tasks to help the user familiar with taskMeter
+ * 
+ * @author Tong
  */
 public class Beginner {
 

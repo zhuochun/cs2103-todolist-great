@@ -884,7 +884,11 @@ public class TaskMeter extends Shell {
         taskList.addMouseListener(new MouseAdapter() {
             @Override
             public void mouseDoubleClick(MouseEvent e) { // switch lists
-                switchList(getSelectedListName());
+                String listname = getSelectedListName();
+                
+                if (listname != null) {
+                    switchList(listname);
+                }
             }
         });
         GridData gd_taskList = new GridData(SWT.FILL, SWT.FILL, true, true);
@@ -1394,7 +1398,14 @@ public class TaskMeter extends Shell {
     
     private String getSelectedListName() {
         TableItem[] items = taskList.getSelection();
-        return items[0].getText();
+        
+        try {
+            String listname = items[0].getText();
+            
+            return listname;
+        } catch (Exception e) {
+            return null;
+        }
     }
     
     private void openTaskMeter() {

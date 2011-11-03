@@ -213,9 +213,8 @@ public class GCalSyn {
 				gCalId = listNameToId.get(taskList.getName());
 				
 				if(gCalId == null){
-					// TODO: create a new List
-					// and then sync the tasks to server	
-					System.err.println("Oops: Cannot get the gCalID. Cal Name:" + taskList.getName());
+					// then ignore it
+					continue;
 				} else{	// if not null, set the id
 					taskList.setGCalId(gCalId);
 				}
@@ -247,15 +246,8 @@ public class GCalSyn {
 				// add in this server Event to the list -- for EventEntry looking up
 				this.eventIdToEntry.put(serverEvent.getId(), serverEvent);
 				
-				System.err.println("Recur");
 				System.err.println("Task Title: " + serverEvent.getTitle().getPlainText());
-				if(serverEvent.getRecurrence() != null){
-					System.err.println(serverEvent.getRecurrence().getValue());
-				} else{
-					System.err.println("Recur is null");
-				}
-				
-				
+			
 //				for(When time:serverEvent.getTimes()){
 //					System.err.println("Start Time:" + time.getStartTime());
 //					if(count++ == 3){
@@ -292,19 +284,15 @@ public class GCalSyn {
 				 * 		update everything on local	--> update all the events on local
 				 */	
 						// localEditTime after serverEditTime:
-				List<RecurrenceException> recurExceptions = serverEvent.getRecurrenceException();
-				
-				
 				for(Integer index:indexList){
 					Task localTask = localTasks.get(index);
 					Date localEditTime = localTask.getLastEditTime();
 					
-					// TODO: resolve the problem of recurring events here
-					
 					// and recurrence exception -- would unlink it from the set of 
 					// recurrence task
 					if(localEditTime.after(serverEditTime)){
-						
+						// do nothing
+						continue;
 //						List<RecurrenceException> exList = serverEvent.getRecurrenceException();
 //						serverEvent.addRecurrenceException(exception);
 //						for(RecurrenceException re:exList){
@@ -563,9 +551,10 @@ public class GCalSyn {
 				continue;
 			}
 			
-			// when it's not sync on server, create that task on server
+			// when it's not sync on server -- ignore
 			if(localTask.getGCalId() == null){
-				createTaskOnServer(taskList,localTask);
+				continue;
+//				createTaskOnServer(taskList,localTask);
 			}
 			ArrayList<Integer> mappedIndexList = res.get(localTask.getGCalId());
 			if(mappedIndexList == null){
@@ -840,10 +829,7 @@ public class GCalSyn {
 			
 			TaskList l = new TaskList("Task Meter");
 			taskLists.add(l);
-//			for(String listName:taskListNames){
-//				TaskList l = new TaskList(listName);
-//				taskLists.add(l);
-//			}
+
 			cal.syncTaskLists(taskLists, null, null);
 			
 			for(TaskList list:taskLists){
@@ -851,7 +837,8 @@ public class GCalSyn {
 				System.out.println("List ID: " + list.getGCalId());
 				
 				for(Task task:list.getTasks()){
-					System.out.println("Task: " + task.getDisplayTaskStr());
+					System.out.println("Task: " + task.getName());
+					System.out.println("Start TIme: " + task.getStartDate());
 				}
 				
 				// then try deleting one of the list

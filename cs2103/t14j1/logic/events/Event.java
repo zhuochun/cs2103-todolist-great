@@ -35,6 +35,9 @@ public abstract class Event {
             case ADD_REMINDER:
                 newEvent = new AddReminder();
                 break;
+            case REMOVE_REMINDER:
+                newEvent = new RemoveReminder();
+                break;
             case MARK_COMPLETE:
                 newEvent = new ToggleStatus();
                 break;

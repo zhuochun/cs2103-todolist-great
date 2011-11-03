@@ -175,6 +175,7 @@ public class TaskMeter extends Shell {
                 } else if ((e.stateMask & SWT.CTRL) == SWT.CTRL && e.keyCode == 'm') { // Toggle Views : Ctrl + m
                     if (quickAddView.isActive()) {
                         quickAddView.close();
+                        smartBar.setFocus();
                     } else {
                         openQuickAddView();
                     }

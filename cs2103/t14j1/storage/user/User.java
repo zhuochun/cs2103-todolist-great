@@ -50,8 +50,8 @@ public class User {
     // Date and Time format
     public static final String[] timeFormats = { "HH:mm", "h:mm a", "hh:mm a" };
     public static final String[] gapBetween  = { ", ", " " };
-    public static final String[] dateFormats = { "MMM dd", "EEE, MMM d", "MMMM dd", "YYYY, MMM d", "dd-MM-YYYY",
-            "YYYY-MM-dd", "dd/MM/YYYY" };
+    public static final String[] dateFormats = { "MMM dd", "EEE, MMM d", "MMMM dd", "yyyy, MMM d", "dd-MM-YYYY",
+            "yyyy-MM-dd", "dd/MM/yyyy" };
     
     // Exception Strings
     private static final String EXCEPTION_EMPTY_NAME = "User name cannot be null or empty";

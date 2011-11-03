@@ -11,7 +11,6 @@ public class Helps {
         "In addition to Task Name, Location, Date/Time, Duration, List and Priority of a task can be specified.",
         "TaskMeter awares it's important to know the location of your appointment; An easy way to do so is provided (next tip).",
         "Specifying Location using '@': \"add jogging @home\". Use () if there is space like @(my home)",
-        "",
         "Specifying Date/Time",
         "It happens from time to time that a Task doesn't have a specific time period. For instance, 2 hours is required for finishing an assignment at any time before next Monday.",
         "Specifying Duration",

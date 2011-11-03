@@ -40,6 +40,9 @@ public class AddReminder extends Event {
         } catch (IllegalArgumentException e) {
             feedback = e.getMessage();
             success  = false;
+        } catch (IndexOutOfBoundsException e) {
+            feedback = e.getMessage();
+            success  = false;
         }
 
         eventHandler.setStatus(feedback);

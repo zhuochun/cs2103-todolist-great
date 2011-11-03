@@ -155,33 +155,42 @@ public class ControlGUI {
     }
 
     public void addReminder(int index, Reminder parameter) {
-        Task task = eventHandler.getTask(index);
+        try {
+            Task task = eventHandler.getTask(index);
 
-        Date remindTime = null;
+            Date remindTime = null;
 
-        switch (parameter) {
-            case START:
-                remindTime = task.getStartDateTime();
-                break;
-            case END:
-                remindTime = task.getEndDateTime();
-                break;
-            case DEADLINE:
-                remindTime = task.getDeadline();
-                break;
-            case CUSTOM:
-                remindTime = getReminderTime();
-                break;
+            switch (parameter) {
+                case START:
+                    remindTime = task.getStartDateTime();
+                    break;
+                case END:
+                    remindTime = task.getEndDateTime();
+                    break;
+                case DEADLINE:
+                    remindTime = task.getDeadline();
+                    break;
+                case CUSTOM:
+                    remindTime = getReminderTime();
+                    break;
+            }
+
+            Event newEvent = Event.generateEvent(Commands.ADD_REMINDER);
+            registerEvent(newEvent, task, remindTime);
+        } catch (IndexOutOfBoundsException e) {
+            eventHandler.setStatus(e.getMessage());
         }
-
-        Event newEvent = Event.generateEvent(Commands.ADD_REMINDER);
-        registerEvent(newEvent, task, remindTime);
     }
 
     public void removeReminder(int index) {
-        Task task = eventHandler.getTask(index);
-        Event newEvent = Event.generateEvent(Commands.REMOVE_REMINDER);
-        registerEvent(newEvent, task);
+        try {
+            Task task = eventHandler.getTask(index);
+            
+            Event newEvent = Event.generateEvent(Commands.REMOVE_REMINDER);
+            registerEvent(newEvent, task);
+        } catch (IndexOutOfBoundsException e) {
+            eventHandler.setStatus(e.getMessage());
+        }
     }
 
     public void toggleStatus(int index, Boolean newStatus) {

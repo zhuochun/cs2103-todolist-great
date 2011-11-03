@@ -27,7 +27,7 @@ public class AutoComplete {
     private int listIdx;
     
     private final String[] Commands = {
-            "add", "del", "move", "edit", "done", "remind", "rename"
+            "add", "delete", "move", "edit", "done", "remind", "rename"
     };
     
     private final String[] Dictionary = {

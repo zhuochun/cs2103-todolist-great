@@ -20,7 +20,7 @@ public class Beginner {
         Priority priority = Priority.IMPORTANT;
         
         When when = new When();
-        when.setDeadline(DateFormat.getNow());
+        //when.setDeadline(DateFormat.getNow());
         
         Boolean status = Task.INCOMPLETE;
         

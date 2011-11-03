@@ -50,6 +50,11 @@ public class Beginner {
         lists.addTask(list, newTask);
         
         // add how to use smartBar
+        name  = "Press F1 for more tips";
+        list  = TaskLists.INBOX;
+        place = "";
         
+        newTask = new Task(name, place, list, priority, when, status);
+        lists.addTask(list, newTask);
     }
 }

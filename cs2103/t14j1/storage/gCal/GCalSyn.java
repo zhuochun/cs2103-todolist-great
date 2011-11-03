@@ -8,7 +8,6 @@ import java.net.URLDecoder;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
-import java.util.GregorianCalendar;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -20,11 +19,11 @@ import java.util.TreeMap;
 import cs2103.t14j1.storage.Priority;
 import cs2103.t14j1.storage.TaskList;
 import cs2103.t14j1.storage.Task;
-import cs2103.t14j1.storage.TaskLists;
 
 import com.google.gdata.client.calendar.CalendarQuery;
 import com.google.gdata.client.calendar.CalendarService;
 import com.google.gdata.data.DateTime;
+import com.google.gdata.data.Link;
 import com.google.gdata.data.PlainTextConstruct;
 import com.google.gdata.data.calendar.CalendarEntry;
 import com.google.gdata.data.calendar.CalendarEventEntry;
@@ -37,16 +36,24 @@ import com.google.gdata.data.extensions.EntryLink;
 import com.google.gdata.data.extensions.Recurrence;
 import com.google.gdata.data.extensions.When;
 import com.google.gdata.util.AuthenticationException;
+import com.google.gdata.util.ResourceNotFoundException;
 import com.google.gdata.util.ServiceException;
 import com.google.gdata.data.extensions.RecurrenceException;
 /**
- * 1. getTaskList method would retrieve all the tasks owned by this user;
- * 	  the tasks are added to the corresponding list
+ * Sync procedure:
+ * 1. call the constructor GCalSyn(email,password)
+ * 2. [optional] get the list user has
+ * 3. sync the list by giving the list want to sync
  * 
  * When first call this method, call getList to see all the list user has, and 
  * 	decide which list the user want to sync with 
  * 
  * Then pass the list(returned by getList) to getTaskFromList, and sync
+ * 
+ * 
+ * I didn't figure how to sync with the recurring task... therefore we cannot
+ *  Sync with the recurring task -- we can only support downloading the tasks
+ *  from Google Calendar for now...
  * 
  * 2. When updating a list:
  * 		a) retrieve all lists, build a Hash Table of: listId => listEntry
@@ -82,8 +89,9 @@ public class GCalSyn {
 	private String passwd;
 	CalendarService myService;
 
-	HashMap<String,CalendarEntry> listIdToEntry;
-	TaskList gCalList[];
+	private HashMap<String,String> listNameToId;
+	private HashMap<String,CalendarEventEntry> eventIdToEntry;
+	private List<TaskList> gCalList;
 	
 	private URL feedUrl;
 	private CalendarFeed list;
@@ -152,37 +160,231 @@ public class GCalSyn {
 		// then get the list feed
 		this.list = myService.getFeed(feedUrl, CalendarFeed.class);
 		
-		// build the calListEntry
-		this.listIdToEntry = new HashMap<String,CalendarEntry>();
-		this.gCalList = new TaskList[list.getEntries().size()];
+		// initialize variable
+		this.listNameToId = new HashMap<String,String>();
+		this.eventIdToEntry = new HashMap<String, CalendarEventEntry>();
+		this.gCalList = new ArrayList<TaskList>();
 		int index = 0;
+		
 		for(CalendarEntry calList:this.list.getEntries()){
-			this.listIdToEntry.put(calList.getId(), calList);
+			this.listNameToId.put(calList.getTitle().getPlainText(), calList.getId());
 			
 			// create a new list on that
 			TaskList taskList = new TaskList(calList.getTitle().getPlainText());
-			taskList.setGCalId(getPurCalendarIdFromUrl(calList.getId()));
+			taskList.setGCalId(calList.getId());
 			
-			this.gCalList[index++] = taskList;
+			this.gCalList.add(taskList);
+		}
+	}
+	
+
+	/** Assumption: there're no list having the same name; if they have the same
+	 * 	 name, take the later one
+	 * @return
+	 *  A set of all the list names
+	 */
+	public Set<String> getCalLists(){
+		return this.listNameToId.keySet();
+	}
+	
+	public boolean syncTaskLists(List<TaskList> taskListList,Date queryStartTime, Date queryEndTime) throws IOException, ServiceException{
+		
+		// check the query range and do corresponding update first
+		// if range undefined, get the default date range
+		if (queryStartTime == null) {
+			Calendar dateBeforeThreeMonth = Calendar.getInstance();
+			dateBeforeThreeMonth.add(Calendar.MONTH, -3);
+
+			queryStartTime = dateBeforeThreeMonth.getTime();
+		}
+		if (queryEndTime == null) {
+			Calendar dateInThreeMonth = Calendar.getInstance();
+			dateInThreeMonth.add(Calendar.MONTH, 3);
+			queryEndTime = dateInThreeMonth.getTime();
 		}
 		
-	}
+		
+		// build the list to sync -- list by list
+			// go through the local list
+		for(TaskList taskList:taskListList){
+			String gCalId = taskList.getGCalId();
+			if(gCalId == null){
+				// check if the list have same name -- on yes, map to it directly
+				gCalId = listNameToId.get(taskList.getName());
+				
+				if(gCalId == null){
+					// TODO: create a new List
+					// and then sync the tasks to server	
+					System.err.println("Oops: Cannot get the gCalID. Cal Name:" + taskList.getName());
+				} else{	// if not null, set the id
+					taskList.setGCalId(gCalId);
+				}
+			}
+			
+			// Query for a list of tasks to be updated
+			CalendarQuery eventQuery = new CalendarQuery(new URL(String.format(
+					privateUrlStrFormat, getPurCalendarIdFromUrl(gCalId))));
+			eventQuery.setMinimumStartTime(new DateTime(queryStartTime));
+			eventQuery.setMaximumStartTime(new DateTime(queryEndTime));
+			
+			
+			// Query on the event range
+			CalendarEventFeed eventFeed = myService.query(eventQuery,
+					CalendarEventFeed.class);
+			
+			// two task lists to be sync
+			List<Task> localTasks = taskList.getTasks();
+			List<CalendarEventEntry> serverEvents = eventFeed.getEntries();
+			
+			// create a hash map from the task id to local task //
+			// build the list of event id->indexList
+			// (use an index list here because there're recurring task )
+			HashMap<String, ArrayList<Integer>> taskIdToLocalIndex = 
+					syncTaskCreateHashMapServerIdToLocalAndCreateTaskOnServerWhenLocalNotSync(localTasks,taskList);
+			
+			// create a corresponding server list to Sync with local list
+			for(CalendarEventEntry serverEvent:serverEvents){
+				// add in this server Event to the list -- for EventEntry looking up
+				this.eventIdToEntry.put(serverEvent.getId(), serverEvent);
+				
+				System.err.println("Recur");
+				System.err.println("Task Title: " + serverEvent.getTitle().getPlainText());
+				if(serverEvent.getRecurrence() != null){
+					System.err.println(serverEvent.getRecurrence().getValue());
+				} else{
+					System.err.println("Recur is null");
+				}
+				
+				
+//				for(When time:serverEvent.getTimes()){
+//					System.err.println("Start Time:" + time.getStartTime());
+//					if(count++ == 3){
+//						if(whenL.remove(time)){
+//							System.out.println("Remove 3rd Succeed!");
+//						} else{
+//							System.out.println("Remove 3rd Failed!");
+//						}
+//						continue;
+//					}
+//				}
+				
+				
+				// get the corresponding list of index on local
+				ArrayList<Integer> indexList = taskIdToLocalIndex.get(getPurCalendarIdFromUrl(serverEvent.getId()));
+				
+				// index doesn't exist, means doesn't exist on local before
+					// -- then create on local correspondingly
+				if(indexList == null){
+					System.err.println("Creating on local. task: " + serverEvent.getTitle().getPlainText());
+					createTaskOnLocal(taskList,serverEvent); 
+					continue;	// then done with this server event
+				}
+				
+				// the server edit time to compare with local one
+				Date serverEditTime = new Date(serverEvent.getEdited().getValue());
 
-	/**
-	 * @return An Array of all the task list this user has
-	 * @throws UnsupportedEncodingException
-	 *             When program fail -- the logic would tell the user that very
-	 *             sorry we cannot process your darling requirement
-	 */
-	public TaskList[] getCalLists(){
-		return this.gCalList;
+				// all the events in this for loop have the same eventID
+				// 		-- it's the google calendar's recurring event
+				/* for each case:
+				 *  if localEditTime after serverEditTime:
+				 *  	update on server	--> create an exception (a new task, and remove that recur)
+				 *  if localEditTime before serverEditTime:
+				 * 		update everything on local	--> update all the events on local
+				 */	
+						// localEditTime after serverEditTime:
+				List<RecurrenceException> recurExceptions = serverEvent.getRecurrenceException();
+				
+				
+				for(Integer index:indexList){
+					Task localTask = localTasks.get(index);
+					Date localEditTime = localTask.getLastEditTime();
+					
+					// TODO: resolve the problem of recurring events here
+					
+					// and recurrence exception -- would unlink it from the set of 
+					// recurrence task
+					if(localEditTime.after(serverEditTime)){
+						
+//						List<RecurrenceException> exList = serverEvent.getRecurrenceException();
+//						serverEvent.addRecurrenceException(exception);
+//						for(RecurrenceException re:exList){
+//							System.out.println("Exc:" + re);
+//						}
+						
+//						EntryLink entryLink = new EntryLink();
+//						entryLink.setEntry(new When());
+//						recurException.setEntryLink(entryLink);
+						
+//						serverEvent.addRecurrenceException(null);
+//						updateTaskOnServer(localTask,serverEvent);
+//						*/
+					}
+				}
+				
+						// localEditTime before serverEditTime:
+				Task firstLocalTask = localTasks.get(indexList.get(0));
+				if(firstLocalTask.getLastEditTime().before(serverEditTime)){
+					// get a list of server time
+					List<When> serverEventTimeList = serverEvent.getTimes();
+					
+					// create a hash table of all the time, to take note if checked or not
+					TreeMap<cs2103.t14j1.storage.When,BooleanWrapper> serverTimeChecked = 
+							new TreeMap<cs2103.t14j1.storage.When,BooleanWrapper>();
+					
+					// put it to the tree map, based on the start time and end time
+					// Note: can only use tree map here because the hash code of the
+					// 	cs2103.t14j1.storage.When class is undecided -- meaning, if
+					// 	use hash table we can only check if it's the same object 
+					for(When serverEventTime: serverEventTimeList){
+						cs2103.t14j1.storage.When serverLocalWhenToBeMapped = new cs2103.t14j1.storage.When();
+						serverLocalWhenToBeMapped.setStartDateTime(new Date(serverEventTime.getStartTime().getValue()));
+						serverLocalWhenToBeMapped.setEndDateTime(new Date(serverEventTime.getEndTime().getValue()));
+						serverTimeChecked.put(serverLocalWhenToBeMapped,new BooleanWrapper(false));
+					}
+					
+					// check if the local task exist on server
+					for(int i=0;i<indexList.size();i++){
+						Task localTask = localTasks.get(indexList.get(i));
+						// check if that task exist on server task list
+						BooleanWrapper checked = serverTimeChecked.get(localTask.getWhen());
+						
+						// when the task doesn't exist on server 
+						//	-- deleted on server already, so delete on local accordingly
+						if(checked == null){
+							taskList.removeTask(localTask);
+						} else{	// task exist; but possibly that the title has changed
+							// because it's object, setting this reference to be true
+							// can affect the value in the indexList
+							checked.set(true);
+							
+							// update local task
+							updateLocalTaskWithoutChangingTime(localTask,serverEvent);
+						}
+					}
+					
+					// in the end, check through all the tasks has been checked
+					// the unchecked task are those not exist on local, so add 
+					// them in
+					Set<Entry<cs2103.t14j1.storage.When,BooleanWrapper>> pairs = serverTimeChecked.entrySet();
+					for(Entry<cs2103.t14j1.storage.When,BooleanWrapper> pair:pairs){
+						// the unchecked case, create task accordingly
+						if(pair.getValue().get() == false){
+							cs2103.t14j1.storage.When startEndTime = pair.getKey();
+							createTaskOnLocal(taskList, serverEvent, startEndTime);
+						}
+					}
+				}
+			}
+		}
+		
+		return true;
 	}
 	
 	/**
 	 * TODO: figure out how to get the place from CalendarEventEntry
 	 * Note: this would only sync with the tasks has a start time; if there's no
 	 * 		start date/time, not sync
-	 * TODO: for the no start date/time ones, would sync with Task Api in the 
+	 * TODO: for the no start date/time ones, would sync with Task Api in the
 	 * 		future
 	 * 
 	 * @param gCalListName
@@ -196,7 +398,7 @@ public class GCalSyn {
 	 * @throws ServiceException
 	 * @throws IOException
 	 */
-	public boolean syncTasksWithGCal(TaskList taskList, Date queryStartTime,
+	private boolean syncTasksWithGCal(TaskList taskList, Date queryStartTime,
 			Date queryEndTime) throws IOException, ServiceException {
 		String gCalId = taskList.getGCalId();
 		if(gCalId == null){
@@ -206,25 +408,7 @@ public class GCalSyn {
 		// Query for a list of task to be updated
 		CalendarQuery eventQuery = new CalendarQuery(new URL(String.format(
 				privateUrlStrFormat, getPurCalendarIdFromUrl(gCalId))));
-			
-			// if range undefined, get the default date range
-		if (queryStartTime != null) {
-			eventQuery.setMinimumStartTime(new DateTime(queryStartTime));
-		} else {
-			GregorianCalendar dateInThreeMonth = new GregorianCalendar();
-			dateInThreeMonth.add(GregorianCalendar.MONTH, -3);
-
-			eventQuery.setMinimumStartTime(new DateTime(dateInThreeMonth
-					.getTime()));
-		}
-		if (queryEndTime != null) {
-			eventQuery.setMaximumStartTime(new DateTime(queryEndTime));
-		} else {
-			GregorianCalendar dateInThreeMonth = new GregorianCalendar();
-			dateInThreeMonth.add(GregorianCalendar.MONTH, 3);
-			eventQuery.setMaximumStartTime(new DateTime(dateInThreeMonth
-					.getTime()));
-		}
+		
 			// query on the event range
 		CalendarEventFeed eventFeed = myService.query(eventQuery,
 				CalendarEventFeed.class);
@@ -233,38 +417,18 @@ public class GCalSyn {
 		List<Task> localTasks = taskList.getTasks();
 		List<CalendarEventEntry> serverEvents = eventFeed.getEntries();
 		
-		
-		
 			// create a hash map from the task id to local task //
 		// build the list of event id->indexList
 		// (use an index list here because there're recurring task )
-		HashMap<String, ArrayList<Integer>> taskIdToLocalIndex = new HashMap<String, ArrayList<Integer>>();
-		for (int i=0;i<localTasks.size();i++) {
-			
-			Task localTask = localTasks.get(i);
-			
-			// if the local task don't have a start date, do nothing about it yet
-			// TODO: would implement the google task api here in the future
-			if(localTask.getStartDateTime() == null){
-				continue;
-			}
-			
-			// when it's not sync on server, create that task on server
-			if(localTask.getGCalId() == null){
-				createTaskOnServer(taskList,localTask);
-			}
-			ArrayList<Integer> mappedIndexList = taskIdToLocalIndex.get(localTask.getGCalId());
-			if(mappedIndexList == null){
-				ArrayList<Integer> indexList = new ArrayList<Integer>();
-				indexList.add(i);
-				taskIdToLocalIndex.put(localTask.getGCalId(), indexList);
-			} else{
-				mappedIndexList.add(new Integer(i));
-			}
-		}
+		HashMap<String, ArrayList<Integer>> taskIdToLocalIndex = 
+				syncTaskCreateHashMapServerIdToLocalAndCreateTaskOnServerWhenLocalNotSync(localTasks,taskList);
 		
 		// then loop through the server list to sync
 		for(CalendarEventEntry serverEvent:serverEvents){
+			// map the server event entry also
+			this.eventIdToEntry.put(serverEvent.getId(), serverEvent);
+			
+			
 			// get the corresponding list of index on local
 			ArrayList<Integer> indexList = taskIdToLocalIndex.get(getPurCalendarIdFromUrl(serverEvent.getId()));
 			
@@ -272,6 +436,7 @@ public class GCalSyn {
 				// -- then create on local correspondingly
 			if(indexList == null){
 				createTaskOnLocal(taskList,serverEvent);
+				continue;	// then done with this server event
 			}
 			
 			// the server edit time to compare with local one
@@ -342,7 +507,7 @@ public class GCalSyn {
 						taskList.removeTask(localTask);
 					} else{	// task exist; but possibly that the title has changed
 						// because it's object, setting this reference to be true
-						// can affect the value in the indexList (hopefully)
+						// can affect the value in the indexList
 						checked.set(true);
 						
 						// update local task
@@ -374,6 +539,8 @@ public class GCalSyn {
  * 				-- then delete it on local
  * 			b) this is a task moved from another list, but not yet updated
  * 				-- then check the sync status
+ * 					-- synced: delete on local
+ * 					-- otherwise: update on server
  * 
  * 		-- then compare the lastUpdateTime: 
  * 			-- if the server version is newer, then update the local one; 
@@ -381,10 +548,38 @@ public class GCalSyn {
  * 			-- else do nothing
  * 
  */
-			
-
 	}
 	
+	private HashMap<String, ArrayList<Integer>> syncTaskCreateHashMapServerIdToLocalAndCreateTaskOnServerWhenLocalNotSync(
+			List<Task> localTasks, TaskList taskList) throws IOException, ServiceException {
+		HashMap<String, ArrayList<Integer>> res = new HashMap<String, ArrayList<Integer>>();
+		for (int i=0;i<localTasks.size();i++) {
+			
+			Task localTask = localTasks.get(i);
+			
+			// if the local task don't have a start date, do nothing about it yet
+			// TODO: would implement the google task api here in the future
+			if(localTask.getStartDateTime() == null){
+				continue;
+			}
+			
+			// when it's not sync on server, create that task on server
+			if(localTask.getGCalId() == null){
+				createTaskOnServer(taskList,localTask);
+			}
+			ArrayList<Integer> mappedIndexList = res.get(localTask.getGCalId());
+			if(mappedIndexList == null){
+				ArrayList<Integer> indexList = new ArrayList<Integer>();
+				indexList.add(i);
+				res.put(localTask.getGCalId(), indexList);
+			} else{
+				mappedIndexList.add(new Integer(i));
+			}
+		}
+		return res;
+	}
+
+
 	private void updateLocalTaskWithoutChangingTime(Task localTask,
 			CalendarEventEntry serverEvent) {
 		localTask.setName(serverEvent.getTitle().getPlainText());
@@ -394,15 +589,18 @@ public class GCalSyn {
 
 	private void updateTaskOnLocal(Task localTask,
 			CalendarEventEntry serverEvent) {
+		// TODO: not done yet; need to set the edit time
 		localTask.setName(serverEvent.getTitle().getPlainText());
+		
 	}
 
 
 	private void updateTaskOnServer(Task localTask,
-			CalendarEventEntry serverEvent) {
-		// TODO
+			CalendarEventEntry serverEvent) throws IOException, ServiceException {
+		serverEvent.setTitle(new PlainTextConstruct(localTask.getName()));
+		serverEvent.setEdited(new DateTime(localTask.getLastEditTime()));
+		serverEvent.update();
 	}
-
 
 	/** Based on the local event and local task list given, create a corresponding task on server
 	 * Assumption: taskList is a list already exist on server -- i.e., it has the gCalId
@@ -421,6 +619,9 @@ public class GCalSyn {
 				
 		// test creating a new task
 		myEntry.setTitle(new PlainTextConstruct(localTask.getName()));
+		Recurrence r = new Recurrence();
+		
+		myEntry.setRecurrence(r);
 		// get default time zone
 		DateTime lastEditTime = new DateTime(localTask.getLastEditTime());
 		
@@ -469,9 +670,7 @@ public class GCalSyn {
 			task.setLastEditTime(lastEditTime);
 			task.setGCalId(serverEvent.getId());
 			
-			//TODO: finish the cahnges
-			//serverEvent.getR
-			// taskList.addTask(task);
+			taskList.addTask(task);
 		}
 		if(times.size() == 0 ){	// when it doesn't have time -- which seems impossible
 			cs2103.t14j1.storage.Task task = new cs2103.t14j1.storage.Task(
@@ -558,7 +757,8 @@ public class GCalSyn {
 	}
 	
 	
-	public boolean createNewEvent(TaskList list, Task task) throws IOException, ServiceException{
+	/*
+	private boolean createNewEvent(TaskList list, Task task) throws IOException, ServiceException{
 		if(task.getGCalId()!=null){
 			return false;	// task already created
 		}
@@ -567,10 +767,46 @@ public class GCalSyn {
 			createNewCalendar(list);
 		}
 		
+		// TOD Create the task into the task list
 		
-		
-		// Create the task into the task list
-		
+		return true;
+	}*/
+	
+	/** 
+	 * For the given list of tasks, delete them on server
+	 * @param taskList
+	 * @return
+	 * 	true on success, false on failure
+	 * @throws ServiceException 
+	 * @throws IOException 
+	 */
+	public boolean deleteLocalTaskList(TaskList taskList) throws IOException, ServiceException{
+		for(Task task:taskList.getTasks()){
+			String taskId = task.getGCalId();
+			if(taskId == null)	continue;	// no ID, no need to delete
+			
+			// get the taskEntry on server
+			CalendarEventEntry calEntry = eventIdToEntry.get(taskId);
+
+			// when cannot find, means it's already deleted on server
+			if(calEntry == null){
+				System.err.println("task doesn't exist on server");
+				System.err.println("ID:" + taskId);
+				continue;
+			}
+			
+			
+			try{
+				calEntry.delete();
+			} catch(ResourceNotFoundException e){
+				System.out.println("Error: ");
+				System.out.println("To delete: " + calEntry.getTitle().getPlainText());
+				System.out.println("Stat Time: " + calEntry.getTimes().get(0).getStartTime() );
+			}
+			
+			// after deletion, remove the record
+			eventIdToEntry.remove(taskId);
+		}
 		return true;
 	}
 	
@@ -589,40 +825,38 @@ public class GCalSyn {
 		try {
 			System.out.println("Start execution.");
 			
-			// call the constructor to get authentication TODO: remove my password before commit
 			GCalSyn cal = new GCalSyn(username,password);
 			
 			System.out.println("Authentation succeeded.");
 			
 			
 			// get the calendar list
-			TaskList tasklists[] = cal.getCalLists();
-			System.out.println("List of calendar: ");
-			for(int i=0;i<tasklists.length;i++){
-				System.out.println("List Name: " + tasklists[i].getName());
-				System.out.println("	List Id: " + tasklists[i].getGCalId());
+			Set<String> taskListNames = cal.getCalLists();
+			
+			// test sync all the task
+			
+			// create the required task list first
+			ArrayList<TaskList> taskLists = new ArrayList<TaskList>();
+			
+			TaskList l = new TaskList("Task Meter");
+			taskLists.add(l);
+//			for(String listName:taskListNames){
+//				TaskList l = new TaskList(listName);
+//				taskLists.add(l);
+//			}
+			cal.syncTaskLists(taskLists, null, null);
+			
+			for(TaskList list:taskLists){
+				System.out.println("List Name:" + list.getName());
+				System.out.println("List ID: " + list.getGCalId());
+				
+				for(Task task:list.getTasks()){
+					System.out.println("Task: " + task.getDisplayTaskStr());
+				}
+				
+				// then try deleting one of the list
+//				cal.deleteLocalTaskList(list);
 			}
-			
-			// test creating task list
-			/*
-			System.out.println("Creating task list");
-			TaskList myList = new TaskList("Task Meter");
-			String colour = "#2952A3";
-			cal.createNewCalendar(myList,colour);
-			System.out.println("Cal ID: " + myList.getGCalId());
-			*/
-			
-			// test creating task
-			TaskList myList = new TaskList("MetterTest");
-			myList.setGCalId("6ks2ghk3fkbudqr71bjlcd9fs8@group.calendar.google.com");
-			
-			Task testTask = new Task();
-			testTask.setName("Demo lalala ~~~");
-			Date now = new Date();
-			testTask.setStartDateTime(now);
-			testTask.setEndDateTime(now);
-			cal.createTaskOnServer(myList,testTask);
-			
 		} catch (AuthenticationException e) {
 			e.printStackTrace();
 		} catch (MalformedURLException e) {

@@ -77,8 +77,10 @@ public class ControlGUI {
      * GUI call this method to clear last command to prevent any crashes in controlGUI
      */
     public void resetCommand() {
-        userCommand = null;
+    	
+    	userCommand = null;
         searchEngine.resetProperties();
+        
     }
 
     /**
@@ -256,6 +258,8 @@ public class ControlGUI {
             convertLongTimeToDate(startDateTime, startTime);
             convertLongTimeToDate(endDateTime, endTime);
             convertLongTimeToDate(deadline, deadlineTime);
+            
+            System.out.println("Adding list is " + list);
 
             newTask = new Task(name, place, list, priority, startDateTime, endDateTime, deadline, duration, status);
         } catch (IllegalArgumentException e) {
@@ -401,6 +405,8 @@ public class ControlGUI {
      */
     public TaskList getSearchResult() {
         assert (userCommand == Commands.SEARCH);
+        
+        System.out.println("ParseCommand returns the correct search command");
 
         setSearchProperties();
 
@@ -430,6 +436,14 @@ public class ControlGUI {
         // searchEngine.setProperty(Search.STATUS, status);
         searchEngine.setProperty(Search.AFTERDATETIME, afterDateTime);
         searchEngine.setProperty(Search.BEFOREDATETIME, beforeDateTime);
+        
+        System.out.println(name);
+        System.out.println("list is " + list);
+        System.out.println(priority);
+        System.out.println(place);
+        System.out.println(duration);
+        System.out.println(afterDateTime);
+        System.out.println(beforeDateTime);
     }
 
     /**

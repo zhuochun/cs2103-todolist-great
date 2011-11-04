@@ -208,17 +208,9 @@ public class ParseCommand {
 	 * @param command - the command passed from the smart bar GUI
 	 */
 	public ParseCommand(String command){
-		// set the time zone to
-//		TimeZone.setDefault(TimeZone.getTimeZone("GMT-0"));
 		
-		// initiation
-		this.commandStr = command;
-		this.startTime = new Time(null);
-		this.endTime = new Time(null);
-		this.duration = new Time(null);
-		this.searchBeforeTime = new Time(null);
-		this.searchAfterTime = new Time(null);
-		this.deadlineTime = new Time(null);
+		init(command);
+		
 		
 		/**
 		 * An overall matcher for date&time
@@ -274,6 +266,7 @@ public class ParseCommand {
 		// then the command matching
 		Pattern regDeleteListCmdPattern = Pattern.compile(regDeleteListCmd,Pattern.CASE_INSENSITIVE);
 		Matcher regDeleteListCmdMatcher = regDeleteListCmdPattern.matcher(commandStr);
+		
 		
 		// start parsing
 		
@@ -597,6 +590,18 @@ public class ParseCommand {
 		this.trimedStr = command.trim();
 	}
 	
+	private void init(String command) {
+		this.commandStr = command;
+		this.startTime = new Time(null);
+		this.endTime = new Time(null);
+		this.duration = new Time(null);
+		this.searchBeforeTime = new Time(null);
+		this.searchAfterTime = new Time(null);
+		this.deadlineTime = new Time(null);
+		
+		
+	}
+
 	private void setSearchParamBasedOnFields(int param, boolean next, int fieldName) {
 		// case of month
 		int current = this.searchAfterDate.get(fieldName);
@@ -1164,7 +1169,7 @@ public class ParseCommand {
 	
 	public static void main(String[] args){
 		// test match here
-		String testStr = "add tennes Monday";
+		String testStr = "add Jogging in December 12th's Morning";
 			/* test cases to be added for Unit Test:
 			 * Reminder : 
 			 * 	"remind 3 4pm tomorrow";

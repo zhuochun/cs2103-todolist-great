@@ -73,16 +73,14 @@ public class SearchEngine {
     	ArrayList<TaskList> searchLists = new ArrayList<TaskList>();
     	
     	if(!lists.hasList(list)) {
-        }   	
-    	else if(list != TaskLists.INBOX)
-        	searchLists.add(lists.getList(list));
-        else {
-        	Iterator<Entry<String, TaskList>> iterator = lists.iterator();
+    		Iterator<Entry<String, TaskList>> iterator = lists.iterator();
         	while (iterator.hasNext()) {
         		TaskList taskList = iterator.next().getValue();
         		searchLists.add(taskList);
         	}
-        }
+        }   	
+    	else
+        	searchLists.add(lists.getList(list));
     	
     	return searchLists;
 	}

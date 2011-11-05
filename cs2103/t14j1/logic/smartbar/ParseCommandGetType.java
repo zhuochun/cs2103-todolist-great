@@ -14,96 +14,7 @@ import cs2103.t14j1.logic.Commands;
  * Type of command fully handled:
  * 		UNDO,		REDO,		EXIT
  */
-public abstract class ParseCommandGetType {
-	public static final boolean IGNORE_CASE = true;
-	public static final boolean CARE_CASE = false;
-	
-		/* define the regex */
-	protected static final String regexWordSpacer = "([^\\d\\w#!]|(^)|($))";
-	protected static final String regexSpacer = "((\\s)|(^)|($))";
-	protected static final String regexNonSpaceWordSpacer = "([^\\d\\w\\ ]|(^)|($))";
-	private static final String regexDateSpacer = "[,-/. ]";
-	
-		// time related
-	// regular expression for matching the time
-	private static final String regTimePointAmPm = // match the 5am/pm, 5 am/pm, or 5:00 am/pm. 
-			"(1[012]|\\d)(:[0-5]\\d){0,2}((\\ )?[ap]m)";
-	private static final String regTimePoint24H = 
-			"([01]?\\d|2[0-3])(:[0-5]\\d){1,2}";
-	private static final String regTimeFormat = // can be either 24 hour, or am/pm
-			"((at" + regexWordSpacer + ")?" + "(" + regTimePointAmPm + "|" + regTimePoint24H +")" +  ")";
-	
-		// regular expression for matching the date
-	private static final String regMonthText =
-			"(January|Jan|February|Feb|March|Mar|April|Apr|May|June|Jun|July|Jul|" + 
-			"August|Aug|September|Sept|October|Oct|November|Nov|December|Dec)";
-	private static final String regWeekText =
-			"(Monday|Mon|Tuesday|Tue|Wednesday|Wed|Thursday|Thur|Friday|Fri|Saturday|Sat|Sunday|Sun)";
-	private static final String regDayOrder = "((this)?|next)";
-
-			// date format
-	private static final String regDateFormat_dd_$mm$_$yy$yy$$ = 
-			"(([12][0-9]|3[01]|(0)?[1-9])" + regexDateSpacer + "(0[1-9]|1[012])(" + 
-			regexDateSpacer + "(19|20)?\\d\\d)?)";
-	private static final String regDateFormat_dd_$M$_$yy$yy$$ = // When month is text, year should be a full string if exist
-			"(([12][0-9]|3[01]|(0)?[1-9])(st|nd|rd|th)?" + regexDateSpacer + "(\\ )?" +
-			regMonthText + "(" + regexDateSpacer + "(19|20)\\d\\d)?)";
-	private static final String regDateFormat_dd_$mm$M$_$yy$yy$$ = 
-			"((on\\ )?(" + regDateFormat_dd_$M$_$yy$yy$$+ "|" + regDateFormat_dd_$mm$_$yy$yy$$ + "))";
-	
-	private static final String regDateFormat_order_weekD = 
-			"((on\\ )?(" + regDayOrder + regexWordSpacer + ")?" + regWeekText + ")";
-	
-	private static final String regDateFormat_today_tomorrow = 
-			"(today|tomorrow|tmr)";
-	
-		// the date format for mm/dd/yy; leave it here for the possible use in the future
-	private static final String regDateFormat_mm_dd_yy =
-			"(0[1-9]|1[012])[- /.](0[1-9]|[12][0-9]|3[01])([- /.](19|20)\\d\\d)?";
-	private static final String regTimeUnit = 
-			"((hour(s)?|h)|(minute(s)?|min)|(second(s)?|sec)|(day(s)?))";
-	private static final String regTimeUnitForSearch = 
-			"((this|next)\\ (" + regTimeUnit + "|week|month|year|" + regWeekText + "|" + regMonthText + "))";
-	
-	private static final String regDateOverallFormat =
-			"(" + regDateFormat_dd_$mm$M$_$yy$yy$$ + "|" + regDateFormat_order_weekD + 
-			"|" + regDateFormat_today_tomorrow + ")";
-	
-	private static final String regDateTimeOverallFormat = "(" +
-//				regTimeFormat +
-//			regDateOverallFormat + regWordSpacer + regTimeFormat + 
-			"(" + regDateOverallFormat+ "(" + regexWordSpacer + regTimeFormat + ")?)|" + 	// date (time)?
-			"(" + regTimeFormat + "("+ regexWordSpacer + regDateOverallFormat + ")?)" +  // time (date)?
-			")";
-	
-	
-	
-	private static final String regDurationFormat = "(for(\\ [\\d]+\\ " + regTimeUnit + ")+)";
-	private static final String regReminderAfterTimeFormat = "(in(\\ [\\d]+\\ " + regTimeUnit + ")+)";
-	private static final String regPlaceFormat = 
-		"((@[\\w]+)|(@\\([^\\)]+\\)))";	// format: @ + word; or: @ + (words)
-	private static final String regPriorityFormat = "(![123])";
-	protected static final String regexList = "((#[\\w]+)|(#\\([^\\)]+\\)))";
-	
-	protected static final String regexSearchCommand = "^/(" + regexSpacer +")*";
-	protected static final String regexAddCommand = "^add(" + regexSpacer +")*";
-	protected static final String regexSwitchListCommand = "^" + regexList + "(" + regexSpacer +")*$";
-	protected static final String regexDeleteTaskCommand = "^(delete|del)\\ [\\d]+$";	// TODO: would need to change later
-	protected static final String regexDeleteListCommand = "^(delete|del)\\ "+ regexList + "$";
-	protected static final String regexDisplayTaskCommand = "^(display|dis)\\ [\\d]+";
-	protected static final String regexDisplayListCommand = "^(display|dis)\\ " + regexList;
-	protected static final String regMoveTaskToListCmd = "^(move|mv)\\ [\\d]+\\ (" + regexList+ "|#)$";
-	protected static final String regMarkAsCompleteCmd = "(^(done)\\ [\\d]+$)|(^[\\d]+\\ (done)$)";	// Syntax 1: [num] + done;  Syntax 2: done + [num]
-	protected static final String regEditTaskCmd = "^(edit)\\ [\\d]+$";	// simply signal an edit
-	protected static final String regSetPriorityCmd = "^[\\d]\\ " + regPriorityFormat + "$";
-	protected static final String regAddListCmd = "^(add)(\\ )+" + regexList+ "$";
-	protected static final String regRenameListCmd = "^(rename)\\ " + regexList+ "\\ " + regexList+ "$";
-	protected static final String regEditListCmd = "^(edit)\\ " + regexList + "$";
-	protected static final String regReminderGeneralCmd = "^(remind)\\ [\\d]+\\ (start|end|deadline|" + regDateTimeOverallFormat +")";
-	protected static final String regReminderNumOnly = "^(remind)\\ [\\d]+$";
-	protected static final String regRemoveReminder = "^(remind)\\ [\\d]+\\ cancel$";
-	
-	
+public abstract class ParseCommandGetType extends RegexMatcher{
 	protected boolean parsingCompleted = false;
 	protected Commands commandType;
 	protected String originalCommand;
@@ -115,8 +26,7 @@ public abstract class ParseCommandGetType {
 	 * the search task command remove the "/", as well as the leading space if has
 	 * 	"/ before 10am" => "before 10am"
 	 */
-	protected String sterilizedCommand;
-	protected String matchedStr;
+	protected String sanitizedCommand;
 	private List<Pair<String,Commands>> regexCommandsFormatToMatchWithoutMarkingParseComplete;
 	private List<Pair<String,Commands>> regexCommandsFormatToMatchAndMarkingParseComplete;
 	
@@ -129,25 +39,11 @@ public abstract class ParseCommandGetType {
 	}
 	
 	public ParseCommandGetType(String command) {
-		
+		super(command);
 		// save the original command string
 		this.originalCommand = command;
 		
 		firstLevelCommandParsing();
-	}
-	
-	protected boolean regexMatchedStrAndSaveMatchedStr(String reg,String matchStr,boolean ignoreCase){
-		
-		Pattern regPattern = Pattern.compile(
-				reg,
-				ignoreCase?Pattern.CASE_INSENSITIVE:0);
-		Matcher regMatcher = regPattern.matcher(matchStr);
-		if(regMatcher.find()){
-			this.matchedStr = regMatcher.group();
-			return true;
-		} else{
-			return false;
-		}
 	}
 	
 	private void firstLevelCommandParsing(){
@@ -171,6 +67,8 @@ public abstract class ParseCommandGetType {
 				return;
 			}
 		}
+		
+		this.commandType = Commands.INVALID;	this.parsingCompleted = true;
 	}
 	
 	private void addCommandRegexFormatToCommandTypeMapping(){
@@ -243,11 +141,9 @@ public abstract class ParseCommandGetType {
 		} else{
 			return false;
 		}
-		
 	}
 
 	private void removeMatchedStringFromOriginalCommand() {
-		this.sterilizedCommand = this.originalCommand.replace(this.matchedStr, "");
+		this.sanitizedCommand = this.originalCommand.replace(this.matchedStr, "");
 	}
-
 }

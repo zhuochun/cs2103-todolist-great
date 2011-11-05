@@ -34,19 +34,17 @@ public class DateTime {
 		this.time = time;
 	}
 	
-	public Date getDateInDateTypeWithTime(){
+	public Date getDateWithTime(){
 		if(date == null)	return null;
 		setTimeOfDateToTime();
 		return date.getTime();
 	}
 	
 	public void setTimeOfDateToTime() {
-		if(this.date == null)	return;
+		if(this.date == null || this.time == null)	return;
 
 		clearTimeFieldForDate(this.date);
-		if(time != null){
-			date.set(Calendar.SECOND, (int)(long)time);
-		}
+		date.set(Calendar.SECOND, (int)(long)time);
 	}
 
 	public void onDateNullDefaultTodayOrNextDayBasedOnTime(){
@@ -87,8 +85,20 @@ public class DateTime {
 		this.time = (long) (SEC_PER_HOUR * HOUR_PER_DAY - 1);
 	}
 	
+	public void setTimeOfDateToFirstSecOnTimeNull(){
+		int lastSec = (SEC_PER_HOUR * HOUR_PER_DAY - 1);
+		clearTimeFieldForDate(date);
+	}
+	
+	public void setTimeOfDateToLastSecOnTimeNull(){
+		if(date == null)	return;
+		int lastSec = (SEC_PER_HOUR * HOUR_PER_DAY - 1);
+		clearTimeFieldForDate(date);
+		date.set(Calendar.SECOND, lastSec);
+	}
+	
 	public long diff(DateTime b){
-		return (int) ((this.getDateInDateTypeWithTime().getTime() - b.getDateInDateTypeWithTime().getTime())/1000);
+		return (int) ((this.getDateWithTime().getTime() - b.getDateWithTime().getTime())/1000);
 	}
 
 	public boolean isTimeInTheAfterNoon() {
@@ -104,8 +114,8 @@ public class DateTime {
 	}
 
 	public boolean isBefore(DateTime dateTime) {
-		if(dateTime.getDateInDateTypeWithTime() == null)	return true;
-		else return this.getDateInDateTypeWithTime().before(dateTime.getDateInDateTypeWithTime());
+		if(dateTime.getDateWithTime() == null)	return true;
+		else return this.getDateWithTime().before(dateTime.getDateWithTime());
 	}
 
 	public void optionallyAddOneDayBasedOnCurrentTime() {

@@ -1,6 +1,7 @@
 package cs2103.t14j1.logic;
 
 import java.util.Date;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -96,26 +97,26 @@ public class ControlGUI {
                 case ADD_TASK:
                     addTask(createTask());
                     break;
-                case DELETE_TASK:
-                    deleteTask(getTaskIdx());
+                case DELETE_TASK: // support multiple index
+                    deleteTasks(getTaskIds());
                     break;
-                case MOVE_TASK:
-                    moveTask(getTaskIdx(), getListName());
+                case MOVE_TASK: // support multiple index
+                    moveTasks(getTaskIds(), getListName());
                     break;
                 case EDIT_TASK:
                     editTask(getTaskIdx());
                     break;
-                case ADD_REMINDER:
-                    addReminder(getTaskIdx(), getReminderParameter());
+                case ADD_REMINDER: // support multiple index
+                    addReminder(getTaskIds(), getReminderParameter());
                     break;
-                case REMOVE_REMINDER:
-                    removeReminder(getTaskIdx());
+                case REMOVE_REMINDER: // support multiple index
+                    removeReminder(getTaskIds());
                     break;
-                case MARK_COMPLETE:
-                    toggleStatus(getTaskIdx(), Task.COMPLETED);
+                case MARK_COMPLETE: // support multiple index
+                    toggleStatuses(getTaskIds(), Task.COMPLETED);
                     break;
-                case MARK_PRIORITY:
-                    togglePriority(getTaskIdx(), getNewTaskPriority());
+                case MARK_PRIORITY: // support multiple index
+                    togglePriorities(getTaskIds(), getNewTaskPriority());
                     break;
                 case ADD_LIST:
                     addList(getListName());
@@ -156,29 +157,32 @@ public class ControlGUI {
         registerEvent(newEvent, index, listName);
     }
 
+    private void moveTasks(Integer[] taskIds, String listName) {
+        Event bulk = Event.generateEvent(Commands.BULK);
+        registerEvent(bulk, Commands.MOVE_TASK, taskIds, listName);
+    }
+
     public void addReminder(int index, Reminder parameter) {
         try {
             Task task = eventHandler.getTask(index);
 
-            Date remindTime = null;
-
-            switch (parameter) {
-                case START:
-                    remindTime = task.getStartDateTime();
-                    break;
-                case END:
-                    remindTime = task.getEndDateTime();
-                    break;
-                case DEADLINE:
-                    remindTime = task.getDeadline();
-                    break;
-                case CUSTOM:
-                    remindTime = getReminderTime();
-                    break;
-            }
-
             Event newEvent = Event.generateEvent(Commands.ADD_REMINDER);
-            registerEvent(newEvent, task, remindTime);
+            registerEvent(newEvent, task, parameter, getReminderTime());
+        } catch (IndexOutOfBoundsException e) {
+            eventHandler.setStatus(e.getMessage());
+        }
+    }
+
+    private void addReminder(Integer[] taskIds, Reminder parameter) {
+        try {
+            Task[] tasks = new Task[taskIds.length];
+            
+            for (int i = 0; i < taskIds.length; i++) {
+                tasks[i] = eventHandler.getTask(taskIds[i]);
+            }
+            
+            Event bulk = Event.generateEvent(Commands.BULK);
+            registerEvent(bulk, Commands.ADD_REMINDER, tasks, parameter, getReminderTime());
         } catch (IndexOutOfBoundsException e) {
             eventHandler.setStatus(e.getMessage());
         }
@@ -195,14 +199,40 @@ public class ControlGUI {
         }
     }
 
+    private void removeReminder(Integer[] taskIds) {
+        try {
+            Task[] tasks = new Task[taskIds.length];
+            
+            for (int i = 0; i < taskIds.length; i++) {
+                tasks[i] = eventHandler.getTask(taskIds[i]);
+            }
+            
+            Event bulk = Event.generateEvent(Commands.BULK);
+            registerEvent(bulk, Commands.REMOVE_REMINDER, tasks);
+        } catch (IndexOutOfBoundsException e) {
+            eventHandler.setStatus(e.getMessage());
+        }
+        
+    }
+
     public void toggleStatus(int index, Boolean newStatus) {
         Event newEvent = Event.generateEvent(Commands.MARK_COMPLETE);
         registerEvent(newEvent, index, newStatus);
     }
 
+    private void toggleStatuses(Integer[] taskIds, boolean completed) {
+        Event bulk = Event.generateEvent(Commands.BULK);
+        registerEvent(bulk, Commands.MARK_COMPLETE, taskIds, completed);
+    }
+
     public void togglePriority(int index, Priority newPriority) {
         Event newEvent = Event.generateEvent(Commands.MARK_PRIORITY);
         registerEvent(newEvent, index, newPriority);
+    }
+
+    private void togglePriorities(Integer[] taskIds, Priority newPriority) {
+        Event bulk = Event.generateEvent(Commands.BULK);
+        registerEvent(bulk, Commands.MARK_PRIORITY, taskIds, newPriority);
     }
 
     public void editList(String oldlist, String newlist) {
@@ -213,6 +243,11 @@ public class ControlGUI {
     public void deleteTask(int taskIdx) {
         Event newEvent = Event.generateEvent(Commands.DELETE_TASK);
         registerEvent(newEvent, taskIdx);
+    }
+
+    private void deleteTasks(Integer[] taskIds) {
+        Event bulk = Event.generateEvent(Commands.BULK);
+        registerEvent(bulk, Commands.DELETE_TASK, taskIds);
     }
 
     public void doSearch(TaskList searchResult) {
@@ -346,15 +381,29 @@ public class ControlGUI {
     }
 
     /**
-     * if the user's command is DELETE_TASK/EDIT_TASK/MARK_COMPLETE/MARK_PRIORITY
-     * GUI will call this method to get the index the user entered
-     * 
-     * @return the index the user entered
+     * EDIT_TASK, DISPLAY_TASK
      */
     public int getTaskIdx() {
-        int taskNum = parseCommand.extractTaskNum();
+        Set<Integer> taskNumSet = parseCommand.extractTaskNum();
 
-        return taskNum;
+        Integer[] taskNums = (Integer[]) taskNumSet.toArray(new Integer[taskNumSet.size()]);
+        
+        return taskNums[0];
+    }
+    
+    /**
+     * MOVE_TASK, DELETE_TASK, MARK_COMPLETE
+     */
+    public Integer[] getTaskIds() {
+        Set<Integer> taskNumSet = parseCommand.extractTaskNum();
+
+        Integer[] taskNums = (Integer[]) taskNumSet.toArray(new Integer[taskNumSet.size()]);
+        
+        for (int i : taskNums) {
+            System.out.print(i + " -> ");
+        }
+        
+        return taskNums;
     }
 
     /**
@@ -475,14 +524,12 @@ public class ControlGUI {
     }
 
     public Reminder getReminderParameter() {
-        Reminder parameter = parseCommand.getRemindParamter();
-        return parameter;
+        return parseCommand.getRemindParamter();
 
     }
 
     public Date getReminderTime() {
-        Date reminderTime = parseCommand.getRemindTime();
-        return reminderTime;
+        return parseCommand.getRemindTime();
     }
 
     public boolean hasUndo() {

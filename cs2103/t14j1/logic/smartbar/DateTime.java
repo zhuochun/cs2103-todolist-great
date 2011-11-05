@@ -13,6 +13,7 @@ import java.util.Date;
 public class DateTime {
 	Calendar date;
 	Long time;
+	int dateToShift = 0;
 	
 	public static int SEC_PER_MINUTE 	= 60;
 	public static int SEC_PER_HOUR		= 3600;
@@ -37,6 +38,7 @@ public class DateTime {
 	public Date getDateWithTime(){
 		if(date == null)	return null;
 		setTimeOfDateToTime();
+		date.add(Calendar.DATE, dateToShift);
 		return date.getTime();
 	}
 	
@@ -129,6 +131,15 @@ public class DateTime {
 
 	public void setDateToBeCurrentTime() {
 		this.date = Calendar.getInstance();
+	}
+
+	public void addSecToTime(Long secs) {
+		if(this.time == null)	return;
+		this.time += secs;
+		if(this.time > HOUR_PER_DAY * SEC_PER_HOUR - 1){
+			this.time -= HOUR_PER_DAY * SEC_PER_HOUR;
+			dateToShift += 1;
+		}
 	}
 }
 

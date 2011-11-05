@@ -492,13 +492,25 @@ implements
 	}
 
 	@Override
-	public Date extractEndDate() {
-		return this.endTime.getDateWithTime();
+	public Date extractEndDate(){
+		if(this.endTime.date != null)	return this.endTime.getDateWithTime();
+		else if(this.duration != null && this.startTime.time != null){
+			this.endTime.date = (Calendar) this.startTime.date.clone();
+			this.endTime.addSecToTime(this.duration);
+			return this.endTime.getDateWithTime();
+		} else return null;
 	}
 
 	@Override
 	public Long extractEndTime() {
-		return this.endTime.getTime();
+		if(this.endTime.time != null){
+			return this.endTime.time;
+		} else if(this.startTime.time !=null && this.duration!= null){
+			this.endTime.time = this.startTime.time + this.duration;
+			return this.endTime.time;
+		} else{
+			return this.endTime.time;
+		}
 	}
 
 	@Override

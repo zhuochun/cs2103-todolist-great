@@ -101,7 +101,7 @@ public class SmartParseTest {
 		assertEquals(date.getTime(),sp.extractStartDate());
 		setDateTimeToTime(19, 0, 0);
 		assertEquals(date.getTime(),sp.extractEndDate());
-		assertEquals(DateTime.SEC_PER_HOUR * 3,(int)sp.extractDuration());
+		assertEquals(DateTime.SEC_PER_HOUR * 3,(long)sp.extractDuration());
 		
 		sp = new ParseCommand("Add sth 4:13:30 pm,12th,Dec ~ 7pm");
 		assertEquals(Commands.ADD_TASK, sp.extractCommand());
@@ -113,7 +113,7 @@ public class SmartParseTest {
 		setDateTimeToTime(19, 0, 0);
 		int endTime = (int) (date.getTimeInMillis()/1000);
 		assertEquals(date.getTime(),sp.extractEndDate());
-		assertEquals(endTime - startTime,(int)sp.extractDuration());
+		assertEquals(endTime - startTime,(long)sp.extractDuration());
 		
 		sp = new ParseCommand("Add sth Oct,13th ~ 12nd, Dec");
 		assertEquals(Commands.ADD_TASK, sp.extractCommand());
@@ -126,7 +126,7 @@ public class SmartParseTest {
 		setDateTimeToTime(23, 59, 59);
 		endTime = (int) (date.getTimeInMillis()/1000);
 		assertEquals(date.getTime(),sp.extractEndDate());
-		assertEquals(endTime - startTime,(int)sp.extractDuration());
+		assertEquals(endTime - startTime,(long)sp.extractDuration());
 		
 		sp = new ParseCommand("add run 4:15pm Nov 12 ~ 2:00:12am, 20 Oct 2012");
 		assertEquals(Commands.ADD_TASK, sp.extractCommand());
@@ -139,7 +139,7 @@ public class SmartParseTest {
 		setDateTimeToTime(2, 0, 12);
 		endTime = (int) (date.getTimeInMillis()/1000);
 		assertEquals(date.getTime(),sp.extractEndDate());
-		assertEquals(endTime - startTime,(int)sp.extractDuration());
+		assertEquals(endTime - startTime,(long)sp.extractDuration());
 	}
 	
 	private void setDateTimeToTime(int h,int m, int s) {

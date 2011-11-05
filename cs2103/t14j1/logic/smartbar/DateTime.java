@@ -12,7 +12,7 @@ import java.util.Date;
  */
 public class DateTime {
 	Calendar date;
-	Integer time;
+	Long time;
 	
 	public static int SEC_PER_MINUTE 	= 60;
 	public static int SEC_PER_HOUR		= 3600;
@@ -30,7 +30,7 @@ public class DateTime {
 		this.date.setTime(date);
 	}
 	
-	public void setTime(Integer time){
+	public void setTime(Long time){
 		this.time = time;
 	}
 	
@@ -45,7 +45,7 @@ public class DateTime {
 
 		clearTimeFieldForDate(this.date);
 		if(time != null){
-			date.set(Calendar.SECOND, time);
+			date.set(Calendar.SECOND, (int)(long)time);
 		}
 	}
 
@@ -55,7 +55,7 @@ public class DateTime {
 	}
 	
 	
-	public Integer getTime(){
+	public Long getTime(){
 		return this.time;
 	}
 	
@@ -80,14 +80,14 @@ public class DateTime {
 	}
 	
 	public void setTimeToFirstSec(){
-		this.time = 0;
+		this.time = 0L;
 	}
 	
 	public void setTimeToLastSec(){
-		this.time = SEC_PER_HOUR * HOUR_PER_DAY - 1;
+		this.time = (long) (SEC_PER_HOUR * HOUR_PER_DAY - 1);
 	}
 	
-	public int diff(DateTime b){
+	public long diff(DateTime b){
 		return (int) ((this.getDateInDateTypeWithTime().getTime() - b.getDateInDateTypeWithTime().getTime())/1000);
 	}
 
@@ -99,7 +99,7 @@ public class DateTime {
 		DateTime res = new DateTime();
 		res.date = Calendar.getInstance();
 		res.time = 
-			(int) ((res.date.getTimeInMillis()/1000) % (HOUR_PER_DAY * SEC_PER_HOUR));
+			(res.date.getTimeInMillis()/1000) % (HOUR_PER_DAY * SEC_PER_HOUR);
 		return res;
 	}
 

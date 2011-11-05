@@ -170,8 +170,8 @@ class DateTimeProcessor extends RegexMatcher{
 	 *  2) hh:mm (am|pm)?
 	 *  3) hh (am|pm)
 	 */
-	protected static Integer regGetTimeFromPureTimeStr(String pureTimeStr){
-		int time = 0;	//new Long(0); 	// initialization
+	protected static Long regGetTimeFromPureTimeStr(String pureTimeStr){
+		long time = 0;	//new Long(0); 	// initialization
 		pureTimeStr = pureTimeStr.toLowerCase();
 		
 		if(pureTimeStr.contains("at "))	pureTimeStr = pureTimeStr.replace("at ", "");

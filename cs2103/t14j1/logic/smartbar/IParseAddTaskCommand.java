@@ -13,13 +13,13 @@ public Commands extractCommand();
 	public String extractPlace();
 
 	public Date extractStartDate();
-	public Integer extractStartTime();
+	public Long extractStartTime();
 	
-	public Integer extractDuration();
+	public Long extractDuration();
 	
 	public Date extractEndDate();
-	public Integer extractEndTime();
+	public Long extractEndTime();
 	
 	public Date extractDeadlineDate();
-	public Integer extractDeadlineTime();
+	public Long extractDeadlineTime();
 }

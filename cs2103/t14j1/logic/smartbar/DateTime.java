@@ -14,6 +14,13 @@ public class DateTime {
 	Calendar date;
 	Integer time;
 	
+	public static int SEC_PER_MINUTE 	= 60;
+	public static int SEC_PER_HOUR		= 3600;
+	public static int HOUR_PER_HALF_DAY	= 12;
+	public static int HOUR_PER_DAY		= 24;
+	
+	public static final DateTime currentTime = DateTime.getInstance();
+	
 	public void setDate(Calendar date){
 		this.date = date;
 	}
@@ -27,26 +34,85 @@ public class DateTime {
 		this.time = time;
 	}
 	
-	public Date getDate(){
-		clearTimeFieldForDate(this.date);
-		
+	public Date getDateInDateTypeWithTime(){
 		if(date == null)	return null;
+		setTimeOfDateToTime();
+		return date.getTime();
+	}
+	
+	public void setTimeOfDateToTime() {
+		if(this.date == null)	return;
+
+		clearTimeFieldForDate(this.date);
 		if(time != null){
 			date.set(Calendar.SECOND, time);
 		}
-		
-		return date.getTime();
 	}
+
+	public void onDateNullDefaultTodayOrNextDayBasedOnTime(){
+		if(date == null)	date = Calendar.getInstance();
+		setTimeOfDateToTime();
+	}
+	
 	
 	public Integer getTime(){
 		return this.time;
 	}
 	
 	public static void clearTimeFieldForDate(Calendar date){
+		if(date == null)	return;
 		date.set(Calendar.MILLISECOND, 0);
 		date.set(Calendar.SECOND, 0);
 		date.set(Calendar.MINUTE, 0);
 		date.set(Calendar.HOUR_OF_DAY, 0);
+	}
+
+	public static int getCurrentTimeInSec() {
+		return (int) (Calendar.getInstance().getTimeInMillis()/1000);
+	}
+
+	public void setTimeToFirstSecOnNull() {
+		if(this.time == null)	this.setTimeToFirstSec();
+	}
+
+	public void setTimeToLastSecOnNull(){
+		if(this.time == null)	this.setTimeToLastSec(); 
+	}
+	
+	public void setTimeToFirstSec(){
+		this.time = 0;
+	}
+	
+	public void setTimeToLastSec(){
+		this.time = SEC_PER_HOUR * HOUR_PER_DAY - 1;
+	}
+	
+	public int diff(DateTime b){
+		return (int) ((this.getDateInDateTypeWithTime().getTime() - b.getDateInDateTypeWithTime().getTime())/1000);
+	}
+
+	public boolean isTimeInTheAfterNoon() {
+		return this.time < HOUR_PER_HALF_DAY * SEC_PER_HOUR;
+	}
+
+	public static DateTime getInstance() {
+		DateTime res = new DateTime();
+		res.date = Calendar.getInstance();
+		res.time = 
+			(int) ((res.date.getTimeInMillis()/1000) % (HOUR_PER_DAY * SEC_PER_HOUR));
+		return res;
+	}
+
+	public boolean isBefore(DateTime dateTime) {
+		if(dateTime.getDateInDateTypeWithTime() == null)	return true;
+		else return this.getDateInDateTypeWithTime().before(dateTime.getDateInDateTypeWithTime());
+	}
+
+	public void optionallyAddOneDayBasedOnCurrentTime() {
+		if(currentTime.isTimeInTheAfterNoon() &&
+				!this.isTimeInTheAfterNoon()){
+			this.date.add(Calendar.DATE, 1);
+		}
 	}
 }
 

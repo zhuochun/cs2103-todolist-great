@@ -4,13 +4,13 @@ package cs2103.t14j1.logic;
  * Importing these interface to support cross-referencing
  */
 import cs2103.t14j1.logic.smartbar.ParseCommand;
-import cs2103.t14j1.logic.smartbar.ParseAddTaskCommand;
+import cs2103.t14j1.logic.smartbar.IParseAddTaskCommand;
 import cs2103.t14j1.logic.smartbar.ParseCommandGetType;
-import cs2103.t14j1.logic.smartbar.ParseListRelatedCommand;
-import cs2103.t14j1.logic.smartbar.ParseReminderCommand;
-import cs2103.t14j1.logic.smartbar.ParseSearchCommand;
-import cs2103.t14j1.logic.smartbar.ParseTaskNumRelatedCommand;
-import cs2103.t14j1.logic.smartbar.ParseMarkPriorityCommand;
+import cs2103.t14j1.logic.smartbar.IParseListRelatedCommand;
+import cs2103.t14j1.logic.smartbar.IParseReminderCommand;
+import cs2103.t14j1.logic.smartbar.IParseSearchCommand;
+import cs2103.t14j1.logic.smartbar.IParseTaskNumRelatedCommand;
+import cs2103.t14j1.logic.smartbar.IParseMarkPriorityCommand;
 
 public enum Commands {
 

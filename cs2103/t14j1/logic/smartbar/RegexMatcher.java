@@ -7,8 +7,9 @@ class RegexMatcher {
 	
 	public static void main(String args[]){
 		// for testing only
-		String str = "10:30:20 ,12/Oct/2011";
-		System.out.println("matched Str: " + regexMatchedStr(regDateTimeOverallFormat, str, true));
+		String str = "1";
+		System.out.println("matched Str: " + regexMatchedStr("^(\\d)+$", str, true));
+		System.out.println(str.matches("^(\\d)+$"));
 	}
 	
 	protected static final boolean IGNORE_CASE = true;
@@ -19,10 +20,12 @@ class RegexMatcher {
 	
 	
 	/* define the regex */
-	protected static final String regexWordSpacer = "([^\\d\\w#!@]|(^)|($))";
+	protected static final String regWordSpacer = "([^\\d\\w#!@]|(^)|($))";
 	protected static final String regexSpacer = "((\\s)|(^)|($))";
 	protected static final String regexNonSpaceWordSpacer = "([^\\d\\w\\ ]|(^)|($))";
 	protected static final String regexDateSpacer = "[,-/. ]+";
+	
+	protected static final String regexNumList = "(((\\d)+([~-](\\d)+)?)([,\\ ](\\d)+([~-](\\d)+)?)*)";
 	
 		// time related
 	// regular expression for matching the time
@@ -31,7 +34,7 @@ class RegexMatcher {
 	protected static final String regTimePoint24H = 
 			"([01]?\\d|2[0-3])(:[0-5]\\d){1,2}";
 	protected static final String regTimeFormat = // can be either 24 hour, or am/pm
-			"((at" + regexWordSpacer + ")?" + "(" + regTimePointAmPm + "|" + regTimePoint24H +")" +  ")";
+			"((at" + regWordSpacer + ")?" + "(" + regTimePointAmPm + "|" + regTimePoint24H +")" +  ")";
 	
 		// regular expression for matching the date
 	protected static final String regMonthText =
@@ -55,7 +58,7 @@ class RegexMatcher {
 			"((on\\ )?(" + regDateFormat_dd_$M$_$yy$yy$$+ "|" + regDateFormat_dd_$mm$_$yy$yy$$ + "))";
 	
 	protected static final String regDateFormat_order_weekD = 
-			"((on\\ )?(" + regDayOrder + regexWordSpacer + ")?" + regWeekText + ")";
+			"((on\\ )?(" + regDayOrder + regWordSpacer + ")?" + regWeekText + ")";
 	
 	protected static final String regDateFormat_today_tomorrow = 
 			"(today|tomorrow|tmr)";
@@ -69,14 +72,15 @@ class RegexMatcher {
 			"((this|next)\\ (" + regTimeUnit + "|week|month|year|" + regWeekText + "|" + regMonthText + "))";
 	
 	protected static final String regDateOverallFormat =
-			"(" + regDateFormat_dd_$mm$M$_$yy$yy$$ + "|" + regDateFormat_order_weekD + 
-			"|" + regDateFormat_today_tomorrow + ")";
+			"(" + 
+			regDateFormat_dd_$mm$M$_$yy$yy$$ + "|" + regDateFormat_M_dd_$yyyy$ + "|" + 
+			regDateFormat_order_weekD +	"|" + regDateFormat_today_tomorrow + ")";
 	
 	protected static final String regDateTimeOverallFormat = "(" +
 //				regTimeFormat +
 //			regDateOverallFormat + regWordSpacer + regTimeFormat + 
-			"(" + regDateOverallFormat+ "(" + regexWordSpacer + "*" + regTimeFormat + ")?)|" + 	// date (time)?
-			"(" + regTimeFormat + "("+ regexWordSpacer + "*" + regDateOverallFormat + ")?)" +  // time (date)?
+			"(" + regDateOverallFormat+ "(" + regWordSpacer + "*" + regTimeFormat + ")?)|" + 	// date (time)?
+			"(" + regTimeFormat + "("+ regWordSpacer + "*" + regDateOverallFormat + ")?)" +  // time (date)?
 			")";
 	
 	
@@ -90,20 +94,20 @@ class RegexMatcher {
 	protected static final String regexSearchCommand = "^/(" + regexSpacer +")*";
 	protected static final String regexAddCommand = "^add(" + regexSpacer +")*";
 	protected static final String regexSwitchListCommand = "^" + regexList + "(" + regexSpacer +")*$";
-	protected static final String regexDeleteTaskCommand = "^(delete|del)\\ [\\d]+$";	// TODO: would need to change later
+	protected static final String regexDeleteTaskCommand = "^(delete|del)\\ " + regexNumList +"$";
 	protected static final String regexDeleteListCommand = "^(delete|del)\\ "+ regexList + "$";
 	protected static final String regexDisplayTaskCommand = "^(display|dis)\\ [\\d]+";
 	protected static final String regexDisplayListCommand = "^(display|dis)\\ " + regexList;
-	protected static final String regMoveTaskToListCmd = "^(move|mv)\\ [\\d]+\\ (" + regexList+ "|#)$";
-	protected static final String regMarkAsCompleteCmd = "(^(done)\\ [\\d]+$)|(^[\\d]+\\ (done)$)";	// Syntax 1: [num] + done;  Syntax 2: done + [num]
+	protected static final String regMoveTaskToListCmd = "^(move|mv)\\ " + regexNumList +"\\ (" + regexList+ "|#)$";
+	protected static final String regMarkAsCompleteCmd = "(^(done)\\ " + regexNumList +"$)|(^" + regexNumList + "\\ (done)$)";
 	protected static final String regEditTaskCmd = "^(edit)\\ [\\d]+$";	// simply signal an edit
-	protected static final String regSetPriorityCmd = "^[\\d]\\ " + regPriorityFormat + "$";
+	protected static final String regSetPriorityCmd = "^" + regexNumList + "\\ " + regPriorityFormat + "$";
 	protected static final String regAddListCmd = "^(add)(\\ )+" + regexList+ "$";
 	protected static final String regRenameListCmd = "^(rename)\\ " + regexList+ "\\ " + regexList+ "$";
 	protected static final String regEditListCmd = "^(edit)\\ " + regexList + "$";
-	protected static final String regReminderGeneralCmd = "^(remind)\\ [\\d]+\\ (start|end|deadline|" + regDateTimeOverallFormat +")";
-	protected static final String regReminderNumOnly = "^(remind)\\ [\\d]+$";
-	protected static final String regRemoveReminder = "^(remind)\\ [\\d]+\\ cancel$";
+	protected static final String regReminderGeneralCmd = "^(remind)\\ " + regexNumList + "\\ (start|end|deadline|" + regDateTimeOverallFormat +")";
+	protected static final String regReminderNumOnly = "^(remind)\\ " + regexNumList + "$";
+	protected static final String regRemoveReminder = "^(remind)\\ " + regexNumList + "\\ cancel$";
 	
 	public RegexMatcher(String strToMatch) {
 		this.originalStr  =strToMatch;
@@ -151,12 +155,12 @@ class RegexMatcher {
 		}
 		
 		// the leading word spacer
-		while(inStr.length() > 0 && inStr.substring(0, 1).matches(regexWordSpacer)){
+		while(inStr.length() > 0 && inStr.substring(0, 1).matches(regWordSpacer)){
 			inStr = inStr.substring(1);
 		}
 		
 		// the tailing word spacer
-		while(inStr.length() > 0 && inStr.substring(inStr.length()-1).matches(regexWordSpacer)){
+		while(inStr.length() > 0 && inStr.substring(inStr.length()-1).matches(regWordSpacer)){
 			inStr = inStr.substring(0, inStr.length()-1);
 		}
 		

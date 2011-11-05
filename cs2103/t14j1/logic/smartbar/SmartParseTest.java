@@ -5,7 +5,10 @@ package cs2103.t14j1.logic.smartbar;
 import static org.junit.Assert.*;
 
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.LinkedList;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -17,10 +20,47 @@ import cs2103.t14j1.storage.Priority;
  *
  */
 public class SmartParseTest {
-	ParseCommand sp;
-	DateTimeProcessor dt;
-	Calendar date = Calendar.getInstance();
+	private ParseCommand sp;
+	private DateTimeProcessor dt;
+	private Calendar date;
+	private int currentYear = Calendar.getInstance().get(Calendar.YEAR);
 	int time;
+	
+	// method I'll be possibly using
+	/* Test on time processor */
+	private String getMessageInTestingDate() {
+		return 
+			"\nres	= " + dt.getDateTime().getDateInDateTypeWithTime() + 
+			"\nwant	= " + date.getTime();
+	}
+	
+	private String getMessageInTestingTime(){
+		return
+			"\nres	= " + dt.getDateTime().getTime() +
+			"\nwant	= " + time;
+	}
+	
+	private void setTime(int hour, int min, int sec) {
+		time = hour * DateTime.SEC_PER_HOUR + 
+				min*DateTime.SEC_PER_MINUTE +
+				sec;
+	}
+	
+
+	private void setDateTimeToLastSec() {
+		setDateTimeToTime(23, 59, 59);
+		
+	}
+
+	private void dateAdd(int i) {
+		this.date.add(Calendar.DATE, i);
+		
+	}
+
+	private void newDate() {
+		this.date = Calendar.getInstance();
+	}
+	
 	
 	@Test
 	public void addBasicTask(){
@@ -50,22 +90,120 @@ public class SmartParseTest {
 		assertEquals(Commands.ADD_TASK, sp.extractCommand());
 		assertEquals("basic task",sp.extractTaskName());
 		assertEquals("--1984--",sp.extractPlace());
-		
-		
 	}
 	
+	@Test
+	public void testTimePeriod(){
+		sp = new ParseCommand("Add sth @(somewhere in the world) 4pm ~ 7pm");
+		assertEquals(Commands.ADD_TASK, sp.extractCommand());
+		assertEquals("sth",sp.extractTaskName());
+		newDate();setDateTimeToTime(16, 0, 0);
+		assertEquals(date.getTime(),sp.extractStartDate());
+		setDateTimeToTime(19, 0, 0);
+		assertEquals(date.getTime(),sp.extractEndDate());
+		assertEquals(DateTime.SEC_PER_HOUR * 3,(int)sp.extractDuration());
+		
+		sp = new ParseCommand("Add sth 4:13:30 pm,12th,Dec ~ 7pm");
+		assertEquals(Commands.ADD_TASK, sp.extractCommand());
+		assertEquals("sth",sp.extractTaskName());
+		newDate();date.set(currentYear, Calendar.DECEMBER, 12);
+		setDateTimeToTime(16, 13, 30);
+		assertEquals(date.getTime(),sp.extractStartDate());
+		int startTime = (int) (date.getTimeInMillis()/1000);
+		setDateTimeToTime(19, 0, 0);
+		int endTime = (int) (date.getTimeInMillis()/1000);
+		assertEquals(date.getTime(),sp.extractEndDate());
+		assertEquals(endTime - startTime,(int)sp.extractDuration());
+		
+		sp = new ParseCommand("Add sth Oct,13th ~ 12nd, Dec");
+		assertEquals(Commands.ADD_TASK, sp.extractCommand());
+		assertEquals("sth",sp.extractTaskName());
+		newDate();date.set(currentYear, Calendar.OCTOBER, 13);
+		setDateTimeToTime(0, 0, 0);
+		assertEquals(date.getTime(),sp.extractStartDate());
+		startTime = (int) (date.getTimeInMillis()/1000);
+		date.set(currentYear, Calendar.DECEMBER, 12);
+		setDateTimeToTime(23, 59, 59);
+		endTime = (int) (date.getTimeInMillis()/1000);
+		assertEquals(date.getTime(),sp.extractEndDate());
+		assertEquals(endTime - startTime,(int)sp.extractDuration());
+		
+		sp = new ParseCommand("add run 4:15pm Nov 12 ~ 2:00:12am, 20 Oct 2012");
+		assertEquals(Commands.ADD_TASK, sp.extractCommand());
+		assertEquals("run",sp.extractTaskName());
+		newDate();date.set(currentYear, Calendar.NOVEMBER, 12);
+		setDateTimeToTime(16, 15, 0);
+		assertEquals(date.getTime(),sp.extractStartDate());
+		startTime = (int) (date.getTimeInMillis()/1000);
+		date.set(2012, Calendar.OCTOBER, 20);
+		setDateTimeToTime(2, 0, 12);
+		endTime = (int) (date.getTimeInMillis()/1000);
+		assertEquals(date.getTime(),sp.extractEndDate());
+		assertEquals(endTime - startTime,(int)sp.extractDuration());
+	}
+	
+	private void setDateTimeToTime(int h,int m, int s) {
+		setTime(h, m, s);
+		DateTime.clearTimeFieldForDate(date);
+		date.add(Calendar.SECOND, time);
+	}
+
 	@Test
 	public void searchTask(){
-		sp = new ParseCommand("/songyy");
+		sp = new ParseCommand("/songyy ");
 		assertEquals(Commands.SEARCH, sp.extractCommand());
 		assertEquals("songyy", sp.extractTaskName());
+		
+		sp = new ParseCommand("/after tomorrow before 13th,Dec");
+		assertEquals(Commands.SEARCH, sp.extractCommand());
+		assertEquals("", sp.extractTaskName());
+		newDate();DateTime.clearTimeFieldForDate(date);dateAdd(1);
+		assertEquals(date.getTime(), sp.extractSearchAfterDate());
+		date.set(currentYear, Calendar.DECEMBER, 13);
+		setDateTimeToLastSec();
+		assertEquals(date.getTime(), sp.extractSearchBeforeDate());
 	}
-	
+
 	@Test
 	public void deleteTask(){
-		sp = new ParseCommand("del 1");
+		List<Integer> res;
+		List<Integer> expected;
+		
+		sp = new ParseCommand("del 1-3,5,6,9");
 		assertEquals(Commands.DELETE_TASK, sp.extractCommand());
-//		assertEquals(1, (int)sp.extractTaskNum().get(0));
+		res = new ArrayList<Integer>();
+		expected = new ArrayList<Integer>();
+		expected.add(1);
+		expected.add(2);
+		expected.add(3);
+		expected.add(5);
+		expected.add(6);
+		expected.add(9);
+		
+		res.addAll(sp.extractTaskNum());
+		for(int i = 0;i < res.size();i++){
+			assertEquals(res.get(i), expected.get(i));
+		}
+		
+		sp = new ParseCommand("del 1-3,2~9 7 8 100~4");
+		assertEquals(Commands.DELETE_TASK, sp.extractCommand());
+		expected.clear();
+		res.clear();
+		
+		expected.add(1);
+		expected.add(2);
+		expected.add(3);
+		expected.add(4);
+		expected.add(5);
+		expected.add(6);
+		expected.add(7);
+		expected.add(8);
+		expected.add(9);
+		res.addAll(sp.extractTaskNum());
+		for(int i = 0;i < res.size();i++){
+			assertEquals(expected.get(i),res.get(i));
+		}
+		
 	}
 	
 	@Test
@@ -94,7 +232,7 @@ public class SmartParseTest {
 	
 	@Test
 	public void markPriority(){
-		sp = new ParseCommand("1 !3");
+		sp = new ParseCommand("1 2 3 4 5 !3");
 		assertEquals(Commands.MARK_PRIORITY, sp.extractCommand());
 		sp = new ParseCommand("1 !4");
 		assertEquals(Commands.INVALID, sp.extractCommand());
@@ -202,76 +340,49 @@ public class SmartParseTest {
 	}
 	
 	@Test
-	public void testOneStatementCommandsSpecialCase(){
-		
-		date = Calendar.getInstance(); DateTime.clearTimeFieldForDate(date);
+	public void testDateProcessor(){
+		newDate(); DateTime.clearTimeFieldForDate(date);
 		dt = new DateTimeProcessor("10:30:20 ,12/Oct/2011");
 		setTime(10, 30, 20);date.set(2011, Calendar.OCTOBER, 12, 10, 30, 20);
 		DateTime.clearTimeFieldForDate(date);date.set(Calendar.SECOND, time);
 		assertTrue(getMessageInTestingTime(),dt.getDateTime().getTime() == time);
-		assertTrue(getMessageInTestingDate(),dt.getDateTime().getDate().equals(date.getTime()));
+		assertTrue(getMessageInTestingDate(),dt.getDateTime().getDateInDateTypeWithTime().equals(date.getTime()));
 		
-		date = Calendar.getInstance();
+		newDate();
 		dt = new DateTimeProcessor("at 5 pm tomorrow");
 		setTime(17, 0, 0);
 		date.set(Calendar.HOUR_OF_DAY, 17);	date.add(Calendar.DATE, 1);
 		DateTime.clearTimeFieldForDate(date);date.set(Calendar.SECOND, time);
 		assertTrue(getMessageInTestingTime(),dt.getDateTime().getTime() == time);
-		assertTrue(getMessageInTestingDate(),dt.getDateTime().getDate().equals(date.getTime()));
+		assertTrue(getMessageInTestingDate(),dt.getDateTime().getDateInDateTypeWithTime().equals(date.getTime()));
 		
-		date = Calendar.getInstance();
+		newDate();
 		dt = new DateTimeProcessor("at 1am 12th,Dec,2013");
 		setTime(1, 0, 0);date.set(2013, Calendar.DECEMBER, 12,1,0,0);
 		DateTime.clearTimeFieldForDate(date);date.set(Calendar.SECOND, time);
 		assertTrue(getMessageInTestingTime(),dt.getDateTime().getTime() == time);
-		assertTrue(getMessageInTestingDate(),dt.getDateTime().getDate().equals(date.getTime()));
+		assertTrue(getMessageInTestingDate(),dt.getDateTime().getDateInDateTypeWithTime().equals(date.getTime()));
 		
-		date = Calendar.getInstance();DateTime.clearTimeFieldForDate(date);
+		newDate();DateTime.clearTimeFieldForDate(date);
 		dt = new DateTimeProcessor("1:30 pm Dec,12th,2020");
 		setTime(13,30,0);date.set(2020, Calendar.DECEMBER, 12, 13, 30, 0);
 		DateTime.clearTimeFieldForDate(date);date.set(Calendar.SECOND, time);
 		assertTrue(getMessageInTestingTime(),dt.getDateTime().getTime() == time);
-		assertTrue(getMessageInTestingDate(),dt.getDateTime().getDate().equals(date.getTime()));
+		assertTrue(getMessageInTestingDate(),dt.getDateTime().getDateInDateTypeWithTime().equals(date.getTime()));
 		
-		date = Calendar.getInstance();DateTime.clearTimeFieldForDate(date);
+		newDate();DateTime.clearTimeFieldForDate(date);
 		dt = new DateTimeProcessor("1:30am today");
 		setTime(1, 30, 0); date.set(Calendar.HOUR_OF_DAY, 1);date.set(Calendar.MINUTE, 30);
 		DateTime.clearTimeFieldForDate(date);date.set(Calendar.SECOND, time);
 		assertTrue(getMessageInTestingTime(),dt.getDateTime().getTime() == time);
-		assertTrue(getMessageInTestingDate(),dt.getDateTime().getDate().equals(date.getTime()));
+		assertTrue(getMessageInTestingDate(),dt.getDateTime().getDateInDateTypeWithTime().equals(date.getTime()));
 		
 		
-		date = Calendar.getInstance(); DateTime.clearTimeFieldForDate(date);
+		newDate(); DateTime.clearTimeFieldForDate(date);
 		dt = new DateTimeProcessor("10:30:20pm next Wednesday");
 		setTime(22, 30, 20);date.add(Calendar.WEEK_OF_YEAR, 1);
 		date.set(Calendar.DAY_OF_WEEK, Calendar.WEDNESDAY);
 		DateTime.clearTimeFieldForDate(date);date.set(Calendar.SECOND, time);
 		assertTrue(getMessageInTestingTime(),dt.getDateTime().getTime() == time);
-	}
-	
-	private void setTime(int hour, int min, int sec) {
-		time = hour * DateTimeProcessor.SEC_PER_HOUR + 
-				min*DateTimeProcessor.SEC_PER_MINUTE +
-				sec;
-		
-	}
-
-	/* Test on time processor */
-	private String getMessageInTestingDate() {
-		return 
-			"\nres	= " + dt.getDateTime().getDate() + 
-			"\nwant	= " + date.getTime();
-	}
-	
-	private String getMessageInTestingTime(){
-		return
-			"\nres	= " + dt.getDateTime().getTime() +
-			"\nwant	= " + time;
-	}
-	
-	
-	@Test
-	public void testDateProcessor(){
-		
 	}
 }

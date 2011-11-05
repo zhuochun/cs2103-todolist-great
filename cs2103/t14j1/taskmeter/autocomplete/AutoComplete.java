@@ -215,7 +215,7 @@ public class AutoComplete {
     }
     
     private boolean completeList() {
-        if (listIdx >= lists.getSize()) {
+        if (listIdx >= listNames.length) {
             listIdx = 0;
         }
         
@@ -263,7 +263,7 @@ public class AutoComplete {
                 
                 listIdx++;
                 
-                if (listIdx >= lists.getSize()) {
+                if (listIdx >= listNames.length) {
                     listIdx = 0;
                 }
             } while (listIdx != oldIdx);

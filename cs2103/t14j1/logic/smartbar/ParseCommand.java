@@ -189,6 +189,7 @@ implements
 		parseListNameAndRemoveParsedStr();
 		parseSearchBeforeTime();
 		parseSearchAfterTime();
+		parsePriorityParam();
 	}
 
 	private void parseSearchAfterTime() {
@@ -330,7 +331,6 @@ implements
 	private void parseDeadlineAndRemoveParsedStr() {
 		if(regexMatchWithSanitizedCommandAddWordSpacerIgnoreCase("by\\ " + regDateTimeOverallFormat)){
 			String deadlineStr = removeLeadingAndTailingNonDigitLetterDefinedSymbol(this.matchedStr).substring(3);	// by pass the "by"
-			deadlineStr = deadlineStr.substring(3);	// remove the "by "
 			
 			deadlineTime = new DateTimeProcessor(deadlineStr).getDateTime();
 			replaceMatchedStringFromSanitizedCommandWithOneSpace();
@@ -423,14 +423,14 @@ implements
 	public Date extractSearchBeforeDate(){
 		if(this.searchBeforeTime == null)	return null;
 		this.searchBeforeTime.setTimeToLastSecOnNull();
-		return this.searchBeforeTime.getDateInDateTypeWithTime();
+		return this.searchBeforeTime.getDateWithTime();
 	}
 
 	@Override
 	public Date extractSearchAfterDate() {
 		if(this.searchAfterTime == null)	return null;
 		this.searchAfterTime.setTimeToFirstSecOnNull();
-		return this.searchAfterTime.getDateInDateTypeWithTime();
+		return this.searchAfterTime.getDateWithTime();
 	}
 
 	@Override
@@ -476,7 +476,7 @@ implements
 
 	@Override
 	public Date extractStartDate() {
-		return this.startTime.getDateInDateTypeWithTime();
+		return this.startTime.getDateWithTime();
 	}
 
 	@Override
@@ -491,7 +491,7 @@ implements
 
 	@Override
 	public Date extractEndDate() {
-		return this.endTime.getDateInDateTypeWithTime();
+		return this.endTime.getDateWithTime();
 	}
 
 	@Override
@@ -501,7 +501,9 @@ implements
 
 	@Override
 	public Date extractDeadlineDate() {
-		return this.deadlineTime.getDateInDateTypeWithTime();
+		if(this.deadlineTime.date == null)	return null;
+		deadlineTime.setTimeOfDateToLastSecOnTimeNull();
+		return this.deadlineTime.getDateWithTime();
 	}
 
 	@Override

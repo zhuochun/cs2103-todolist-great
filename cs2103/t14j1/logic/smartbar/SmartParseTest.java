@@ -4,11 +4,11 @@ package cs2103.t14j1.logic.smartbar;
 
 import static org.junit.Assert.*;
 
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Set;
 
 import org.junit.Test;
 
@@ -46,6 +46,9 @@ public class SmartParseTest {
 				sec;
 	}
 	
+	private List<Integer>getNumsFromSet(Set<Integer> set){
+		return new LinkedList<Integer>(set);
+	}
 
 	private void setDateTimeToLastSec() {
 		setDateTimeToTime(23, 59, 59);
@@ -208,32 +211,50 @@ public class SmartParseTest {
 	
 	@Test
 	public void moveTask(){
-		sp = new ParseCommand("mv 1 #lulala");
+		sp = new ParseCommand("mv 1 #(lualla)");
 		assertEquals(Commands.MOVE_TASK, sp.extractCommand());
+		assertEquals("lualla", sp.extractListName());
+		assertEquals(1, sp.extractTaskNum().size());
 		
 		sp = new ParseCommand("move 12 #lulala");
 		assertEquals(Commands.MOVE_TASK, sp.extractCommand());
-//		assertEquals(1, (int)sp.extractTaskNum().get(0));
+		assertEquals(1, sp.extractTaskNum().size());
+		assertEquals(12, (int)getNumsFromSet(sp.extractTaskNum()).get(0));
+		
+		sp = new ParseCommand("edit 1,2");	
+		assertEquals(Commands.INVALID, sp.extractCommand());
 	}
 
 	@Test
 	public void editTask(){
 		sp = new ParseCommand("edit 1");
 		assertEquals(Commands.EDIT_TASK, sp.extractCommand());
+		
+		sp = new ParseCommand("edit 1,2");
+		assertEquals(Commands.INVALID, sp.extractCommand());
 	}
 	
 	@Test
 	public void markComplete(){
-		sp = new ParseCommand("1 done");
+		sp = new ParseCommand("1-3,5 done");
 		assertEquals(Commands.MARK_COMPLETE, sp.extractCommand());
-		sp = new ParseCommand("done 1");
+		sp = new ParseCommand("done 1,1~2,5-6");
 		assertEquals(Commands.MARK_COMPLETE, sp.extractCommand());
+		List<Integer> res = getNumsFromSet(sp.extractTaskNum());
+		List<Integer> want = new LinkedList<Integer>();
+		want.add(1);want.add(2);want.add(5);want.add(6);
+		for(int i=0;i<want.size();i++){
+			assertEquals(want.get(i), res.get(i));
+		}
 	}
 	
 	@Test
 	public void markPriority(){
 		sp = new ParseCommand("1 2 3 4 5 !3");
 		assertEquals(Commands.MARK_PRIORITY, sp.extractCommand());
+		List<Integer> res = getNumsFromSet(sp.extractTaskNum());
+		assertEquals(5, res.size());
+		
 		sp = new ParseCommand("1 !4");
 		assertEquals(Commands.INVALID, sp.extractCommand());
 	}
@@ -246,16 +267,18 @@ public class SmartParseTest {
 		assertEquals(Commands.ADD_REMINDER, sp.extractCommand());
 		sp = new ParseCommand("remind 2 deadline");
 		assertEquals(Commands.ADD_REMINDER, sp.extractCommand());
-		sp = new ParseCommand("remind 12 tomorrow");
+		sp = new ParseCommand("remind 12 13 14 tomorrow");
 		assertEquals(Commands.ADD_REMINDER, sp.extractCommand());
-		sp = new ParseCommand("remind 12 tomrrow");
+		assertEquals(3, sp.extractTaskNum().size());
+		sp = new ParseCommand("remind 1,2~5,3 tomrrow");
 		assertEquals(Commands.INVALID, sp.extractCommand());
 	}
 	
 	@Test
 	public void removeReminder(){
-		sp = new ParseCommand("remind 1 cancel");
+		sp = new ParseCommand("remind 1,2~5,3 cancel");
 		assertEquals(Commands.REMOVE_REMINDER, sp.extractCommand());
+		assertEquals(5, sp.extractTaskNum().size());
 		sp = new ParseCommand("remind 1 can");
 		assertEquals(Commands.INVALID, sp.extractCommand());
 	}
@@ -376,7 +399,6 @@ public class SmartParseTest {
 		DateTime.clearTimeFieldForDate(date);date.set(Calendar.SECOND, time);
 		assertTrue(getMessageInTestingTime(),dt.getDateTime().getTime() == time);
 		assertTrue(getMessageInTestingDate(),dt.getDateTime().getDateInDateTypeWithTime().equals(date.getTime()));
-		
 		
 		newDate(); DateTime.clearTimeFieldForDate(date);
 		dt = new DateTimeProcessor("10:30:20pm next Wednesday");

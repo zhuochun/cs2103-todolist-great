@@ -111,7 +111,7 @@ implements
 	}
 
 	private void parseListAndReturnInboxOnNoListNameGiven() {
-		saveOriginalStringToSanitizedCommandAndRemoveExtraSpace();
+		saveOriginalStringToSanitizedCommand();
 		parseListNameAndRemoveParsedStr();
 		if(this.list == null)	this.list = TaskLists.INBOX;
 	}
@@ -122,11 +122,15 @@ implements
 	}
 
 	private void parseTaskNumAndListRelatedCommand() {
-		saveOriginalStringToSanitizedCommandAndRemoveExtraSpace();
+		saveOriginalStringToSanitizedCommand();
 		parseNumList();
 		parseListNameAndRemoveParsedStr();
 		parseNewListName();
 		parsePriorityParam();
+	}
+
+	private void saveOriginalStringToSanitizedCommand() {
+		this.sanitizedCommand = this.originalStr;
 	}
 
 	private void parseNewListName() {
@@ -456,7 +460,7 @@ implements
 	}
 
 	@Override
-	public String extractListName() {
+	public String extractListName(){
 		return this.list;
 	}
 

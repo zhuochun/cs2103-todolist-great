@@ -227,7 +227,7 @@ implements
 	
 	private void parseDuration() {
 		if(regexMatchWithSanitizedCommandAddWordSpacerIgnoreCase(regDurationFormat)){
-			String pureDurationStr = removeLeadingAndTailingBracket(matchedStr);
+			String pureDurationStr = removeLeadingAndTailingBracket(matchedStr).substring(4);
 			Long res = regDurationPartsProess(pureDurationStr);
 			
 			if(res == null)	outputErr("Unsuccessful Duration processing");
@@ -495,7 +495,7 @@ implements
 	public Date extractEndDate(){
 		if(this.endTime.date != null)	return this.endTime.getDateWithTime();
 		else if(this.duration != null && this.startTime.time != null){
-			this.endTime.date = (Calendar) this.startTime.date.clone();
+			this.endTime = this.startTime.clone();
 			this.endTime.addSecToTime(this.duration);
 			return this.endTime.getDateWithTime();
 		} else return null;

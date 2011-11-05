@@ -141,5 +141,14 @@ public class DateTime {
 			dateToShift += 1;
 		}
 	}
+	
+	public DateTime clone(){
+		DateTime res = new DateTime();
+		res.date = (Calendar) this.date.clone();
+		res.time = this.time;
+		res.dateToShift = this.dateToShift;
+		
+		return res;
+	}
 }
 

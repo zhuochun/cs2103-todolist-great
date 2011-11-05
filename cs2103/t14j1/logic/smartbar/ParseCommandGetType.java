@@ -74,11 +74,11 @@ public abstract class ParseCommandGetType extends RegexMatcher{
 		// command can be done directly
 		regexCommandsFormatToMatchAndMarkingParseComplete = new LinkedList<Pair<String,Commands>>();
 		regexCommandsFormatToMatchAndMarkingParseComplete.add(
-				new Pair<String,Commands>("^undo(\\s)*$", Commands.UNDO));
+				new Pair<String,Commands>("^" + regWordSpacer + "*undo" + regWordSpacer + "*$", Commands.UNDO));
 		regexCommandsFormatToMatchAndMarkingParseComplete.add(
-				new Pair<String,Commands>("redo(\\s)*", Commands.REDO));
+				new Pair<String,Commands>("^" + regWordSpacer + "*redo" + regWordSpacer + "*$", Commands.REDO));
 		regexCommandsFormatToMatchAndMarkingParseComplete.add(
-				new Pair<String,Commands>("^exit(\\s)*$", Commands.EXIT));
+				new Pair<String,Commands>("^" + regWordSpacer + "*exit" + regWordSpacer + "*$", Commands.EXIT));
 		
 		
 		// command needs further dealing with
@@ -103,7 +103,7 @@ public abstract class ParseCommandGetType extends RegexMatcher{
 		regexCommandsFormatToMatchWithoutMarkingParseComplete.add(
 				new Pair<String,Commands>(regexDisplayListCommand, Commands.DISPLAY_LISTS));
 		regexCommandsFormatToMatchWithoutMarkingParseComplete.add(
-				new Pair<String,Commands>("^(display|dis)(\\s)*$", Commands.DISPLAY_LISTS));
+				new Pair<String,Commands>("^"+ regWordSpacer +"*(display|dis)"+regWordSpacer+"*$", Commands.DISPLAY_LISTS));
 		
 		
 		regexCommandsFormatToMatchWithoutMarkingParseComplete.add(

@@ -14,6 +14,7 @@ import org.junit.Test;
 
 import cs2103.t14j1.logic.Commands;
 import cs2103.t14j1.storage.Priority;
+import cs2103.t14j1.storage.TaskLists;
 
 /**
  * @author SongYY
@@ -175,15 +176,15 @@ public class SmartParseTest {
 		assertEquals(Commands.SEARCH, sp.extractCommand());
 		assertEquals("songyy", sp.extractTaskName());
 		
-		sp = new ParseCommand("/after tomorrow before 13th,Dec; #(mumama) @gov !3");
+		sp = new ParseCommand("/hero after tomorrow before 13th,Dec,2013 #(mumama) @gov !3");
 		assertEquals(Commands.SEARCH, sp.extractCommand());
-		assertEquals("", sp.extractTaskName());
+		assertEquals("hero", sp.extractTaskName());
 		newDate();DateTime.clearTimeFieldForDate(date);dateAdd(1);
 		assertEquals(date.getTime(), sp.extractSearchAfterDate());
 		assertEquals("mumama", sp.extractListName());
 		assertEquals("gov", sp.extractPlace());
 		assertEquals(Priority.LOW,sp.extractPriority());
-		date.set(currentYear, Calendar.DECEMBER, 13);
+		date.set(2013, Calendar.DECEMBER, 13);
 		setDateTimeToLastSec();
 		assertEquals(date.getTime(), sp.extractSearchBeforeDate());
 	}
@@ -326,6 +327,10 @@ public class SmartParseTest {
 		assertEquals(Commands.INVALID, sp.extractCommand());
 		sp = new ParseCommand("rename #(flyfy1 songyy) #(luala)");
 		assertEquals(Commands.RENAME_LIST, sp.extractCommand());
+		assertEquals("flyfy1 songyy", sp.extractListName());
+		assertEquals("luala", sp.extractNewListName());
+		sp = new ParseCommand("rename #(flyfy1 songyy) #");
+		assertEquals(Commands.INVALID, sp.extractCommand());
 	}
 	
 	@Test
@@ -340,10 +345,13 @@ public class SmartParseTest {
 	public void switchList(){
 		sp = new ParseCommand("#abc");
 		assertEquals(Commands.SWITCH_LIST, sp.extractCommand());
+		assertEquals("abc", sp.extractListName());
 		sp = new ParseCommand("#(abc)");
 		assertEquals(Commands.SWITCH_LIST, sp.extractCommand());
+		assertEquals("abc", sp.extractListName());
 		sp = new ParseCommand("#");	
 		assertEquals(Commands.SWITCH_LIST, sp.extractCommand());
+		assertEquals(TaskLists.INBOX, sp.extractListName());
 	}
 	
 	@Test
@@ -352,20 +360,24 @@ public class SmartParseTest {
 		assertEquals(Commands.DISPLAY_LISTS, sp.extractCommand());
 		sp = new ParseCommand("display");
 		assertEquals(Commands.DISPLAY_LISTS, sp.extractCommand());
+		assertEquals(TaskLists.INBOX, sp.extractListName());
 		sp = new ParseCommand("dis #(abc)");	
 		assertEquals(Commands.DISPLAY_LISTS, sp.extractCommand());
 	}
 	
 	@Test
 	public void displayTask(){
-		sp = new ParseCommand("dis 1");
+		sp = new ParseCommand("dis 1,2,3,5~100");
 		assertEquals(Commands.DISPLAY_TASK, sp.extractCommand());
+		assertEquals(99, sp.extractTaskNum().size());
 	}
 	
 	@Test
 	public void testOneStatementCommands(){
 		sp = new ParseCommand("undo");
 		assertEquals(Commands.UNDO, sp.extractCommand());
+		sp = new ParseCommand("undoo");
+		assertEquals(Commands.INVALID, sp.extractCommand());
 		
 		sp = new ParseCommand("exit");
 		assertEquals(Commands.EXIT, sp.extractCommand());
@@ -381,6 +393,9 @@ public class SmartParseTest {
 		
 		sp = new ParseCommand("redo\n");
 		assertEquals(Commands.REDO, sp.extractCommand());
+		
+		sp = new ParseCommand("redoo \n");
+		assertEquals(Commands.INVALID, sp.extractCommand());
 	}
 	
 	@Test

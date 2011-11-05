@@ -1,6 +1,7 @@
 package cs2103.t14j1.logic;
 
 import java.util.Date;
+import java.util.Set;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -96,11 +97,11 @@ public class ControlGUI {
                 case ADD_TASK:
                     addTask(createTask());
                     break;
-                case DELETE_TASK:
-                    deleteTask(getTaskIdx());
+                case DELETE_TASK: // support multiple index
+                    deleteTasks(getTaskIds());
                     break;
-                case MOVE_TASK:
-                    moveTask(getTaskIdx(), getListName());
+                case MOVE_TASK: // support multiple index
+                    moveTasks(getTaskIds(), getListName());
                     break;
                 case EDIT_TASK:
                     editTask(getTaskIdx());
@@ -111,11 +112,11 @@ public class ControlGUI {
                 case REMOVE_REMINDER:
                     removeReminder(getTaskIdx());
                     break;
-                case MARK_COMPLETE:
-                    toggleStatus(getTaskIdx(), Task.COMPLETED);
+                case MARK_COMPLETE: // support multiple index
+                    toggleStatuses(getTaskIds(), Task.COMPLETED);
                     break;
-                case MARK_PRIORITY:
-                    togglePriority(getTaskIdx(), getNewTaskPriority());
+                case MARK_PRIORITY: // support multiple index
+                    togglePriorities(getTaskIds(), getNewTaskPriority());
                     break;
                 case ADD_LIST:
                     addList(getListName());
@@ -154,6 +155,11 @@ public class ControlGUI {
     public void moveTask(int index, String listName) {
         Event newEvent = Event.generateEvent(Commands.MOVE_TASK);
         registerEvent(newEvent, index, listName);
+    }
+
+    private void moveTasks(Integer[] taskIds, String listName) {
+        Event bulk = Event.generateEvent(Commands.BULK);
+        registerEvent(bulk, Commands.MOVE_TASK, taskIds, listName);
     }
 
     public void addReminder(int index, Reminder parameter) {
@@ -200,9 +206,19 @@ public class ControlGUI {
         registerEvent(newEvent, index, newStatus);
     }
 
+    private void toggleStatuses(Integer[] taskIds, boolean completed) {
+        Event bulk = Event.generateEvent(Commands.BULK);
+        registerEvent(bulk, Commands.MARK_COMPLETE, taskIds, completed);
+    }
+
     public void togglePriority(int index, Priority newPriority) {
         Event newEvent = Event.generateEvent(Commands.MARK_PRIORITY);
         registerEvent(newEvent, index, newPriority);
+    }
+
+    private void togglePriorities(Integer[] taskIds, Priority newPriority) {
+        Event bulk = Event.generateEvent(Commands.BULK);
+        registerEvent(bulk, Commands.MARK_PRIORITY, taskIds, newPriority);
     }
 
     public void editList(String oldlist, String newlist) {
@@ -213,6 +229,11 @@ public class ControlGUI {
     public void deleteTask(int taskIdx) {
         Event newEvent = Event.generateEvent(Commands.DELETE_TASK);
         registerEvent(newEvent, taskIdx);
+    }
+
+    private void deleteTasks(Integer[] taskIds) {
+        Event bulk = Event.generateEvent(Commands.BULK);
+        registerEvent(bulk, Commands.DELETE_TASK, taskIds);
     }
 
     public void doSearch(TaskList searchResult) {
@@ -346,15 +367,29 @@ public class ControlGUI {
     }
 
     /**
-     * if the user's command is DELETE_TASK/EDIT_TASK/MARK_COMPLETE/MARK_PRIORITY
-     * GUI will call this method to get the index the user entered
-     * 
-     * @return the index the user entered
+     * EDIT_TASK, DISPLAY_TASK
      */
     public int getTaskIdx() {
-        int taskNum = parseCommand.extractTaskNum();
+        Set<Integer> taskNumSet = parseCommand.extractTaskNum();
 
-        return taskNum;
+        Integer[] taskNums = (Integer[]) taskNumSet.toArray(new Integer[taskNumSet.size()]);
+        
+        return taskNums[0];
+    }
+    
+    /**
+     * MOVE_TASK, DELETE_TASK, MARK_COMPLETE
+     */
+    public Integer[] getTaskIds() {
+        Set<Integer> taskNumSet = parseCommand.extractTaskNum();
+
+        Integer[] taskNums = (Integer[]) taskNumSet.toArray(new Integer[taskNumSet.size()]);
+        
+        for (int i : taskNums) {
+            System.out.print(i + " -> ");
+        }
+        
+        return taskNums;
     }
 
     /**

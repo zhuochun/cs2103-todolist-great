@@ -5,6 +5,7 @@ cs2103/t14j1/storage/TaskLists.java.orig
 cs2103/t14j1/logic/Control.java.orig
 cs2103/t14j1/storage/Task.java.bak
 cs2103/t14j1/storage/Task.java.orig
+cs2103/t14j1/taskmeter/calendarView/TestArr.java
 syntax: regexp
 ^.*java.bak
 ^.*java.orig

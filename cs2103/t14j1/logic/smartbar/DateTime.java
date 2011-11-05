@@ -119,40 +119,16 @@ public class DateTime {
 	}
 
 	public void optionallyAddOneDayBasedOnCurrentTime() {
+		if(this.date == null)	return;
+		
 		if(currentTime.isTimeInTheAfterNoon() &&
 				!this.isTimeInTheAfterNoon()){
 			this.date.add(Calendar.DATE, 1);
 		}
 	}
+
+	public void setDateToBeCurrentTime() {
+		this.date = Calendar.getInstance();
+	}
 }
 
-
-/*
-class Time implements Comparable<Time>{
-	private Long time = null;
-	
-	Time(){
-		this.time = null;
-	}
-	
-	Time(Long time){
-		this.time = time;
-	}
-	
-	public void setTime(Long time){
-		this.time = time;
-	}
-	
-	public void setTime(Integer time){
-		this.time = (long)time;
-	}
-	
-	public Long getTime(){
-		return this.time;
-	}
-	
-	public int compareTo(Time b){
-		return (int)(this.getTime() - b.getTime());
-	}
-}
-*/

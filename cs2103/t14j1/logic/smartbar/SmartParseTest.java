@@ -68,10 +68,12 @@ public class SmartParseTest {
 	
 	@Test
 	public void addBasicTask(){
-		sp = new ParseCommand("Add basic task !3");
+		sp = new ParseCommand("Add basic task !3 3am");
 		assertEquals(Commands.ADD_TASK, sp.extractCommand());
 		assertEquals("basic task",sp.extractTaskName());
 		assertEquals(Priority.LOW,sp.extractPriority());
+		newDate();setDateTimeToTime(3, 0, 0);
+		assertEquals(date.getTime(),sp.extractStartDate());
 		
 		sp = new ParseCommand("Add basic task #home ! 1 4pm ~ 7pm by tomorrow @home");
 		assertEquals(Commands.ADD_TASK, sp.extractCommand());

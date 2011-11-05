@@ -476,6 +476,8 @@ implements
 
 	@Override
 	public Date extractStartDate() {
+		if(this.startTime.date == null)	this.startTime.setDateToBeCurrentTime();
+		startTime.optionallyAddOneDayBasedOnCurrentTime();
 		return this.startTime.getDateWithTime();
 	}
 

@@ -106,11 +106,11 @@ public class ControlGUI {
                 case EDIT_TASK:
                     editTask(getTaskIdx());
                     break;
-                case ADD_REMINDER:
-                    addReminder(getTaskIdx(), getReminderParameter());
+                case ADD_REMINDER: // support multiple index
+                    addReminder(getTaskIds(), getReminderParameter());
                     break;
-                case REMOVE_REMINDER:
-                    removeReminder(getTaskIdx());
+                case REMOVE_REMINDER: // support multiple index
+                    removeReminder(getTaskIds());
                     break;
                 case MARK_COMPLETE: // support multiple index
                     toggleStatuses(getTaskIds(), Task.COMPLETED);
@@ -166,25 +166,23 @@ public class ControlGUI {
         try {
             Task task = eventHandler.getTask(index);
 
-            Date remindTime = null;
-
-            switch (parameter) {
-                case START:
-                    remindTime = task.getStartDateTime();
-                    break;
-                case END:
-                    remindTime = task.getEndDateTime();
-                    break;
-                case DEADLINE:
-                    remindTime = task.getDeadline();
-                    break;
-                case CUSTOM:
-                    remindTime = getReminderTime();
-                    break;
-            }
-
             Event newEvent = Event.generateEvent(Commands.ADD_REMINDER);
-            registerEvent(newEvent, task, remindTime);
+            registerEvent(newEvent, task, parameter, getReminderTime());
+        } catch (IndexOutOfBoundsException e) {
+            eventHandler.setStatus(e.getMessage());
+        }
+    }
+
+    private void addReminder(Integer[] taskIds, Reminder parameter) {
+        try {
+            Task[] tasks = new Task[taskIds.length];
+            
+            for (int i = 0; i < taskIds.length; i++) {
+                tasks[i] = eventHandler.getTask(taskIds[i]);
+            }
+            
+            Event bulk = Event.generateEvent(Commands.BULK);
+            registerEvent(bulk, Commands.ADD_REMINDER, tasks, parameter, getReminderTime());
         } catch (IndexOutOfBoundsException e) {
             eventHandler.setStatus(e.getMessage());
         }
@@ -199,6 +197,22 @@ public class ControlGUI {
         } catch (IndexOutOfBoundsException e) {
             eventHandler.setStatus(e.getMessage());
         }
+    }
+
+    private void removeReminder(Integer[] taskIds) {
+        try {
+            Task[] tasks = new Task[taskIds.length];
+            
+            for (int i = 0; i < taskIds.length; i++) {
+                tasks[i] = eventHandler.getTask(taskIds[i]);
+            }
+            
+            Event bulk = Event.generateEvent(Commands.BULK);
+            registerEvent(bulk, Commands.REMOVE_REMINDER, tasks);
+        } catch (IndexOutOfBoundsException e) {
+            eventHandler.setStatus(e.getMessage());
+        }
+        
     }
 
     public void toggleStatus(int index, Boolean newStatus) {
@@ -510,14 +524,12 @@ public class ControlGUI {
     }
 
     public Reminder getReminderParameter() {
-        Reminder parameter = parseCommand.getRemindParamter();
-        return parameter;
+        return parseCommand.getRemindParamter();
 
     }
 
     public Date getReminderTime() {
-        Date reminderTime = parseCommand.getRemindTime();
-        return reminderTime;
+        return parseCommand.getRemindTime();
     }
 
     public boolean hasUndo() {

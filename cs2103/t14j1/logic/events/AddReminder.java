@@ -4,6 +4,7 @@ import java.util.Date;
 
 import cs2103.t14j1.logic.DateFormat;
 import cs2103.t14j1.storage.Task;
+import cs2103.t14j1.taskmeter.reminder.Reminder;
 
 /**
  * a add reminder event
@@ -16,9 +17,28 @@ public class AddReminder extends Event {
     Task task;
     Date remindTime;
 
+    /**
+     * task, Remind type, Date (if type is CUSTOM)
+     */
     public void register(Object... objs) {
         task = (Task) objs[0];
-        remindTime = (Date) objs[1];
+        
+        Reminder parameter = (Reminder) objs[1];
+        
+        switch (parameter) {
+            case START:
+                remindTime = task.getStartDateTime();
+                break;
+            case END:
+                remindTime = task.getEndDateTime();
+                break;
+            case DEADLINE:
+                remindTime = task.getDeadline();
+                break;
+            case CUSTOM:
+                remindTime = (Date) objs[2];
+                break;
+        }
     }
 
     public boolean execute() {

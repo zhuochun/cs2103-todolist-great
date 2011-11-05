@@ -5,7 +5,7 @@ import java.util.Date;
 import cs2103.t14j1.logic.Commands;
 import cs2103.t14j1.storage.Priority;
 
-public interface ParseAddTaskCommand {
+public interface IParseAddTaskCommand {
 public Commands extractCommand();
 	public String extractTaskName();
 	public String extractListName();

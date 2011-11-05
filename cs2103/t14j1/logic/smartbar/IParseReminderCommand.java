@@ -5,7 +5,7 @@ import java.util.Date;
 import cs2103.t14j1.logic.Commands;
 import cs2103.t14j1.taskmeter.reminder.Reminder;
 
-public interface ParseReminderCommand {
+public interface IParseReminderCommand {
 	public Commands extractCommand();
 	
 	/** called when it's "rename list"

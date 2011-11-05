@@ -17,7 +17,6 @@ import cs2103.t14j1.logic.Commands;
 public abstract class ParseCommandGetType extends RegexMatcher{
 	protected boolean parsingCompleted = false;
 	protected Commands commandType;
-	protected String originalCommand;
 	
 	/**
 	 * The string removed the unnecessary part, for example:
@@ -41,7 +40,7 @@ public abstract class ParseCommandGetType extends RegexMatcher{
 	public ParseCommandGetType(String command) {
 		super(command);
 		// save the original command string
-		this.originalCommand = command;
+		this.originalStr = command;
 		
 		firstLevelCommandParsing();
 	}
@@ -49,7 +48,7 @@ public abstract class ParseCommandGetType extends RegexMatcher{
 	private void firstLevelCommandParsing(){
 		addCommandRegexFormatToCommandTypeMapping();
 		
-		if(originalCommand == null){
+		if(originalStr == null){
 			this.commandType = Commands.INVALID;
 		}
 		
@@ -135,7 +134,7 @@ public abstract class ParseCommandGetType extends RegexMatcher{
 
 	private boolean handleMatchedCommandWithRegexFormat(Pair<String,Commands> regexCommandPair){
 		if(regexMatchedStrAndSaveMatchedStr(regexCommandPair.first,
-				originalCommand,IGNORE_CASE)){
+				originalStr,IGNORE_CASE)){
 			this.commandType = regexCommandPair.second;
 			return true;
 		} else{
@@ -144,6 +143,6 @@ public abstract class ParseCommandGetType extends RegexMatcher{
 	}
 
 	private void removeMatchedStringFromOriginalCommand() {
-		this.sanitizedCommand = this.originalCommand.replace(this.matchedStr, "");
+		this.sanitizedCommand = this.originalStr.replace(this.matchedStr, "");
 	}
 }

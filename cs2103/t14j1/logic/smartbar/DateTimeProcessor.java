@@ -12,11 +12,6 @@ import java.util.regex.Pattern;
  */
 class DateTimeProcessor extends RegexMatcher{
 	
-	static int SEC_PER_MINUTE 	= 60;
-	static int SEC_PER_HOUR		= 3600;
-	static int HOUR_PER_HALF_DAY= 12;
-	static int HOUR_PER_DAY		= 24;
-	
 	private String operatingDateTimeStr;
 	private DateTime dateTime = new DateTime();
 	private Calendar dateToSubstituteOnNoDateStr;
@@ -38,25 +33,14 @@ class DateTimeProcessor extends RegexMatcher{
 	public DateTime getDateTime(){
 		if(dateTimeProecssed){
 			return this.dateTime;
-		} else{
-			processTime();
-			processDate();
-			mergeProcessedDateTime();
-			dateTimeProecssed = true;
-			return this.dateTime;
 		}
+	
+		processTime();
+		processDate();
+		dateTimeProecssed = true;
+		return this.dateTime;
 	}
 	
-	private void mergeProcessedDateTime() {
-		if(this.dateTime.date == null){
-			if(dateToSubstituteOnNoDateStr != null){
-				this.dateTime.setDate((Calendar) dateToSubstituteOnNoDateStr.clone());
-			} else{	// default to today
-				this.dateTime.setDate(Calendar.getInstance());
-			}
-		}
-	}
-
 	private void processTime() {
 		if(regexMatchesWholeWorldAndSaveMatchedStr(regTimeFormat)){
 			this.dateTime.setTime(regGetTimeFromPureTimeStr(matchedStr));
@@ -175,7 +159,7 @@ class DateTimeProcessor extends RegexMatcher{
 
 	private boolean regexMatchesWholeWorldAndSaveMatchedStr(String regex) {
 		return regexMatchedStrAndSaveMatchedStr(
-				regexWordSpacer + regex + regexWordSpacer, 
+				regWordSpacer + regex + regWordSpacer, 
 				this.operatingDateTimeStr, 
 				IGNORE_CASE);
 	}
@@ -193,7 +177,7 @@ class DateTimeProcessor extends RegexMatcher{
 		if(pureTimeStr.contains("at "))	pureTimeStr = pureTimeStr.replace("at ", "");
 		
 		// capture the [a|p]m. 
-		if(pureTimeStr.contains("pm"))	time += HOUR_PER_HALF_DAY * SEC_PER_HOUR;
+		if(pureTimeStr.contains("pm"))	time += DateTime.HOUR_PER_HALF_DAY * DateTime.SEC_PER_HOUR;
 		
 		// remove the am/pm tag
 		String[] purifiedTime = pureTimeStr.split("[a|p]m");
@@ -219,7 +203,7 @@ class DateTimeProcessor extends RegexMatcher{
 		Calendar date = Calendar.getInstance();
 		
 		// spacer is here
-		String[] dayInfo = weekDStr.split(regexWordSpacer);
+		String[] dayInfo = weekDStr.split(regWordSpacer);
 		weekDStr = dayInfo[dayInfo.length - 1];
 		
 		boolean nextWeek = false;

@@ -1,6 +1,6 @@
 package cs2103.t14j1.logic.smartbar;
 
-import java.util.List;
+import java.util.Set;
 
 import cs2103.t14j1.logic.Commands;
 
@@ -11,7 +11,7 @@ import cs2103.t14j1.logic.Commands;
  * @author SongYY
  *
  */
-public interface ParseTaskNumRelatedCommand {
+public interface IParseTaskNumRelatedCommand {
 	public Commands extractCommand();
-	public List<Integer> extractTaskNum();
+	public Set<Integer> extractTaskNum();
 }

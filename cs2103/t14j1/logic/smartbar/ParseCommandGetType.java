@@ -122,7 +122,7 @@ public abstract class ParseCommandGetType extends RegexMatcher{
 				new Pair<String,Commands>(regReminderGeneralCmd, Commands.ADD_REMINDER));
 		regexCommandsFormatToMatchWithoutMarkingParseComplete.add(
 				new Pair<String,Commands>(regReminderNumOnly, Commands.ADD_REMINDER));
-		regexCommandsFormatToMatchAndMarkingParseComplete.add(
+		regexCommandsFormatToMatchWithoutMarkingParseComplete.add(
 				new Pair<String,Commands>(regRemoveReminder, Commands.REMOVE_REMINDER));
 			
 			// These are the less restrictive ones; should check in the end

@@ -4,9 +4,8 @@ public class Helps {
     
     private static int index = 0;
     
-    // TODO: try to write as many as tips)
     private static final String[] tips = {
-        "Welcome to TaskMeter, press global hotkey \"Ctrl + Alt + T\" to open or minimize TaskMeter window.",
+        "Welcome to TaskMeter, you can press global hotkey \"F6\" to open or hide TaskMeter window.",
         "Alternatively, typing \"add + spacebar + Task\" onto TaskMeter smartbar also works fine.",
         "In addition to Task, Location, Date/Time, Duration, List and Priority of a task can be specified.",
         "TaskMeter awares it's important to know the location of your appointment; An easy way to do so is provided (next tip).",
@@ -32,8 +31,8 @@ public class Helps {
         "TaskMeter adopts color-coding to make it easier for users to distinguish different type of tasks.",
         "WHITE = DEFAULT. A task in white has nothing special.",
         "RED = IMPORTANT. A task in red has high priority.",
-        "PURPLE = OVERDUE. A task in purple shows that you’ve missed its deadline.",
-        "GREY = COMPLETE. A task in grey is the task you’ve completed."
+        "PURPLE = OVERDUE. A task in purple shows that you've missed its deadline.",
+        "GREY = COMPLETE. A task in grey is the task you've completed."
     };
     
     /**

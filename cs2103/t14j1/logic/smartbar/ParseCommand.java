@@ -1,16 +1,13 @@
 package cs2103.t14j1.logic.smartbar;
 
 import java.util.Calendar;
-import java.util.Collection;
 import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
 import java.util.TreeSet;
 
-import cs2103.t14j1.logic.Commands;
 import cs2103.t14j1.storage.Priority;
-import cs2103.t14j1.storage.TaskList;
 import cs2103.t14j1.storage.TaskLists;
 import cs2103.t14j1.taskmeter.reminder.Reminder;
 
@@ -24,7 +21,7 @@ implements
 	private DateTime startTime = new DateTime();
 	private DateTime endTime = new DateTime();
 	
-	private Integer duration = null;
+	private Long duration = null;
 	private Priority priority = null;
 	private String place = null;
 	private String list;
@@ -226,7 +223,7 @@ implements
 	private void parseDuration() {
 		if(regexMatchWithSanitizedCommandAddWordSpacerIgnoreCase(regDurationFormat)){
 			String pureDurationStr = removeLeadingAndTailingBracket(matchedStr);
-			Integer res = regDurationPartsProess(pureDurationStr);
+			Long res = regDurationPartsProess(pureDurationStr);
 			
 			if(res == null)	outputErr("Unsuccessful Duration processing");
 			duration = res;
@@ -237,9 +234,9 @@ implements
 		}
 	}
 	
-	private static Integer regDurationPartsProess(String durationStr){
+	private static Long regDurationPartsProess(String durationStr){
 		String durationParts[] = durationStr.trim().split("\\ ");
-		int res = 0;
+		long res = 0;
 		
 		// then try to tell the duration information
 		for(int i=0; i<durationParts.length; i+=2){
@@ -479,12 +476,12 @@ implements
 	}
 
 	@Override
-	public Integer extractStartTime() {
+	public Long extractStartTime() {
 		return this.startTime.time;
 	}
 
 	@Override
-	public Integer extractDuration() {
+	public Long extractDuration() {
 		return this.duration;
 	}
 
@@ -494,7 +491,7 @@ implements
 	}
 
 	@Override
-	public Integer extractEndTime() {
+	public Long extractEndTime() {
 		return this.endTime.getTime();
 	}
 
@@ -504,7 +501,7 @@ implements
 	}
 
 	@Override
-	public Integer extractDeadlineTime() {
+	public Long extractDeadlineTime() {
 		return this.deadlineTime.getTime();
 	}
 }

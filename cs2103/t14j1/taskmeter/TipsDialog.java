@@ -16,6 +16,12 @@ import org.eclipse.wb.swt.SWTResourceManager;
 
 import cs2103.t14j1.storage.user.Helps;
 
+/**
+ * display tips and tricks, it refers to storage.user.helps
+ * 
+ * @author Zhuochun
+ *
+ */
 public class TipsDialog extends Dialog {
 
     protected Shell shell;

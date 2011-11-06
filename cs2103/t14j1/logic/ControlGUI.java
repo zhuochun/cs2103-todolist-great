@@ -541,7 +541,10 @@ public class ControlGUI {
     }
 
     public void undo() {
-        assert(undoManager.hasUndo());
+        if (!hasUndo()) {
+            eventHandler.setStatus(eventHandler.getMsg("msg.null.undo"));
+            return ;
+        }
 
         Event lastEvent = undoManager.getUndo();
         Event redo = lastEvent.undo();
@@ -552,7 +555,10 @@ public class ControlGUI {
     }
 
     public void redo() {
-        assert(undoManager.hasRedo());
+        if (!hasRedo()) {
+            eventHandler.setStatus(eventHandler.getMsg("msg.null.redo"));
+            return ;
+        }
 
         Event lastEvent = undoManager.getRedo();
         Event undo = lastEvent.undo();

@@ -11,7 +11,7 @@ import cs2103.t14j1.storage.gCal.GCalSyn;
 /**
  * a basic task list and its properties
  * 
- * @author Zhuochun
+ * @author Zhuochun, Shusbham
  * 
  */
 public class TaskList implements Iterable<Task> {

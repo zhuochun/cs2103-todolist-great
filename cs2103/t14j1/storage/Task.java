@@ -9,7 +9,7 @@ import cs2103.t14j1.storage.user.User;
 /**
  * a basic Task and its properties
  * 
- * @author Zhuochun
+ * @author Zhuochun, Shubham
  * 
  */
 public class Task implements Comparable<Object> {

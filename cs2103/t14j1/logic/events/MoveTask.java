@@ -51,7 +51,10 @@ public class MoveTask extends Event {
 
             eventHandler.setModified();
             eventHandler.refreshAll();
-            eventHandler.switchToTask(task.getList());
+            
+            if (!newListName.equals(TaskLists.TRASH)) {
+                eventHandler.switchToTask(task.getList());
+            }
 
             success  = true;
             feedback = String.format(eventHandler.getMsg("msg.MOVE"), task.getName(), newListName);

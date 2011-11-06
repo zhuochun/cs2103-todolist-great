@@ -14,10 +14,10 @@ import cs2103.t14j1.storage.user.User;
  * @author Zhuochun
  */
 public class When implements Comparable<Object> {
-    public Calendar startDateTime;
-    public Calendar endDateTime;
-    public Calendar deadline;
-    public Boolean  isAllDay;
+    private Calendar startDateTime;
+    private Calendar endDateTime;
+    private Calendar deadline;
+    private Boolean  isAllDay;
     
     public static final boolean ALL_DAY_TASK   = true;
     public static final boolean DATE_TIME_TASK = false;

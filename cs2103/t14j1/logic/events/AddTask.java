@@ -50,25 +50,25 @@ public class AddTask extends Event {
     }
 
     public Event undo() {
-        // if addTask created a newList, undo should remove the list
-        if (listname != null) {
-            Event del = new DeleteList();
-            del.setEventLisnter(eventHandler);
-            del.register(listname);
-            
-            if (!del.execute()) {
-                return null;
-            }
-        }
-        
         Event undo = new DeleteTask();
         undo.setEventLisnter(eventHandler);
 
         undo.register(task);
-        
+
         boolean success = undo.execute();
-        
+
         if (success) {
+            // if addTask created a newList, undo should remove the list
+            if (listname != null) {
+                Event del = new DeleteList();
+                del.setEventLisnter(eventHandler);
+                del.register(listname);
+
+                if (!del.execute()) {
+                    return null;
+                }
+            }
+
             return undo;
         } else {
             return null;

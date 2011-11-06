@@ -9,7 +9,7 @@ import java.util.List;
 /**
  * a basic task list and its properties
  * 
- * @author Zhuochun
+ * @author Zhuochun, Shusbham
  * 
  */
 public class TaskList implements Iterable<Task> {

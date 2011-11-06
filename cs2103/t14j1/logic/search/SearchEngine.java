@@ -13,6 +13,11 @@ import cs2103.t14j1.storage.TaskList;
 import cs2103.t14j1.storage.TaskLists;
 import cs2103.t14j1.storage.When;
 
+/**
+ * This class is responsible for searching
+ * @author Shubham Goyal
+ *
+ */
 public class SearchEngine {
     
     private TaskLists lists; // stores a copy of the lists
@@ -76,6 +81,7 @@ public class SearchEngine {
     		Iterator<Entry<String, TaskList>> iterator = lists.iterator();
         	while (iterator.hasNext()) {
         		TaskList taskList = iterator.next().getValue();
+        		//The results which have been deleted are not included unless the user specifically asks for them.
         		if(!(taskList.getName().compareTo("Trash") == 0))
         			searchLists.add(taskList);
         	}

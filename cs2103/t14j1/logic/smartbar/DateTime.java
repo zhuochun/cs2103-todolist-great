@@ -39,6 +39,8 @@ public class DateTime {
 		if(date == null)	return null;
 		setTimeOfDateToTime();
 		date.add(Calendar.DATE, dateToShift);
+		dateToShift = 0;
+		
 		return date.getTime();
 	}
 	
@@ -104,14 +106,19 @@ public class DateTime {
 	}
 
 	public boolean isTimeInTheAfterNoon() {
-		return this.time < HOUR_PER_HALF_DAY * SEC_PER_HOUR;
+		if(this.time == null)	return false;
+		
+		return this.time > HOUR_PER_HALF_DAY * SEC_PER_HOUR;
 	}
 
 	public static DateTime getInstance() {
 		DateTime res = new DateTime();
-		res.date = Calendar.getInstance();
-		res.time = 
-			(res.date.getTimeInMillis()/1000) % (HOUR_PER_DAY * SEC_PER_HOUR);
+		Calendar current =Calendar.getInstance(); 
+		res.date = current;
+		res.time = (long) current.get(Calendar.SECOND);
+		res.time += (long) current.get(Calendar.MINUTE) * SEC_PER_MINUTE;
+		res.time += (long) current.get(Calendar.HOUR_OF_DAY) * SEC_PER_HOUR;
+		
 		return res;
 	}
 
@@ -149,6 +156,14 @@ public class DateTime {
 		res.dateToShift = this.dateToShift;
 		
 		return res;
+	}
+
+	public boolean isToday() {
+		for(int i=Calendar.ERA;i<Calendar.DAY_OF_WEEK_IN_MONTH;i++){
+			if(date.get(i) != currentTime.date.get(i))	return false;
+		}
+		
+		return true;
 	}
 }
 

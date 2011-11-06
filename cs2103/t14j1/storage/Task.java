@@ -3,7 +3,6 @@ package cs2103.t14j1.storage;
 import java.util.Date;
 
 import cs2103.t14j1.logic.DateFormat;
-import cs2103.t14j1.storage.gCal.GCalSyn;
 import cs2103.t14j1.storage.user.User;
 
 /**
@@ -24,7 +23,7 @@ public class Task implements Comparable<Object> {
     private boolean     status;      // completed or not
     
     // additional parameter to note if it's to be synced with gCalendar
-    private int syncWithGCal = GCalSyn.NOT_SYN;
+    //private int syncWithGCal = GCalSyn.NOT_SYN;
     private String gCalId    = null;
 	private Date lastEditTime;
 

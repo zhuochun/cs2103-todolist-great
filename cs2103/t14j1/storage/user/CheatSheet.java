@@ -3,22 +3,41 @@ package cs2103.t14j1.storage.user;
 public class CheatSheet {
     
     private static final String[] categories = {
-        "User", "Edit", "Setting" // TODO: fill this up
+        "Global", "User", "Edit", "Windows", "Setting", "Tips" // TODO: fill this up
     };
     
     private static final String[][] categoryItems  = {
-        { // "User"
-            "Add New List - Ctrl + L"
+    	{ // "Global"
+            // TODO: change and fill this up
+    		"Hide/Show TaskMeter - F6",
+    		"Focus at SmartBar - Ctrl + K",
+    		"Focus at Task Table - Ctrl + T",
+    		"Focus at List Table - Ctrl + I"
+        },
+    	{ // "User"
+            "Add New List - Ctrl + L",
+            "Add New Task - Ctrl + N",
+            "Save - Ctrl + S",
+            "Search - Ctrl + F"
         },
         { // "Edit"
-            // TODO: change and fill this up
-            "Add New List - Ctrl + L"
+            "Undo - Ctrl + Z",
+            "Redo - Ctrl + Y",
+            "Delete Task/List - Del",
+            "Edit Task/List - Ctrl + E",
+            "Toggle Status - Ctrl + D",
+            "Activate Reminder - Ctrl + R",
+            "Change Priority - Ctrl + PRIORITY (1 or 2 or 3)"
+        },
+        { // "Windows"
+            "Toggle between Quick Add View/Full View - Ctrl + M"
         },
         { // "Setting"
-            // TODO: change and fill this up
-            "Add New List - Ctrl + L"
+            "Toggle Auto Completion - Ctrl + 0"
+        },
+        { // "Tips"
+            "Get Tips - Ctrl + L"
         }
-        // add more
     };
     
     public static String[] getCategories() {

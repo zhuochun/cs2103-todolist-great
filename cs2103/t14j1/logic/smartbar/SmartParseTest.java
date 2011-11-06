@@ -383,10 +383,10 @@ public class SmartParseTest {
 	public void renameList(){
 		sp = new ParseCommand("rename #abc");
 		assertEquals(Commands.INVALID, sp.extractCommand());
-		sp = new ParseCommand("rename #(flyfy1 songyy) #(luala)");
+		sp = new ParseCommand("rename #(flyfy1 songyy) #luala1");
 		assertEquals(Commands.RENAME_LIST, sp.extractCommand());
 		assertEquals("flyfy1 songyy", sp.extractListName());
-		assertEquals("luala", sp.extractNewListName());
+		assertEquals("luala1", sp.extractNewListName());
 		sp = new ParseCommand("rename #(flyfy1 songyy) #");
 		assertEquals(Commands.INVALID, sp.extractCommand());
 	}

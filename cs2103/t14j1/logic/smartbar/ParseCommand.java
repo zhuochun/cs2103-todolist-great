@@ -108,7 +108,7 @@ implements
 		} else if(reminderParamStr.equalsIgnoreCase("deadline")){
 			this.reminderType = Reminder.DEADLINE;
 		} else{
-			this.reminderType = Reminder.START;
+			this.reminderType = cs2103.t14j1.storage.user.User.getDefaultReminder();
 		}
 	}
 

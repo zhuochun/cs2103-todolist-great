@@ -86,7 +86,7 @@ class RegexMatcher {
 			")";
 	
 	
-	protected static final String regDurationFormat = "(for(\\ [\\d]+\\ " + regTimeUnit + ")+)";
+	protected static final String regDurationFormat = "(for(" + regWordSpacer +"*[\\d]+" + regTimeUnit + ")+)";
 	protected static final String regReminderAfterTimeFormat = "(in(\\ [\\d]+\\ " + regTimeUnit + ")+)";
 	protected static final String regPlaceFormat = 
 		"((@[\\w\\d]+)|(@\\([^\\)]+\\)))";	// format: @ + word; or: @ + (words)

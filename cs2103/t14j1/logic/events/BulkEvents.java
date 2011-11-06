@@ -60,6 +60,7 @@ public class BulkEvents extends Event {
         int successCount = 0;
         int failedCount  = 0;
         
+        // perform undo
         for (Event e : undoEvents) {
             Event undo = e.undo();
             
@@ -71,17 +72,21 @@ public class BulkEvents extends Event {
             }
         }
         
+        // determine success
+        if (events.size() > 0) {
+            success = true;
+        } else {
+            success = false;
+        }
+        
+        // print result if necessary
         if (suppress) {
             StringBuilder feedback = new StringBuilder();
             feedback.append("Undo/Redo Bulk Events -> ");
             
             if (events.size() == 0) {
-                success = false;
-                
                 feedback.append("failed");
             } else {
-                success = true;
-                
                 feedback.append("succeed: ");
                 feedback.append(successCount);
                 
@@ -105,6 +110,7 @@ public class BulkEvents extends Event {
         StringBuilder successIdx = new StringBuilder();
         StringBuilder failedIdx  = new StringBuilder();
         
+        // perform event
         for (int i = objArray.length - 1; i >= 0; i--) { // backward to prevent delete problem
             Object obj  = objArray[i];
             Event event = Event.generateEvent(command);
@@ -136,6 +142,13 @@ public class BulkEvents extends Event {
             }
         }
         
+        // determine success
+        if (events.size() > 0) {
+            success = true;
+        } else {
+            success = false;
+        }
+        
         // form feedback
         if (suppress) {
             StringBuilder feedback = new StringBuilder();
@@ -143,13 +156,9 @@ public class BulkEvents extends Event {
             feedback.append(" -> ");
             
             if (events.size() == 0) {
-                success  = false;
-
                 feedback.append("failed: ");
                 feedback.append(failedIdx.toString().substring(0, failedIdx.length()-2));
             } else {
-                success  = true;
-
                 feedback.append("succeed: ");
                 feedback.append(successIdx.toString().substring(0, successIdx.length()-2));
 

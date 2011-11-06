@@ -345,6 +345,9 @@ public class SmartParseTest {
 		assertEquals(3, sp.extractTaskNum().size());
 		sp = new ParseCommand("remind 1,2~5,3 tomrrow");
 		assertEquals(Commands.INVALID, sp.extractCommand());
+		sp = new ParseCommand("remind 1,2~5,3");
+		assertEquals(Commands.ADD_REMINDER, sp.extractCommand());
+		assertEquals(Reminder.START, sp.getRemindParamter());
 		sp = new ParseCommand("remind 1,2,3 in 2 minutes");
 		assertEquals(Commands.ADD_REMINDER, sp.extractCommand());
 		newDate();date.add(Calendar.MINUTE, 2);

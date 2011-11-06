@@ -18,6 +18,12 @@ import cs2103.t14j1.storage.TaskLists;
 import cs2103.t14j1.taskmeter.EventListener;
 import cs2103.t14j1.taskmeter.reminder.Reminder;
 
+/**
+ * The class which controls all the other components. Also serves as an interface between
+ * the GUI and other components of the project
+ * @author Shubham Goyal
+ *
+ */
 public class ControlGUI {
     
     private static final Logger LOGGER = Logger.getLogger(ControlGUI.class.getName());

@@ -8,7 +8,7 @@ import java.util.TreeMap;
 /**
  * Stores all the list, need this extra abstraction for GUI
  * 
- * @author Zhuochun, Shubham
+ * @author Zhuochun
  * 
  */
 public class TaskLists implements Iterable<Entry<String, TaskList>> {

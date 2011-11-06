@@ -1,5 +1,11 @@
 package cs2103.t14j1.storage.user;
 
+/**
+ * helps, tips and tricks for taskmeter
+ * 
+ * @author Worapol
+ *
+ */
 public class Helps {
     
     private static int index = 0;

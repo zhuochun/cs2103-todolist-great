@@ -1,20 +1,19 @@
 package cs2103.t14j1.storage.user;
 
 public class CheatSheet {
-    
+
     private static final String[] categories = {
-        "Global", "User", "Edit", "Windows", "Setting", "Tips" // TODO: fill this up
+            "Global", "User", "Edit", "Windows", "Setting", "Tips"
     };
-    
-    private static final String[][] categoryItems  = {
-    	{ // "Global"
-            // TODO: change and fill this up
-    		"Hide/Show TaskMeter - F6",
-    		"Focus at SmartBar - Ctrl + K",
-    		"Focus at Task Table - Ctrl + T",
-    		"Focus at List Table - Ctrl + I"
+
+    private static final String[][] categoryItems = {
+        { // "Global"
+            "Hide/Show TaskMeter - F6",
+            "Focus at SmartBar - Ctrl + K",
+            "Focus at Task Table - Ctrl + T",
+            "Focus at List Table - Ctrl + I"
         },
-    	{ // "User"
+        { // "User"
             "Add New List - Ctrl + L",
             "Add New Task - Ctrl + N",
             "Save - Ctrl + S",
@@ -36,14 +35,14 @@ public class CheatSheet {
             "Toggle Auto Completion - Ctrl + 0"
         },
         { // "Tips"
-            "Get Tips - Ctrl + L"
+            "Get Tips - F1"
         }
     };
-    
+
     public static String[] getCategories() {
         return categories;
     }
-    
+
     public static String[] getItemInCategory(String name) {
         for (int i = 0; i < categories.length; i++) {
             if (categories[i].equals(name)) {

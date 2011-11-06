@@ -140,7 +140,7 @@ implements
 	}
 
 	private void parseNumList() {
-		if(regexMatchWithSanitizedCommandAddWordSpacerIgnoreCase(regexNumList)){
+		if(regexMatchWithSanitizedCommandAddWordSpacerCareCase(regexNumList)){
 			String taskNString = removeLeadingAndTailingNonDigitLetterDefinedSymbol(this.matchedStr);
 			this.taskNum = getListOfTaskNum(taskNString);
 		}
@@ -194,7 +194,7 @@ implements
 	}
 
 	private void parseSpecialSearchStr() {
-		if(regexMatchWithSanitizedCommandAddWordSpacerIgnoreCase("today|tomorrow|" + regTimeUnitForSearch)){
+		if(regexMatchWithSanitizedCommandAddWordSpacerCareCase("today|tomorrow|" + regTimeUnitForSearch)){
 			this.searchAfterTime	= DateTime.getInstance();
 			String str = removeLeadingAndTailingNonDigitLetterDefinedSymbol(matchedStr);
 			
@@ -279,7 +279,7 @@ implements
 	}
 
 	private void parseSearchAfterTime() {
-		if(regexMatchWithSanitizedCommandAddWordSpacerIgnoreCase(
+		if(regexMatchWithSanitizedCommandAddWordSpacerCareCase(
 				"after\\ " + regDateTimeOverallFormat)){
 			String strToProcess = removeLeadingAndTailingNonDigitLetterDefinedSymbol(matchedStr).substring(6);
 			this.searchAfterTime = new DateTimeProcessor(strToProcess).getDateTime();
@@ -289,7 +289,7 @@ implements
 	}
 
 	private void parseSearchBeforeTime() {
-		if(regexMatchWithSanitizedCommandAddWordSpacerIgnoreCase(
+		if(regexMatchWithSanitizedCommandAddWordSpacerCareCase(
 				"before\\ " + regDateTimeOverallFormat)){
 			String strToProcess = removeLeadingAndTailingNonDigitLetterDefinedSymbol(matchedStr).substring(6);
 			this.searchBeforeTime = new DateTimeProcessor(strToProcess).getDateTime();
@@ -312,7 +312,7 @@ implements
 	
 	
 	private void parseDuration() {
-		if(regexMatchWithSanitizedCommandAddWordSpacerIgnoreCase(regDurationFormat)){
+		if(regexMatchWithSanitizedCommandAddWordSpacerCareCase(regDurationFormat)){
 			String pureDurationStr = removeLeadingAndTailingNonDigitLetterDefinedSymbol(matchedStr).substring(4);
 			Long res = regDurationPartsProess(pureDurationStr);
 			
@@ -352,7 +352,7 @@ implements
 	}
 	
 	private boolean parseDateTimeAndRemoveMatchedStr(){
-		if(regexMatchWithSanitizedCommandAddWordSpacerIgnoreCase(regDateTimeOverallFormat)){
+		if(regexMatchWithSanitizedCommandAddWordSpacerCareCase(regDateTimeOverallFormat)){
 			this.startTime = new DateTimeProcessor(matchedStr).getDateTime();
 			replaceMatchedStringFromSanitizedCommandWithOneSpace();
 			return true;
@@ -360,7 +360,7 @@ implements
 	}
 	
 	private boolean parsedTimePeriod() {
-		if(regexMatchWithSanitizedCommandAddWordSpacerIgnoreCase(
+		if(regexMatchWithSanitizedCommandAddWordSpacerCareCase(
 				regDateTimeOverallFormat + "(\\ )?[\\-\\~](\\ )?" + regDateTimeOverallFormat)){
 			String[] timePoint = matchedStr.split("[\\~\\-]");
 
@@ -415,7 +415,7 @@ implements
 	}
 
 	private void parseDeadlineAndRemoveParsedStr() {
-		if(regexMatchWithSanitizedCommandAddWordSpacerIgnoreCase("by\\ " + regDateTimeOverallFormat)){
+		if(regexMatchWithSanitizedCommandAddWordSpacerCareCase("by\\ " + regDateTimeOverallFormat)){
 			String deadlineStr = removeLeadingAndTailingNonDigitLetterDefinedSymbol(this.matchedStr).substring(3);	// by pass the "by"
 			
 			deadlineTime = new DateTimeProcessor(deadlineStr).getDateTime();
@@ -433,7 +433,7 @@ implements
 
 	private String parseParamWithBracketTypeAndRemoveParsedStr(String regex) {
 		String res = null;
-		if(regexMatchWithSanitizedCommandAddWordSpacerIgnoreCase(regex)){
+		if(regexMatchWithSanitizedCommandAddWordSpacerCareCase(regex)){
 			res = removeLeadingAndTailingCharUntilBracketOrLetter(matchedStr);
 			res = removeLeadingAndTailingBracket(res);
 			replaceMatchedStringFromSanitizedCommandWithOneSpace();
@@ -442,7 +442,7 @@ implements
 	}
 
 	private void parsePriorityParam() {
-		if(regexMatchWithSanitizedCommandAddWordSpacerIgnoreCase(regPriorityFormat)){
+		if(regexMatchWithSanitizedCommandAddWordSpacerCareCase(regPriorityFormat)){
 			String priority = removeLeadingAndTailingNonDigitLetterDefinedSymbol(matchedStr).substring(1);
 			this.priority = translatePriority(priority);
 			replaceMatchedStringFromSanitizedCommandWithOneSpace();
@@ -501,8 +501,8 @@ implements
 		
 	}
 
-	private boolean regexMatchWithSanitizedCommandAddWordSpacerIgnoreCase(String regex) {
-		return regexMatchedStrAndSaveMatchedStr(regWordSpacer + regex + regWordSpacer, sanitizedCommand, true);
+	private boolean regexMatchWithSanitizedCommandAddWordSpacerCareCase(String regex) {
+		return regexMatchedStrAndSaveMatchedStr(regWordSpacer + regex + regWordSpacer, sanitizedCommand, false);
 	}
 	
 	@Override

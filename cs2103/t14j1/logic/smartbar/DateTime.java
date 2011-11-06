@@ -20,8 +20,6 @@ public class DateTime {
 	public static int HOUR_PER_HALF_DAY	= 12;
 	public static int HOUR_PER_DAY		= 24;
 	
-	public static final DateTime currentTime = DateTime.getInstance();
-	
 	public void setDate(Calendar date){
 		this.date = date;
 	}
@@ -130,7 +128,10 @@ public class DateTime {
 	public void optionallyAddOneDayBasedOnCurrentTime() {
 		if(this.date == null)	return;
 		
-		if(currentTime.isTimeInTheAfterNoon() &&
+		DateTime currentTime = DateTime.getInstance();
+		
+		if(this.isToday() &&
+				currentTime.isTimeInTheAfterNoon() &&
 				!this.isTimeInTheAfterNoon()){
 			this.date.add(Calendar.DATE, 1);
 		}
@@ -159,8 +160,9 @@ public class DateTime {
 	}
 
 	public boolean isToday() {
+		Calendar currentTime = Calendar.getInstance();
 		for(int i=Calendar.ERA;i<Calendar.DAY_OF_WEEK_IN_MONTH;i++){
-			if(date.get(i) != currentTime.date.get(i))	return false;
+			if(date.get(i) != currentTime.get(i))	return false;
 		}
 		
 		return true;

@@ -6,6 +6,11 @@ package cs2103.t14j1.logic;
 import cs2103.t14j1.logic.smartbar.ParseCommand;
 import cs2103.t14j1.logic.smartbar.ParseCommandGetType;
 
+/**
+ * Defines the different types of commands supported by us
+ * @author Shubham Goyal
+ *
+ */
 public enum Commands {
 
     /**

@@ -1,5 +1,11 @@
 package cs2103.t14j1.storage.user;
 
+/**
+ * stores hotkeys and global shortcuts
+ * 
+ * @author Worapol
+ *
+ */
 public class CheatSheet {
 
     private static final String[] categories = {

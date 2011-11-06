@@ -1,8 +1,6 @@
 package cs2103.t14j1.logic.smartbar;
 
 import java.util.Calendar;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 /**
  * For a given time String, this would parse and return the corresponding 

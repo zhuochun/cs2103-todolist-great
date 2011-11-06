@@ -88,7 +88,6 @@ public class DateTime {
 	}
 	
 	public void setTimeOfDateToFirstSecOnTimeNull(){
-		int lastSec = (SEC_PER_HOUR * HOUR_PER_DAY - 1);
 		clearTimeFieldForDate(date);
 	}
 	

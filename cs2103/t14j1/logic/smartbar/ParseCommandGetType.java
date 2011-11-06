@@ -2,8 +2,6 @@ package cs2103.t14j1.logic.smartbar;
 
 import java.util.LinkedList;
 import java.util.List;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 import cs2103.t14j1.logic.Commands;
 

@@ -1,6 +1,5 @@
 package cs2103.t14j1.logic.smartbar;
 
-import cs2103.t14j1.logic.Commands;
 
 class Pair<A,B> {
 	A first;

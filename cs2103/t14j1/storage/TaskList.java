@@ -6,8 +6,6 @@ import java.util.Comparator;
 import java.util.Iterator;
 import java.util.List;
 
-import cs2103.t14j1.storage.gCal.GCalSyn;
-
 /**
  * a basic task list and its properties
  * 
@@ -18,11 +16,6 @@ public class TaskList implements Iterable<Task> {
 
     private String           listname;  // name of the list
     private final List<Task> tasks;
-    
-    // properties used by gCalSyn
-    private String gCalId    = null;
-    private int gCalProperty = GCalSyn.NOT_SYN;
-    private String colour    = null;
 
     // Exception Strings
     private static final String EXCEPTION_LIST_EMPTY_NAME = "TaskList name cannot be empty";
@@ -215,37 +208,5 @@ public class TaskList implements Iterable<Task> {
         Iterator<Task> iterateTasks = tasks.iterator();
         return iterateTasks;
     }
-    
-    
-    // method created for gCalSyn
-    public void setGCalId(String id){
-    	this.gCalId = id;
-    	// the only reason for setting the id is because it's just created
-    	// therefore the status should be set to "updated"
-    	this.gCalProperty = GCalSyn.UPDATED;
-    }
-    
-    public String getGCalId(){
-    	return this.gCalId;
-    }
-    
-    public boolean setGCalProperty(int gCalProperty){
-    	if(this.gCalProperty == gCalProperty){
-    		return false;
-    	}
-    	this.gCalProperty = gCalProperty;
-    	return true;
-    }
-    
-    public int getGCalProperty(){
-    	return this.gCalProperty;
-    }
-    
-    public void setListColourStr(String colour){
-    	this.colour = colour;
-    }
-    
-    public String getListColourStr(){
-    	return this.colour;
-    }
+   
 }

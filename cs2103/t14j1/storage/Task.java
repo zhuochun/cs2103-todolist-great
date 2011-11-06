@@ -21,11 +21,6 @@ public class Task implements Comparable<Object> {
     private When        when;        // stores start/end, duration, deadline
     private Date        reminder;    // store reminder time
     private boolean     status;      // completed or not
-    
-    // additional parameter to note if it's to be synced with gCalendar
-    //private int syncWithGCal = GCalSyn.NOT_SYN;
-    private String gCalId    = null;
-	private Date lastEditTime;
 
     public static final boolean COMPLETED  = true;
     public static final boolean INCOMPLETE = false;
@@ -88,7 +83,6 @@ public class Task implements Comparable<Object> {
         this.when          = new When();
         this.reminder      = null;
         this.status        = INCOMPLETE;
-        this.lastEditTime  = new Date();	// mark the last edit time to be the time when created
     }
     
     /**
@@ -580,37 +574,6 @@ public class Task implements Comparable<Object> {
         
         return 1;
     }
-
-    /**
-     * Function for the gCalSyn class
-     * @author songyy
-     * @return
-     */
-    public void setGCalId(String id){
-    	this.gCalId = id;
-    }
-    
-    public String getGCalId(){
-    	return this.gCalId;
-    }
-    
-	/**
-	 * Needed by GCalSync
-	 * @author songyy
-	 * @return
-	 */
-	public Date getLastEditTime() {
-		return this.lastEditTime;
-	}
-	
-	/**
-	 * Needed by GCalSync
-	 * @author songyy
-	 * @return
-	 */
-	public void setLastEditTime(Date time) {
-		this.lastEditTime = time;
-	}
 	
 	/**
 	 * Needed by GCalSyn

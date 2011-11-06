@@ -1,5 +1,6 @@
 package cs2103.t14j1.logic;
 
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.Set;
 import java.util.logging.Level;
@@ -245,9 +246,9 @@ public class ControlGUI {
         registerEvent(newEvent, taskIdx);
     }
 
-    private void deleteTasks(Integer[] taskIds) {
+    private boolean deleteTasks(Integer[] taskIds) {
         Event bulk = Event.generateEvent(Commands.BULK);
-        registerEvent(bulk, Commands.DELETE_TASK, taskIds);
+        return registerEvent(bulk, Commands.DELETE_TASK, taskIds);
     }
 
     public void doSearch(TaskList searchResult) {
@@ -256,25 +257,42 @@ public class ControlGUI {
     }
 
     public void clearTrash() { // not undoable, not a individual event
-        lists.getList(TaskLists.TRASH).clear();
-        eventHandler.setStatus(eventHandler.getMsg("msg.CLEAR_TRASH"));
+        TaskList trashbox = lists.getList(TaskLists.TRASH);
+        
+        Integer[] deleteIdx = new Integer[trashbox.getSize()];
+        
+        for (int i = 1; i <= deleteIdx.length; i++) {
+            deleteIdx[i-1] = i;
+        }
+        
+        boolean success = deleteTasks(deleteIdx);
+        
+        if (success) {
+            eventHandler.setStatus(eventHandler.getMsg("msg.CLEAR_TRASH"));
+        }
     }
 
     public void clearCompleted(TaskList list) {
-        TaskList remove = new TaskList("Completed");
+        ArrayList<Integer> removeIdx = new ArrayList<Integer>();
 
         // look through all completed tasks
+        int i = 1;
         for (Task t : list) {
-            if (t.isCompleted())
-                remove.addTask(t);
-        }
-        // move all completed tasks to Trash
-        for (Task t : remove) {
-            lists.moveTask(TaskLists.TRASH, t);
+            if (t.isCompleted()) {
+                removeIdx.add(i);
+            }
+            i++;
         }
 
-        eventHandler.setStatus(String.format(eventHandler.getMsg("msg.CLEAR_COMPLETED"), remove.getSize(),
-                list.getName()));
+        // convert to idxArray, perform bulk deletion
+        Integer[] idxArray = (Integer[]) removeIdx.toArray(new Integer[removeIdx.size()]);
+
+        boolean success = deleteTasks(idxArray);
+
+        if (success) {
+            eventHandler.setStatus(String.format(eventHandler.getMsg("msg.CLEAR_COMPLETED"), idxArray.length,
+                    list.getName()));
+        }
     }
 
     /**
@@ -347,7 +365,7 @@ public class ControlGUI {
             e.register(objs);
 
             success = e.execute();
-
+            
             if (success && e.hasUndo()) {
                 undoManager.addUndo(e);
             }
@@ -541,7 +559,10 @@ public class ControlGUI {
     }
 
     public void undo() {
-        assert(undoManager.hasUndo());
+        if (!hasUndo()) {
+            eventHandler.setStatus(eventHandler.getMsg("msg.null.undo"));
+            return ;
+        }
 
         Event lastEvent = undoManager.getUndo();
         Event redo = lastEvent.undo();
@@ -552,7 +573,10 @@ public class ControlGUI {
     }
 
     public void redo() {
-        assert(undoManager.hasRedo());
+        if (!hasRedo()) {
+            eventHandler.setStatus(eventHandler.getMsg("msg.null.redo"));
+            return ;
+        }
 
         Event lastEvent = undoManager.getRedo();
         Event undo = lastEvent.undo();

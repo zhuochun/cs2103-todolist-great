@@ -17,6 +17,7 @@ public class BulkEvents extends Event {
     Object[]         objArray;
     Object[]         parameters;
     ArrayList<Event> events;
+    Event[]          undoEvents;
 
     /**
      * command, objs for each command
@@ -25,11 +26,12 @@ public class BulkEvents extends Event {
         // initial attributes
         events     = new ArrayList<Event>();
         parameters = new Object[2];
+        
         // take in objs
         command    = (Commands) objs[0];
         
         if (command == Commands.BULK) {
-            events = (ArrayList<Event>) objs[1];
+            undoEvents = (Event[]) objs[1];
         } else {
             objArray   = (Object[]) objs[1];
             // take in additional parameters
@@ -45,25 +47,70 @@ public class BulkEvents extends Event {
 
     public boolean execute() {
         if (command == Commands.BULK) {
-            return false;
+            return executeUndoEvents();
         } else {
             return executeNewEvents();
         }
     }
     
+    private boolean executeUndoEvents() {
+        boolean success = false;
+        
+        boolean suppress = undoEvents.length > 1;
+        int successCount = 0;
+        int failedCount  = 0;
+        
+        // perform undo
+        for (Event e : undoEvents) {
+            Event undo = e.undo();
+            
+            if (undo != null) {
+                events.add(undo);
+                successCount++;
+            } else {
+                failedCount++;
+            }
+        }
+        
+        // determine success
+        if (events.size() > 0) {
+            success = true;
+        } else {
+            success = false;
+        }
+        
+        // print result if necessary
+        if (suppress) {
+            StringBuilder feedback = new StringBuilder();
+            feedback.append("Undo/Redo Bulk Events -> ");
+            
+            if (events.size() == 0) {
+                feedback.append("failed");
+            } else {
+                feedback.append("succeed: ");
+                feedback.append(successCount);
+                
+                if (failedCount > 0) {
+                    feedback.append(", failed: ");
+                    feedback.append(failedCount);
+                }
+            }
+            
+            eventHandler.setStatus(feedback.toString());
+        }
+        
+        return success;
+    }
+    
     private boolean executeNewEvents() {
-        String  feedback;
         boolean success  = false;
         
-        boolean suppress = true; // suppress output for individual event
-        
-        if (objArray.length == 1) {
-            suppress = false;
-        }
+        boolean suppress = objArray.length > 1; // suppress output for individual event
         
         StringBuilder successIdx = new StringBuilder();
         StringBuilder failedIdx  = new StringBuilder();
         
+        // perform event
         for (int i = objArray.length - 1; i >= 0; i--) { // backward to prevent delete problem
             Object obj  = objArray[i];
             Event event = Event.generateEvent(command);
@@ -95,34 +142,35 @@ public class BulkEvents extends Event {
             }
         }
         
+        // determine success
+        if (events.size() > 0) {
+            success = true;
+        } else {
+            success = false;
+        }
+        
         // form feedback
         if (suppress) {
-            StringBuilder fb = new StringBuilder();
-            fb.append(command.toString().toLowerCase().replace('_', ' '));
-            fb.append(" -> ");
+            StringBuilder feedback = new StringBuilder();
+            feedback.append(command.toString().toLowerCase().replace('_', ' '));
+            feedback.append(" -> ");
             
             if (events.size() == 0) {
-                success  = false;
-
-                fb.append("failed: ");
-                fb.append(failedIdx.toString().substring(0, failedIdx.length()-2));
+                feedback.append("failed: ");
+                feedback.append(failedIdx.toString().substring(0, failedIdx.length()-2));
             } else {
-                success  = true;
-
-                fb.append("succeed: ");
-                fb.append(successIdx.toString().substring(0, successIdx.length()-2));
+                feedback.append("succeed: ");
+                feedback.append(successIdx.toString().substring(0, successIdx.length()-2));
 
                 if (failedIdx.length() > 0) {
-                    fb.append("; ");
-                    fb.append("failed: ");
-                    fb.append(failedIdx.toString().substring(0, failedIdx.length()-2));
+                    feedback.append("; ");
+                    feedback.append("failed: ");
+                    feedback.append(failedIdx.toString().substring(0, failedIdx.length()-2));
                 }
 
             }
 
-            feedback = fb.toString();
-
-            eventHandler.setStatus(feedback);
+            eventHandler.setStatus(feedback.toString());
         }
 
         return success;
@@ -139,8 +187,11 @@ public class BulkEvents extends Event {
     public Event undo() {
         Event undo = new BulkEvents();
         undo.setEventLisnter(eventHandler);
+        
+        // convert events to array
+        Event[] undoEvents = events.toArray(new Event[events.size()]);
 
-        undo.register(Commands.BULK, events);
+        undo.register(Commands.BULK, undoEvents);
         boolean success = undo.execute();
         
         if (success) {

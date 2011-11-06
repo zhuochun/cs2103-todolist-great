@@ -8,8 +8,8 @@ class RegexMatcher {
 	
 	public static void main(String args[]){
 		// for testing only
-		String str = "1";
-//		System.out.println("matched Str: " + regexMatchedStr("^(\\d)+$", str, true));
+		String str = "for 2 hour";
+		System.out.println("matched Str: " + regexMatchedStr(regDurationFormat, str, false));
 //		System.out.println(str.matches("^(\\d)+$"));
 		System.out.println("Cal hour:" + Calendar.getInstance().get(Calendar.HOUR));
 	}
@@ -85,8 +85,7 @@ class RegexMatcher {
 			"(" + regTimeFormat + "("+ regWordSpacer + "*" + regDateOverallFormat + ")?)" +  // time (date)?
 			")";
 	
-	
-	protected static final String regDurationFormat = "(for(" + regWordSpacer +"*[\\d]+" + regTimeUnit + ")+)";
+	protected static final String regDurationFormat = "(for(" + regWordSpacer +"*[\\d]+\\ " + regTimeUnit + ")+)";
 	protected static final String regReminderAfterTimeFormat = "(in(\\ [\\d]+\\ " + regTimeUnit + ")+)";
 	protected static final String regPlaceFormat = 
 		"((@[\\w\\d]+)|(@\\([^\\)]+\\)))";	// format: @ + word; or: @ + (words)

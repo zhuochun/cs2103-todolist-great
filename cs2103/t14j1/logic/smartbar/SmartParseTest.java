@@ -72,15 +72,28 @@ public class SmartParseTest {
 	
 	@Test
 	public void addBasicTask(){
+		Calendar currentTime = Calendar.getInstance();
+		
 		sp = new ParseCommand("Add rasing sun 3pm");
 		assertEquals(Commands.ADD_TASK, sp.extractCommand());
 		assertEquals("rasing sun",sp.extractTaskName());
 		
+		sp = new ParseCommand("add sth this Friday 3am");
+		assertEquals(Commands.ADD_TASK, sp.extractCommand());
+		assertEquals("sth",sp.extractTaskName());
+		newDate();	date.set(Calendar.DAY_OF_WEEK,Calendar.FRIDAY);
+		setDateTimeToTime(3, 0, 0);
+		if(currentTime.get(Calendar.DAY_OF_WEEK) >= Calendar.FRIDAY)	date.add(Calendar.WEEK_OF_YEAR, 1);
+		assertEquals(date.getTime(),sp.extractStartDate());
+		assertEquals(time,(long)sp.extractStartTime());
+		
+		
 		sp = new ParseCommand("Add basic task !3 3am for 2 hours, 3 minutes");
 		assertEquals(Commands.ADD_TASK, sp.extractCommand());
-//		assertEquals("basic task for 2 hours, 3 minutes",sp.extractTaskName());
+		assertEquals("basic task for 2 hours, 3 minutes",sp.extractTaskName());
 		assertEquals(Priority.LOW,sp.extractPriority());
 		newDate();setDateTimeToTime(3, 0, 0);
+		if(currentTime.get(Calendar.AM_PM) == Calendar.PM)	dateAdd(1);
 		assertEquals(date.getTime(),sp.extractStartDate());
 		assertEquals(2 * DateTime.SEC_PER_HOUR + 3*DateTime.SEC_PER_MINUTE,(long)sp.extractDuration());
 		date.add(Calendar.SECOND, 2 * DateTime.SEC_PER_HOUR + 3*DateTime.SEC_PER_MINUTE);
@@ -108,6 +121,7 @@ public class SmartParseTest {
 		assertEquals("home",sp.extractPlace());
 		assertEquals("life is good",sp.extractListName());
 		newDate();setDateTimeToTime(4, 0, 0);
+		if(currentTime.get(Calendar.AM_PM) == Calendar.PM)	dateAdd(1);
 		assertEquals(date.getTime(),sp.extractStartDate());
 		assertEquals(null,sp.extractEndDate());
 		
@@ -208,7 +222,6 @@ public class SmartParseTest {
 		assertTrue(dateRoughlyEqual(date.getTime(),sp.extractSearchAfterDate()));
 		setDateTimeToTime(23, 59, 59);
 		
-		System.out.print("res: " + sp.extractSearchBeforeDate());
 		assertTrue(dateRoughlyEqual(date.getTime(),sp.extractSearchBeforeDate()));
 		
 		

@@ -8,8 +8,8 @@ class RegexMatcher {
 	
 	public static void main(String args[]){
 		// for testing only
-		String str = "for 2 hour";
-		System.out.println("matched Str: " + regexMatchedStr(regDurationFormat, str, false));
+		String str = "remind 1 2 3 in 2 min";
+		System.out.println("matched Str: " + regexMatchedStr(regReminderGeneralCmd, str, false));
 //		System.out.println(str.matches("^(\\d)+$"));
 		System.out.println("Cal hour:" + Calendar.getInstance().get(Calendar.HOUR));
 	}
@@ -78,19 +78,17 @@ class RegexMatcher {
 			regDateFormat_dd_$mm$M$_$yy$yy$$ + "|" + regDateFormat_M_dd_$yyyy$ + "|" + 
 			regDateFormat_order_weekD +	"|" + regDateFormat_today_tomorrow + ")";
 	
-	protected static final String regDateTimeOverallFormat = "(" +
-//				regTimeFormat +
-//			regDateOverallFormat + regWordSpacer + regTimeFormat + 
+	protected static final String regDateTimeOverallFormat = "(" + 
 			"(" + regDateOverallFormat+ "(" + regWordSpacer + "*" + regTimeFormat + ")?)|" + 	// date (time)?
 			"(" + regTimeFormat + "("+ regWordSpacer + "*" + regDateOverallFormat + ")?)" +  // time (date)?
 			")";
 	
 	protected static final String regDurationFormat = "(for(" + regWordSpacer +"*[\\d]+\\ " + regTimeUnit + ")+)";
-	protected static final String regReminderAfterTimeFormat = "(in(\\ [\\d]+\\ " + regTimeUnit + ")+)";
+	protected static final String regReminderAfterTimeFormat = "(in(\\ " + regexNumList +"\\ " + regTimeUnit + ")+)";
 	protected static final String regPlaceFormat = 
 		"((@[\\w\\d]+)|(@\\([^\\)]+\\)))";	// format: @ + word; or: @ + (words)
 	protected static final String regPriorityFormat = "(![123])";
-	protected static final String regexList = "((#[\\w]+)|(#\\([^\\)]+\\)))";
+	protected static final String regexList = "((#[\\w][\\w\\d]*)|(#\\([^\\)]+\\)))";
 	
 	protected static final String regexSearchCommand = "^/(" + regexSpacer +")*";
 	protected static final String regexAddCommand = "^add(" + regexSpacer +")*";
@@ -105,8 +103,10 @@ class RegexMatcher {
 	protected static final String regSetPriorityCmd = "^" + regexNumList + "\\ " + regPriorityFormat + "$";
 	protected static final String regAddListCmd = "^(add)(\\ )+" + regexList+ "$";
 	protected static final String regRenameListCmd = "^(rename)\\ " + regexList+ "\\ " + regexList+ "$";
-	protected static final String regEditListCmd = "^(edit)\\ " + regexList + "$";
-	protected static final String regReminderGeneralCmd = "^(remind)\\ " + regexNumList + "\\ (start|end|deadline|" + regDateTimeOverallFormat +")";
+	protected static final String regEditListCmd =	"^(edit)\\ " + regexList + "$";
+	protected static final String regReminderGeneralCmd = 
+			"^(remind)\\ " + regexNumList + "\\ (start|end|deadline|" +
+			regDateTimeOverallFormat + "|"+ regReminderAfterTimeFormat +")";
 	protected static final String regReminderNumOnly = "^(remind)\\ " + regexNumList + "$";
 	protected static final String regRemoveReminder = "^(remind)\\ " + regexNumList + "\\ cancel$";
 	

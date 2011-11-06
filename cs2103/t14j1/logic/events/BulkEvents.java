@@ -127,7 +127,7 @@ public class BulkEvents extends Event {
                     successIdx.append(objIdx);
                 } else if (obj instanceof Task) {
                     Task task = (Task) obj;
-                    successIdx.append("\"" + task.getName().substring(0, 9) + "..\"");
+                    successIdx.append("\"" + task.getName() + "\"");
                 }
                 successIdx.append(", ");
             } else {
@@ -136,7 +136,7 @@ public class BulkEvents extends Event {
                     failedIdx.append(objIdx);
                 } else if (obj instanceof Task) {
                     Task task = (Task) obj;
-                    failedIdx.append("\"" + task.getName().substring(0, 9) + "..\"");
+                    failedIdx.append("\"" + task.getName() + "\"");
                 }
                 failedIdx.append(", ");
             }

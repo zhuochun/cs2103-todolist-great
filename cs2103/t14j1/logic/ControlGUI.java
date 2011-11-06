@@ -152,7 +152,6 @@ public class ControlGUI {
             LOGGER.log(Level.SEVERE, "executeCommand : " + userCommand, e);
         }
     }
-
     public void moveTask(int index, String listName) {
         Event newEvent = Event.generateEvent(Commands.MOVE_TASK);
         registerEvent(newEvent, index, listName);
@@ -168,8 +167,7 @@ public class ControlGUI {
             Task task = eventHandler.getTask(index);
 
             Event newEvent   = Event.generateEvent(Commands.ADD_REMINDER);
-            Date  remindTime = getReminderTime();
-            registerEvent(newEvent, task, parameter, remindTime);
+            registerEvent(newEvent, task, parameter, null);
         } catch (IndexOutOfBoundsException e) {
             eventHandler.setStatus(e.getMessage());
         }

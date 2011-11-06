@@ -167,8 +167,9 @@ public class ControlGUI {
         try {
             Task task = eventHandler.getTask(index);
 
-            Event newEvent = Event.generateEvent(Commands.ADD_REMINDER);
-            registerEvent(newEvent, task, parameter, getReminderTime());
+            Event newEvent   = Event.generateEvent(Commands.ADD_REMINDER);
+            Date  remindTime = getReminderTime();
+            registerEvent(newEvent, task, parameter, remindTime);
         } catch (IndexOutOfBoundsException e) {
             eventHandler.setStatus(e.getMessage());
         }

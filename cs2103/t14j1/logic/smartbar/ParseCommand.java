@@ -31,8 +31,8 @@ implements
 	// for rename list
 	private String newListName = null;
 	
-	private DateTime searchBeforeTime	= new DateTime();
-	private DateTime searchAfterTime	= new DateTime();
+	private DateTime searchBeforeTime;
+	private DateTime searchAfterTime;
 	
 	private Reminder reminderType;
 	private Calendar reminderTime;
@@ -185,17 +185,103 @@ implements
 	}
 
 	private void parseSearchTask() {
-		parseParamPlaceAndRemoveParsedStr();
-		parseListNameAndRemoveParsedStr();
 		parseSearchBeforeTime();
 		parseSearchAfterTime();
+		parseSpecialSearchStr();
+		parseParamPlaceAndRemoveParsedStr();
+		parseListNameAndRemoveParsedStr();
 		parsePriorityParam();
+	}
+
+	private void parseSpecialSearchStr() {
+		if(regexMatchWithSanitizedCommandAddWordSpacerIgnoreCase("today|tomorrow|" + regTimeUnitForSearch)){
+			this.searchAfterTime	= DateTime.getInstance();
+			String str = removeLeadingAndTailingNonDigitLetterDefinedSymbol(matchedStr);
+			
+			if(str.equalsIgnoreCase("today")){
+				this.searchBeforeTime	= searchAfterTime.clone();
+				searchBeforeTime.setTimeToLastSec();
+			} 
+			
+			else if(str.equalsIgnoreCase("tomorrow")){
+				this.searchAfterTime.date.add(Calendar.DATE, 1);
+				this.searchBeforeTime = this.searchAfterTime.clone();
+				this.searchAfterTime.setTimeToFirstSec();
+				this.searchBeforeTime.setTimeToLastSec();
+			}
+			
+			else{
+				String timeArgs[] = removeLeadingAndTailingNonDigitLetterDefinedSymbol(matchedStr).split("\\ ");
+				boolean isNext = (timeArgs[0].equalsIgnoreCase("next"));
+				int param = 0;
+				
+				String unit = timeArgs[1];	// compare the time unit
+				if(unit.length() >= 3 && unit.substring(0, 3).equalsIgnoreCase("sec")){
+					_searchClearSetFieldHelper(isNext,Calendar.SECOND);
+				} else if(unit.length() >= 3 && unit.substring(0, 3).equalsIgnoreCase("min")){
+					_searchClearSetFieldHelper(isNext,Calendar.MINUTE);
+				} else if(unit.length() >= 1 && unit.substring(0, 1).equalsIgnoreCase("h")){
+					_searchClearSetFieldHelper(isNext,Calendar.HOUR_OF_DAY);
+				} else if(unit.length() >= 3 && unit.substring(0, 3).equalsIgnoreCase("day")){
+					_searchClearSetFieldHelper(isNext, Calendar.DAY_OF_YEAR);
+				} else if(unit.equalsIgnoreCase("week")){
+					_searchClearSetFieldHelper(isNext, Calendar.WEEK_OF_YEAR);
+				} else if(unit.equalsIgnoreCase("month")){
+					_searchClearSetFieldHelper(isNext, Calendar.MONTH);
+				} else if(unit.equalsIgnoreCase("year")){
+					_searchClearSetFieldHelper(isNext, Calendar.YEAR);
+				} else if((param = DateTimeProcessor.dateParseGetMonthFromText(unit)) != -1){
+					setSearchParamBasedOnFields(param,isNext,Calendar.MONTH,Calendar.YEAR);
+				} else if((param = DateTimeProcessor.dateParseGetDayOfWeekFromText(unit)) != -1){
+					setSearchParamBasedOnFields(param,isNext,Calendar.DAY_OF_WEEK,Calendar.WEEK_OF_YEAR);
+				} else{
+					outputErr("Problem with parsing search time period");
+				}
+			}
+			replaceMatchedStringFromSanitizedCommandWithOneSpace();
+		}
+	}
+
+	private void setSearchParamBasedOnFields(int param, boolean next, int fieldToCompare,int higherOrderYear){
+		clearCalendarFields(this.searchAfterTime, fieldToCompare);
+		if(next)	this.searchAfterTime.date.add(higherOrderYear, 1);
+		this.searchBeforeTime = this.searchAfterTime.clone();
+		this.searchBeforeTime.date.add(fieldToCompare, 1);
+		this.searchBeforeTime.date.add(Calendar.MILLISECOND, -1);
+	}
+	
+	/**
+	 * Clear all the fields lower than given field, exclusive
+	 * Say input field is Calendar.MINUTE, then this would clear the 
+	 * second and millisecond fields
+	 * @param date
+	 * @param field
+	 */
+	private void clearCalendarFields(DateTime date, int field) {
+		for(int i=field+1;i<=Calendar.MILLISECOND; i++){
+			date.date.clear(i);
+		}
+		
+		if(field >= Calendar.AM_PM){
+			date.time = (date.date.getTimeInMillis()/1000)%(DateTime.HOUR_PER_DAY * DateTime.SEC_PER_HOUR);
+		}
+	}
+
+	private void _searchClearSetFieldHelper(boolean next, int currentField) {
+		int lowerField = Calendar.MILLISECOND;
+		if(next)	this.searchAfterTime.date.add(currentField, 1);
+		this.searchBeforeTime = this.searchAfterTime.clone();
+		clearCalendarFields(this.searchBeforeTime,currentField);
+		if(next)	clearCalendarFields(this.searchAfterTime,currentField);
+		
+		this.searchBeforeTime.date.add(currentField, 1);this.searchBeforeTime.time = null;
+		this.searchBeforeTime.date.add(lowerField, -1);this.searchAfterTime.time = null;
 	}
 
 	private void parseSearchAfterTime() {
 		if(regexMatchWithSanitizedCommandAddWordSpacerIgnoreCase(
 				"after\\ " + regDateTimeOverallFormat)){
-			String strToProcess = removeLeadingAndTailingBracket(matchedStr).substring(6);
+			String strToProcess = removeLeadingAndTailingNonDigitLetterDefinedSymbol(matchedStr).substring(6);
 			this.searchAfterTime = new DateTimeProcessor(strToProcess).getDateTime();
 			
 			replaceMatchedStringFromSanitizedCommandWithOneSpace();
@@ -205,7 +291,7 @@ implements
 	private void parseSearchBeforeTime() {
 		if(regexMatchWithSanitizedCommandAddWordSpacerIgnoreCase(
 				"before\\ " + regDateTimeOverallFormat)){
-			String strToProcess = removeLeadingAndTailingBracket(matchedStr).substring(6);
+			String strToProcess = removeLeadingAndTailingNonDigitLetterDefinedSymbol(matchedStr).substring(6);
 			this.searchBeforeTime = new DateTimeProcessor(strToProcess).getDateTime();
 			
 			replaceMatchedStringFromSanitizedCommandWithOneSpace();
@@ -227,7 +313,7 @@ implements
 	
 	private void parseDuration() {
 		if(regexMatchWithSanitizedCommandAddWordSpacerIgnoreCase(regDurationFormat)){
-			String pureDurationStr = removeLeadingAndTailingBracket(matchedStr).substring(4);
+			String pureDurationStr = removeLeadingAndTailingNonDigitLetterDefinedSymbol(matchedStr).substring(4);
 			Long res = regDurationPartsProess(pureDurationStr);
 			
 			if(res == null)	outputErr("Unsuccessful Duration processing");

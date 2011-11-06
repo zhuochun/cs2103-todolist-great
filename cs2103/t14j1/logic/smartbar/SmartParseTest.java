@@ -6,6 +6,7 @@ import static org.junit.Assert.*;
 
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Set;
@@ -53,7 +54,6 @@ public class SmartParseTest {
 
 	private void setDateTimeToLastSec() {
 		setDateTimeToTime(23, 59, 59);
-		
 	}
 
 	private void dateAdd(int i) {
@@ -63,6 +63,10 @@ public class SmartParseTest {
 
 	private void newDate() {
 		this.date = Calendar.getInstance();
+	}
+	
+	private static boolean dateRoughlyEqual(Date a, Date b) {
+		return (a.getTime() - b.getTime())<2000;
 	}
 	
 	
@@ -94,11 +98,14 @@ public class SmartParseTest {
 		assertEquals("home",sp.extractPlace());
 		
 		
-		sp = new ParseCommand("Add basic #(life is good) task @home");
+		sp = new ParseCommand("Add basic #(life is good) task @home 4am today");
 		assertEquals(Commands.ADD_TASK, sp.extractCommand());
 		assertEquals("basic task",sp.extractTaskName());
 		assertEquals("home",sp.extractPlace());
 		assertEquals("life is good",sp.extractListName());
+		newDate();setDateTimeToTime(4, 0, 0);
+		assertEquals(date.getTime(),sp.extractStartDate());
+		assertEquals(null,sp.extractEndDate());
 		
 		sp = new ParseCommand("Add basic task @(somewhere in the world)");
 		assertEquals(Commands.ADD_TASK, sp.extractCommand());
@@ -177,9 +184,29 @@ public class SmartParseTest {
 
 	@Test
 	public void searchTask(){
-		sp = new ParseCommand("/songyy ");
+		sp = new ParseCommand("/songyy today");
 		assertEquals(Commands.SEARCH, sp.extractCommand());
 		assertEquals("songyy", sp.extractTaskName());
+		newDate();
+		assertTrue(dateRoughlyEqual(date.getTime(),sp.extractSearchAfterDate()));
+		setDateTimeToLastSec();
+		assertTrue(dateRoughlyEqual(date.getTime(),sp.extractSearchBeforeDate()));
+		
+		sp = new ParseCommand("/songyy this Sept");
+		newDate();date.set(currentYear, Calendar.SEPTEMBER, 1, 0, 0, 0);
+		assertTrue(dateRoughlyEqual(date.getTime(),sp.extractSearchAfterDate()));
+		newDate();date.set(currentYear, Calendar.OCTOBER, 1, 0, 0, 0);
+		date.add(Calendar.SECOND, -1);
+		assertTrue(dateRoughlyEqual(date.getTime(),sp.extractSearchBeforeDate()));
+		
+		sp = new ParseCommand("/songyy next day");
+		newDate();dateAdd(1);setDateTimeToTime(0, 0, 0);
+		assertTrue(dateRoughlyEqual(date.getTime(),sp.extractSearchAfterDate()));
+		setDateTimeToTime(23, 59, 59);
+		
+		System.out.print("res: " + sp.extractSearchBeforeDate());
+		assertTrue(dateRoughlyEqual(date.getTime(),sp.extractSearchBeforeDate()));
+		
 		
 		sp = new ParseCommand("/hero after tomorrow before 13th,Dec,2013 #(mumama) @gov !3");
 		assertEquals(Commands.SEARCH, sp.extractCommand());

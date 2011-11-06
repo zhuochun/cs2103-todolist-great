@@ -1,5 +1,6 @@
 package cs2103.t14j1.logic.smartbar;
 
+import java.util.Calendar;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -8,8 +9,9 @@ class RegexMatcher {
 	public static void main(String args[]){
 		// for testing only
 		String str = "1";
-		System.out.println("matched Str: " + regexMatchedStr("^(\\d)+$", str, true));
-		System.out.println(str.matches("^(\\d)+$"));
+//		System.out.println("matched Str: " + regexMatchedStr("^(\\d)+$", str, true));
+//		System.out.println(str.matches("^(\\d)+$"));
+		System.out.println("Cal hour:" + Calendar.getInstance().get(Calendar.HOUR));
 	}
 	
 	protected static final boolean IGNORE_CASE = true;

@@ -18,6 +18,7 @@ import org.eclipse.swt.widgets.Shell;
 import org.eclipse.swt.widgets.Text;
 import org.eclipse.wb.swt.SWTResourceManager;
 
+import cs2103.t14j1.logic.DateFormat;
 import cs2103.t14j1.storage.Priority;
 import cs2103.t14j1.storage.Task;
 import cs2103.t14j1.storage.When;
@@ -114,6 +115,7 @@ public class TaskDetailDialog extends Dialog {
         txtName.setBounds(10, 10, 380, 25);
 
         createDateTime();
+        createReminder();
 
         Label lblWhere = new Label(shell, SWT.NONE);
         lblWhere.setAlignment(SWT.RIGHT);
@@ -152,7 +154,7 @@ public class TaskDetailDialog extends Dialog {
             }
         });
         btnSave.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
-        btnSave.setBounds(230, 254, 80, 30);
+        btnSave.setBounds(230, 255, 80, 30);
         btnSave.setText(TaskMeter.getResourceString("button.save"));
 
         Button btnClose = new Button(shell, SWT.NONE);
@@ -164,9 +166,8 @@ public class TaskDetailDialog extends Dialog {
             }
         });
         btnClose.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
-        btnClose.setBounds(315, 254, 75, 30);
+        btnClose.setBounds(315, 255, 75, 30);
         btnClose.setText(TaskMeter.getResourceString("button.cancel"));
-
     }
 
     private void createDateTime() {
@@ -288,6 +289,20 @@ public class TaskDetailDialog extends Dialog {
             dt.setEnabled(false);
         } else {
             dt.setEnabled(true);
+        }
+    }
+    
+    private void createReminder() {
+        if (task.getReminder() != null) {
+            Label lblReminderTime = new Label(shell, SWT.NONE);
+            lblReminderTime.setForeground(SWTResourceManager.getColor(220, 20, 60));
+            lblReminderTime.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
+            lblReminderTime.setBounds(215, 73, 200, 15);
+            
+            StringBuilder remindStr = new StringBuilder();
+            remindStr.append("Reminder: ");
+            remindStr.append(DateFormat.dateToStrShort(task.getReminder()));
+            lblReminderTime.setText(remindStr.toString());
         }
     }
 

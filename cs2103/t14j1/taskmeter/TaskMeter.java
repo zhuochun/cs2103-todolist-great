@@ -1279,6 +1279,10 @@ public class TaskMeter extends Shell {
         
         String newList = dialog.open();
         
+        if (newList == null || newList.isEmpty()) {
+            return ;
+        }
+        
         logic.addList(newList);
     }
     

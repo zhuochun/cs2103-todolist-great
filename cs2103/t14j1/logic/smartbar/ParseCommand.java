@@ -574,7 +574,9 @@ implements
 
 	@Override
 	public Long extractDuration() {
-		return this.duration;
+		if(this.duration != null)	return this.duration;
+		if(this.startTime.time != null)	return 0L;
+		return null;
 	}
 
 	@Override

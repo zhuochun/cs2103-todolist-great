@@ -93,7 +93,9 @@ implements
 		
 		String reminderParamStr = sanitizedCommand.substring(lastPosOfSpace+1);
 		
-		if(parseDateTimeAndRemoveMatchedStr()){
+		if(parseAfterCurrentTimeFormat()){
+			
+		} else if(parseDateTimeAndRemoveMatchedStr()){
 			if(startTime.time == null){
 				this.reminderType = Reminder.INVALID;
 			} else if(startTime.date == null){
@@ -106,8 +108,25 @@ implements
 		} else if(reminderParamStr.equalsIgnoreCase("deadline")){
 			this.reminderType = Reminder.DEADLINE;
 		} else{
-			this.reminderType = Reminder.START;
+			this.reminderType = cs2103.t14j1.storage.user.User.getDefaultReminder();
 		}
+	}
+
+	private boolean parseAfterCurrentTimeFormat() {
+		if(regexMatchWithSanitizedCommandAddWordSpacerCareCase(regReminderAfterTimeFormat)){
+			String matchedStr = removeLeadingAndTailingNonDigitLetterDefinedSymbol(this.matchedStr);
+			String pureDurationStr = matchedStr.substring(matchedStr.indexOf(' '));
+			Long res = regDurationPartsProess(pureDurationStr);
+			if(res == null){
+				this.reminderType = Reminder.INVALID;
+				return false;
+			}
+			this.reminderTime = Calendar.getInstance();
+			reminderTime.add(Calendar.SECOND, (int)(long) res);
+			this.reminderType = Reminder.CUSTOM;
+			replaceMatchedStringFromSanitizedCommandWithOneSpace();
+			return true;
+		}else return false;
 	}
 
 	private void parseListAndReturnInboxOnNoListNameGiven() {

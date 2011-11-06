@@ -113,7 +113,8 @@ public class SmartParseTest {
 		assertEquals(DateTime.SEC_PER_HOUR * 3,(long)sp.extractDuration());
 		newDate();DateTime.clearTimeFieldForDate(date);dateAdd(2);dateSecAdd(-1);
 		assertEquals(date.getTime(), sp.extractDeadlineDate());
-		assertEquals(null, sp.extractDeadlineTime());
+//		assertEquals(time, (long) sp.extractDeadlineTime());
+		
 		assertEquals("home",sp.extractPlace());
 		
 		
@@ -140,7 +141,7 @@ public class SmartParseTest {
 	
 	@Test
 	public void testTimePeriod(){
-		sp = new ParseCommand("Add sth @(somewhere in the world) 4pm ~ 7pm by 3am");
+		sp = new ParseCommand("Add sth @(somewhere in the world) 4pm ~ 7pm");
 		assertEquals(Commands.ADD_TASK, sp.extractCommand());
 		assertEquals("sth",sp.extractTaskName());
 		newDate();setDateTimeToTime(16, 0, 0);
@@ -149,8 +150,9 @@ public class SmartParseTest {
 		assertEquals(date.getTime(),sp.extractEndDate());
 		assertEquals(DateTime.SEC_PER_HOUR * 3,(long)sp.extractDuration());
 		newDate();setDateTimeToTime(3, 0, 0);dateAdd(1);
-		assertEquals(date.getTime(), sp.extractDeadlineDate());
-		assertEquals(time, (long)sp.extractDeadlineTime());
+//		assertEquals(date.getTime(), sp.extractDeadlineDate());
+		assertEquals(null, sp.extractDeadlineDate());
+		assertEquals(null, sp.extractDeadlineTime());
 		
 		
 		sp = new ParseCommand("Add sth 4:13:30 pm,12th,Dec ~ 7pm");

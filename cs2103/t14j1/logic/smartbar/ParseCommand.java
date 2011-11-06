@@ -622,10 +622,20 @@ implements
 	}
 
 	@Override
-	public Date extractDeadlineDate() {
-		this.deadlineTime.onDateNullDefaultTodayOrNextDayBasedOnTime();
-		this.deadlineTime.optionallyAddOneDayBasedOnCurrentTime();
-		this.deadlineTime.setTimeOfDateToLastSecOnTimeNull();
+	public Date extractDeadlineDate(){
+		if(this.deadlineTime.time == null && this.deadlineTime.date == null){
+			return null;	// no deadline specified
+		} else if(this.deadlineTime.date == null){	// means time is not null
+			if(this.startTime.date == null && this.startTime.time == null){
+				this.deadlineTime.onDateNullDefaultTodayOrNextDayBasedOnTime();
+				this.deadlineTime.optionallyAddOneDayBasedOnCurrentTime();
+				this.deadlineTime.setTimeOfDateToLastSecOnTimeNull();
+			} else if(this.startTime.date != null){
+				this.deadlineTime.date = (Calendar) this.startTime.date.clone();
+				this.deadlineTime.setTimeOfDateToTime();
+			} 
+		}
+		
 		if(this.deadlineTime.date == null)	return null;
 		deadlineTime.setTimeOfDateToLastSecOnTimeNull();
 		return this.deadlineTime.getDateWithTime();
@@ -633,6 +643,7 @@ implements
 
 	@Override
 	public Long extractDeadlineTime() {
+		if(this.deadlineTime.time == null && this.deadlineTime.date != null)	this.deadlineTime.setTimeToLastSec();
 		return this.deadlineTime.getTime();
 	}
 }

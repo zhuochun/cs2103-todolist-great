@@ -50,6 +50,7 @@ public class DateTime {
 	}
 
 	public void onDateNullDefaultTodayOrNextDayBasedOnTime(){
+		if(time == null)	return;
 		if(date == null)	date = Calendar.getInstance();
 		setTimeOfDateToTime();
 	}
@@ -93,6 +94,8 @@ public class DateTime {
 	
 	public void setTimeOfDateToLastSecOnTimeNull(){
 		if(date == null)	return;
+		if(time!=null)	return;
+		
 		int lastSec = (SEC_PER_HOUR * HOUR_PER_DAY - 1);
 		clearTimeFieldForDate(date);
 		date.set(Calendar.SECOND, lastSec);

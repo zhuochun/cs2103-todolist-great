@@ -36,7 +36,7 @@ public class Helps {
         "TASK Searching: Finding What You Stored\n------------------------------------------------------------\nSearching TASK using '/':\n\"/+TASK Details\"\n\n/homework #Physics\n\nRemarks:\n- You can search by any combination of TASK Details you entered.",
         "We're all busy with life. And, from time to time, we make mistakes.\nTaskMeter realizes this, hence, allowing Undo/Redo",
         "TASK Undo/Redo-ing\n------------------------------------------------------------\nUndo using \"Ctrl + Z\" or typing \"undo\" onto TaskMeter smartbar.\nRedo using \"Ctrl + Y\" or typing \"redo\" onto TaskMeter smartbar.",
-        "Now you're a TaskMeter expert! Please read TaskMeter User Guide for more details."
+        "Now you're a TaskMeter expert!\nPlease read TaskMeter User Guide for more details."
     };
     
     /**

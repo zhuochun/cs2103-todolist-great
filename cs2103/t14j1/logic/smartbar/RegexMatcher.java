@@ -6,14 +6,6 @@ import java.util.regex.Pattern;
 
 class RegexMatcher {
 	
-	public static void main(String args[]){
-		// for testing only
-		String str = "remind 1 2 3 in 2 min";
-		System.out.println("matched Str: " + regexMatchedStr(regReminderGeneralCmd, str, false));
-//		System.out.println(str.matches("^(\\d)+$"));
-		System.out.println("Cal hour:" + Calendar.getInstance().get(Calendar.HOUR));
-	}
-	
 	protected static final boolean IGNORE_CASE = true;
 	protected static final boolean CARE_CASE = false;
 	

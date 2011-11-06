@@ -16,6 +16,7 @@ import org.junit.Test;
 import cs2103.t14j1.logic.Commands;
 import cs2103.t14j1.storage.Priority;
 import cs2103.t14j1.storage.TaskLists;
+import cs2103.t14j1.taskmeter.reminder.Reminder;
 
 /**
  * @author SongYY
@@ -334,6 +335,7 @@ public class SmartParseTest {
 	public void addReminder(){
 		sp = new ParseCommand("remind 1 start");
 		assertEquals(Commands.ADD_REMINDER, sp.extractCommand());
+		assertEquals(Reminder.START, sp.getRemindParamter());
 		sp = new ParseCommand("remind 2 end");
 		assertEquals(Commands.ADD_REMINDER, sp.extractCommand());
 		sp = new ParseCommand("remind 2 deadline");
@@ -343,6 +345,13 @@ public class SmartParseTest {
 		assertEquals(3, sp.extractTaskNum().size());
 		sp = new ParseCommand("remind 1,2~5,3 tomrrow");
 		assertEquals(Commands.INVALID, sp.extractCommand());
+		sp = new ParseCommand("remind 1,2~5,3");
+		assertEquals(Commands.ADD_REMINDER, sp.extractCommand());
+		assertEquals(Reminder.START, sp.getRemindParamter());
+		sp = new ParseCommand("remind 1,2,3 in 2 minutes");
+		assertEquals(Commands.ADD_REMINDER, sp.extractCommand());
+		newDate();date.add(Calendar.MINUTE, 2);
+		dateRoughlyEqual(date.getTime(), sp.getRemindTime());
 	}
 	
 	@Test
@@ -374,10 +383,10 @@ public class SmartParseTest {
 	public void renameList(){
 		sp = new ParseCommand("rename #abc");
 		assertEquals(Commands.INVALID, sp.extractCommand());
-		sp = new ParseCommand("rename #(flyfy1 songyy) #(luala)");
+		sp = new ParseCommand("rename #(flyfy1 songyy) #luala1");
 		assertEquals(Commands.RENAME_LIST, sp.extractCommand());
 		assertEquals("flyfy1 songyy", sp.extractListName());
-		assertEquals("luala", sp.extractNewListName());
+		assertEquals("luala1", sp.extractNewListName());
 		sp = new ParseCommand("rename #(flyfy1 songyy) #");
 		assertEquals(Commands.INVALID, sp.extractCommand());
 	}

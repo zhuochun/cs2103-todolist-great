@@ -88,7 +88,7 @@ class RegexMatcher {
 	protected static final String regPlaceFormat = 
 		"((@[\\w\\d]+)|(@\\([^\\)]+\\)))";	// format: @ + word; or: @ + (words)
 	protected static final String regPriorityFormat = "(![123])";
-	protected static final String regexList = "((#[\\w]+)|(#\\([^\\)]+\\)))";
+	protected static final String regexList = "((#[\\w][\\w\\d]*)|(#\\([^\\)]+\\)))";
 	
 	protected static final String regexSearchCommand = "^/(" + regexSpacer +")*";
 	protected static final String regexAddCommand = "^add(" + regexSpacer +")*";

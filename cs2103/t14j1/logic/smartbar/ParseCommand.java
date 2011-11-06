@@ -453,7 +453,7 @@ implements
 	private String parseParamWithBracketTypeAndRemoveParsedStr(String regex) {
 		String res = null;
 		if(regexMatchWithSanitizedCommandAddWordSpacerCareCase(regex)){
-			res = removeLeadingAndTailingCharUntilBracketOrLetter(matchedStr);
+			res = removeLeadingAndTailingCharUntilBracketOrLetterOrDigit(matchedStr);
 			res = removeLeadingAndTailingBracket(res);
 			replaceMatchedStringFromSanitizedCommandWithOneSpace();
 		}
@@ -494,7 +494,7 @@ implements
 		return inStr;
 	}
 
-	private String removeLeadingAndTailingCharUntilBracketOrLetter(
+	private String removeLeadingAndTailingCharUntilBracketOrLetterOrDigit(
 			String inStr) {
 		if(inStr == null)	return inStr;
 		
@@ -507,7 +507,8 @@ implements
 		int length = 0;
 		while( (length = inStr.length()) > 0 &&
 				inStr.charAt(length-1)!=')'&&
-				!Character.isLetter(inStr.charAt(length-1))
+				!Character.isLetter(inStr.charAt(length-1))&&
+				!Character.isDigit(inStr.charAt(length-1))
 				){
 			inStr = inStr.substring(0,length-1);
 		}

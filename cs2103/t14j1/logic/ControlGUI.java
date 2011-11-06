@@ -152,7 +152,6 @@ public class ControlGUI {
             LOGGER.log(Level.SEVERE, "executeCommand : " + userCommand, e);
         }
     }
-
     public void moveTask(int index, String listName) {
         Event newEvent = Event.generateEvent(Commands.MOVE_TASK);
         registerEvent(newEvent, index, listName);

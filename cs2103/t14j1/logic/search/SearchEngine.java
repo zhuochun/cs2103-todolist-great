@@ -76,7 +76,8 @@ public class SearchEngine {
     		Iterator<Entry<String, TaskList>> iterator = lists.iterator();
         	while (iterator.hasNext()) {
         		TaskList taskList = iterator.next().getValue();
-        		searchLists.add(taskList);
+        		if(!(taskList.getName().compareTo("Trash") == 0))
+        			searchLists.add(taskList);
         	}
         }   	
     	else

@@ -12,6 +12,12 @@ import org.eclipse.wb.swt.SWTResourceManager;
 
 import cs2103.t14j1.storage.user.CheatSheet;
 
+/**
+ * display cheat sheet and shortcuts defined in storage.user.cheatsheet class
+ * 
+ * @author Zhuochun
+ *
+ */
 public class CheatSheetDialog extends Dialog {
 
     protected Shell shell;

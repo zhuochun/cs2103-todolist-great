@@ -623,6 +623,9 @@ implements
 
 	@Override
 	public Date extractDeadlineDate() {
+		this.deadlineTime.onDateNullDefaultTodayOrNextDayBasedOnTime();
+		this.deadlineTime.optionallyAddOneDayBasedOnCurrentTime();
+		this.deadlineTime.setTimeOfDateToLastSecOnTimeNull();
 		if(this.deadlineTime.date == null)	return null;
 		deadlineTime.setTimeOfDateToLastSecOnTimeNull();
 		return this.deadlineTime.getDateWithTime();

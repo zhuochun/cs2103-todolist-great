@@ -107,8 +107,8 @@ public class ControlGUI {
                 case DELETE_TASK: // support multiple index
                     deleteTasks(getTaskIds());
                     break;
-                case MOVE_TASK: // support multiple index
-                    moveTasks(getTaskIds(), getListName());
+                case MOVE_TASK: // support multiple index, disable for now
+                    moveTask(getTaskIdx(), getListName());
                     break;
                 case EDIT_TASK:
                     editTask(getTaskIdx());
@@ -163,10 +163,12 @@ public class ControlGUI {
         registerEvent(newEvent, index, listName);
     }
 
+    /* disable for this version, because it requires another event specially for this
     private void moveTasks(Integer[] taskIds, String listName) {
         Event bulk = Event.generateEvent(Commands.BULK);
         registerEvent(bulk, Commands.MOVE_TASK, taskIds, listName);
     }
+    */
 
     public void addReminder(int index, Reminder parameter) {
         try {

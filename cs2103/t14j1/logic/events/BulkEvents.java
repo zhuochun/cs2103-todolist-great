@@ -87,12 +87,13 @@ public class BulkEvents extends Event {
             if (events.size() == 0) {
                 feedback.append("failed");
             } else {
-                feedback.append("succeed: ");
                 feedback.append(successCount);
+                feedback.append(" succeed");
                 
                 if (failedCount > 0) {
-                    feedback.append(", failed: ");
+                    feedback.append(", ");
                     feedback.append(failedCount);
+                    feedback.append(" failed");
                 }
             }
             

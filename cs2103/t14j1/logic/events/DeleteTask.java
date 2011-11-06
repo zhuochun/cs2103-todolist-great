@@ -32,6 +32,8 @@ public class DeleteTask extends Event {
         try {
             if (index != -1) {
                 task = eventHandler.getTask(index);
+                // delete task from search result
+                eventHandler.removeTaskInSearch(index);
             }
             oldListName = task.getList();
             

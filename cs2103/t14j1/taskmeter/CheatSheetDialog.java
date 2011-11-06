@@ -52,7 +52,7 @@ public class CheatSheetDialog extends Dialog {
     private void createContents() {
         shell = new Shell(getParent(), SWT.DIALOG_TRIM);
         shell.setSize(450, 404);
-        shell.setText("Cheat Sheet - TaskMeter");
+        shell.setText(TaskMeter.getResourceString("CheatSheetDialog.title"));
         
         Tree tree = new Tree(shell, SWT.BORDER | SWT.FULL_SELECTION);
         tree.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));

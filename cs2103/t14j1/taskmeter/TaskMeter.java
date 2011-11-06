@@ -422,6 +422,12 @@ public class TaskMeter extends Shell {
             public void editIdxTask(int idx) {
                 editTask(idx);
             }
+            
+            public void removeTaskInSearch(int idx) {
+                if (mode == MODE_SEARCH) {
+                    searchResult.removeTask(idx);
+                }
+            }
         });
     }
 

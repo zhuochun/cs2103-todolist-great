@@ -27,11 +27,11 @@ public class AutoComplete {
     private int listIdx;
     
     private final String[] Commands = {
-            "add", "delete", "move", "edit", "done", "remind", "rename"
+            "add", "delete", "move", "edit", "done", "remind", "rename", "undo", "redo"
     };
     
     private final String[] Dictionary = {
-            "this", "next", "today", "tomorrow", "done",
+            "this", "next", "today", "tomorrow", "done", "cancel",
             "before", "after", "start", "end", "deadline",
             "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday", "Sunday",
             "January", "Feburary", "March", "April", "May", "June", "July", "August",
@@ -215,7 +215,7 @@ public class AutoComplete {
     }
     
     private boolean completeList() {
-        if (listIdx >= lists.getSize()) {
+        if (listIdx >= listNames.length) {
             listIdx = 0;
         }
         
@@ -263,7 +263,7 @@ public class AutoComplete {
                 
                 listIdx++;
                 
-                if (listIdx >= lists.getSize()) {
+                if (listIdx >= listNames.length) {
                     listIdx = 0;
                 }
             } while (listIdx != oldIdx);

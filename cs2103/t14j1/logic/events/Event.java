@@ -59,6 +59,9 @@ public abstract class Event {
             case SEARCH:
                 newEvent = new Search();
                 break;
+            case BULK:
+                newEvent = new BulkEvents();
+                break;
             default:
                 break;
         }

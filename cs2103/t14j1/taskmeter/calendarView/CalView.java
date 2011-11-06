@@ -12,8 +12,10 @@ import org.eclipse.swt.events.PaintListener;
 import org.eclipse.swt.graphics.Color;
 import org.eclipse.swt.graphics.GC;
 import org.eclipse.swt.graphics.Point;
+import org.eclipse.swt.graphics.Rectangle;
 import org.eclipse.swt.widgets.Composite;
 import org.eclipse.swt.widgets.Display;
+import org.eclipse.swt.widgets.ScrollBar;
 import org.eclipse.swt.widgets.Shell;
 
 import cs2103.t14j1.storage.Task;
@@ -76,6 +78,11 @@ public class CalView extends Composite{
 	// for formating
 	private static final String timeFormat = "%2d:%2d";
 	private static final String dateFormat = "%s,%s.%s";
+	
+	private static final int distToUpper	= 10;
+	private static final int distToLeft		= 10;
+	private static final int distToRight	= 10;
+	private static final int distToLower	= 10;
 	
 	private static final int calTopTextSize = 10;
 	private static final int calTopTaskSize = 30;
@@ -155,15 +162,19 @@ public class CalView extends Composite{
 		tasklist = new LinkedList<TaskList>();
 		currentTime = Calendar.getInstance();
 		
+		Rectangle bounds = parent.getBounds();
+		System.out.println(bounds);
+		this.setSize(bounds.height - distToUpper - distToLower,bounds.width - distToLeft - distToRight);
+		this.setLocation(bounds.x,bounds.y);
+		
+//		ScrollBar sb = 
+		
 		// end of initialization
-		
-		
 		this.addPaintListener(new PaintListener() {
 			public void paintControl(PaintEvent e) {
 				CalView.this.paintControl(e);
 			}
 		});
-		
 	}
 	
 	private void paintControl(PaintEvent e){
@@ -348,7 +359,6 @@ public class CalView extends Composite{
 		// create the calendar view
 		CalView view = new CalView(shell, SWT.NONE);
 		view.addList(l);
-		view.setSize(900, 700);
 		view.setLocation(5,5);
 		//view.setTimeInterval(360);
 		

@@ -842,14 +842,14 @@ public class TaskMeter extends Shell {
         new MenuItem(menuHelp, SWT.SEPARATOR);
         */
         
-        MenuItem mntmTip = new MenuItem(menuHelp, SWT.NONE);
-        mntmTip.addSelectionListener(new SelectionAdapter() {
+        MenuItem mntmCheatSheet = new MenuItem(menuHelp, SWT.NONE);
+        mntmCheatSheet.addSelectionListener(new SelectionAdapter() {
             @Override
             public void widgetSelected(SelectionEvent e) {
-                showTips();
+                showCheatSheet();
             }
         });
-        mntmTip.setText(getResourceString("help.tip"));
+        mntmCheatSheet.setText(getResourceString("help.cheatsheet"));
     
         MenuItem mntmHelp = new MenuItem(menuHelp, SWT.NONE);
         mntmHelp.addSelectionListener(new SelectionAdapter() {
@@ -1374,6 +1374,14 @@ public class TaskMeter extends Shell {
      */
     public void showTips() {
         TipsDialog dialog = new TipsDialog(this);
+        dialog.open();
+    }
+    
+    /**
+     * open cheat sheet that show hotkeys
+     */
+    public void showCheatSheet() {
+        CheatSheetDialog dialog = new CheatSheetDialog(this);
         dialog.open();
     }
 

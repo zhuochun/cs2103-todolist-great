@@ -76,6 +76,12 @@ public class SmartParseTest {
 	public void addBasicTask(){
 		Calendar currentTime = Calendar.getInstance();
 		
+		sp = new ParseCommand("Add rasing sun");
+		assertEquals(Commands.ADD_TASK, sp.extractCommand());
+		assertEquals("rasing sun",sp.extractTaskName());
+		//assertEquals(null,sp.extractStartDate());
+		
+		
 		sp = new ParseCommand("Add rasing sun 3pm");
 		assertEquals(Commands.ADD_TASK, sp.extractCommand());
 		assertEquals("rasing sun",sp.extractTaskName());

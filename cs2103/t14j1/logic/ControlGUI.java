@@ -264,19 +264,15 @@ public class ControlGUI {
     }
 
     public void clearTrash() { // not undoable, not a individual event
+    	
         TaskList trashbox = lists.getList(TaskLists.TRASH);
         
-        Integer[] deleteIdx = new Integer[trashbox.getSize()];
-        
-        for (int i = 1; i <= deleteIdx.length; i++) {
-            deleteIdx[i-1] = i;
+        for(int i = trashbox.getSize(); i > 0; i --) {
+        	trashbox.removeTask(i);
         }
         
-        boolean success = deleteTasks(deleteIdx);
+        eventHandler.setStatus(eventHandler.getMsg("msg.CLEAR_TRASH"));
         
-        if (success) {
-            eventHandler.setStatus(eventHandler.getMsg("msg.CLEAR_TRASH"));
-        }
     }
 
     public void clearCompleted(TaskList list) {
@@ -327,8 +323,6 @@ public class ControlGUI {
             convertLongTimeToDate(startDateTime, startTime);
             convertLongTimeToDate(endDateTime, endTime);
             convertLongTimeToDate(deadline, deadlineTime);
-            
-            System.out.println("Adding list is " + list);
 
             newTask = new Task(name, place, list, priority, startDateTime, endDateTime, deadline, duration, status);
         } catch (IllegalArgumentException e) {

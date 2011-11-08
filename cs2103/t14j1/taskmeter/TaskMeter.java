@@ -1228,7 +1228,7 @@ public class TaskMeter extends Shell {
                 task.getPriority().toString().toLowerCase(),
                 task.getStartEndDateStr() == null ? "" : task.getStartEndDateStr(),
                 task.getDeadlineStr() == null ? "" : task.getDeadlineStr(),
-                task.getDurationStr() == null ? "" : task.getDurationStr(),
+                ((task.getDurationStr() == null) || (task.getDurationStr() == "0 Minutes")) ? "" : task.getDurationStr(),
                 task.getStatusStr()
                 });
         highlightTask(item, task);

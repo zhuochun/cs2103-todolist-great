@@ -110,6 +110,12 @@ public class DateTime {
 		
 		return this.time > HOUR_PER_HALF_DAY * SEC_PER_HOUR;
 	}
+	
+	public boolean isTimeInTheMorning() {
+		if(this.time == null)	return false;
+		
+		return this.time < HOUR_PER_HALF_DAY * SEC_PER_HOUR;
+	}
 
 	public static DateTime getInstance() {
 		DateTime res = new DateTime();
@@ -134,7 +140,7 @@ public class DateTime {
 		
 		if(this.isToday() &&
 				currentTime.isTimeInTheAfterNoon() &&
-				!this.isTimeInTheAfterNoon()){
+				this.isTimeInTheMorning()){
 			this.date.add(Calendar.DATE, 1);
 		}
 	}

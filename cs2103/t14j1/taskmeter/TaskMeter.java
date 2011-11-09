@@ -69,7 +69,7 @@ import cs2103.t14j1.taskmeter.reminder.ReminderDialog;
  */
 public class TaskMeter extends Shell {
     private static final Logger LOGGER = Logger.getLogger(TaskMeter.class.getName());
-    	
+    
     private static final ResourceBundle resourceBundle = ResourceBundle.getBundle("taskmeter_res");
     private Label statusBar;        // status bar
     private Table taskTable;        // task table lists all the tasks
@@ -1206,7 +1206,7 @@ public class TaskMeter extends Shell {
                 task.getPriority().toString().toLowerCase(),
                 task.getStartEndDateStr() == null ? "" : task.getStartEndDateStr(),
                 task.getDeadlineStr() == null ? "" : task.getDeadlineStr(),
-                ((task.getDurationStr() == null) || (task.getDurationStr() == "0 Minutes")) ? "" : task.getDurationStr(),
+                task.getDurationStr() == null ? "" : task.getDurationStr(),
                 task.getStatusStr()
                 });
         highlightTask(tableItem, task);
@@ -1228,7 +1228,7 @@ public class TaskMeter extends Shell {
                 task.getPriority().toString().toLowerCase(),
                 task.getStartEndDateStr() == null ? "" : task.getStartEndDateStr(),
                 task.getDeadlineStr() == null ? "" : task.getDeadlineStr(),
-                ((task.getDurationStr() == null) || (task.getDurationStr() == "0 Minutes")) ? "" : task.getDurationStr(),
+                task.getDurationStr() == null ? "" : task.getDurationStr(),
                 task.getStatusStr()
                 });
         highlightTask(item, task);
@@ -1343,7 +1343,7 @@ public class TaskMeter extends Shell {
     
     private void switchTask(String listname) {
         switchList(listname);
-        taskTable.setSelection(taskTable.getItemCount()-1);
+        //taskTable.setSelection(taskTable.getItemCount()-1);
     }
 
     private void editTask(int index) {

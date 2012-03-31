@@ -60,7 +60,6 @@ import storage.Priority;
 import storage.Task;
 import storage.TaskList;
 import storage.TaskLists;
-import storage.logging.Log;
 import storage.user.User;
 
 
@@ -111,35 +110,6 @@ public class TaskMeter extends Shell {
     private static final int MODE_LIST   = 0;
     private static final int MODE_SEARCH = 1;
     
-    /**
-     * Launch the application.
-     * 
-     * @param args
-     */
-    public static void main(String args[]) {
-        try {
-            Log.setup();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        
-        User.initial();
-        
-        final Display display = Display.getDefault();
-        try {
-            TaskMeter application = new TaskMeter(display);
-            application.open();
-            application.layout();
-            while (!application.isDisposed()) {
-                if (!display.readAndDispatch()) {
-                    display.sleep();
-                }
-            }
-        } catch (Exception e) {
-            LOGGER.log(Level.SEVERE, "main", e);
-        }
-    }
-
     /**
      * Create the shell and all respected components
      * 
@@ -304,7 +274,9 @@ public class TaskMeter extends Shell {
     protected void createContents() {
         addShellListener(new ShellAdapter() { // close taskMeter check
             public void shellClosed(ShellEvent e) {
-                e.doit = closeTaskMeter();
+            	// assume user want to minimiz
+				e.display.getActiveShell().setMinimized (true);
+                e.doit = false;
             }
         });
         
@@ -893,14 +865,13 @@ public class TaskMeter extends Shell {
         });
         GridData gd_taskList = new GridData(SWT.FILL, SWT.FILL, true, true);
         gd_taskList.verticalSpan = 4;
-        gd_taskList.widthHint = 150;
-        gd_taskList.horizontalSpan = 2;
+        gd_taskList.widthHint = 144;
         taskList.setLayoutData(gd_taskList);
         taskList.setHeaderVisible(true);
         taskList.setLinesVisible(true);
 
         TableColumn tblclmnLists = new TableColumn(taskList, SWT.CENTER);
-        tblclmnLists.setWidth(300);
+        tblclmnLists.setWidth(154);
         tblclmnLists.setText(getResourceString("list"));
     }
 
@@ -908,6 +879,7 @@ public class TaskMeter extends Shell {
      * create the table for displaying tasks
      */
     private void createTaskTable() {
+        new Label(this, SWT.NONE);
         taskTable = new Table(this, SWT.BORDER | SWT.FULL_SELECTION);
         taskTable.setSelection(0);
         taskTable.setFont(SWTResourceManager.getFont("Segoe UI", 10, SWT.NORMAL));
@@ -939,6 +911,9 @@ public class TaskMeter extends Shell {
     }
     
     private void createBottomButtons() {
+        new Label(this, SWT.NONE);
+        new Label(this, SWT.NONE);
+        new Label(this, SWT.NONE);
         Button btnTrashBox = new Button(this, SWT.NONE);
         btnTrashBox.addSelectionListener(new SelectionAdapter() {
             @Override

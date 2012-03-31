@@ -79,7 +79,6 @@ public class TaskMeter extends Shell {
     private Tray  tray;             // system tray
     private TrayItem trayItem;      // tray item
     private ToolTip  remindTray;    // tray reminder
-    private Process  globalHotKey;  // global hotkey (F6 in Windows operating System) process
 
     private boolean   isModified;
     private int       mode;         // MODE_LIST and MODE_SEARCH for different events
@@ -202,15 +201,6 @@ public class TaskMeter extends Shell {
         setMinimumSize(new Point(700, 500));
         setSize(995, 600);
         
-        // load global hotkey process
-        try {
-            globalHotKey = Runtime.getRuntime().exec("resource/TaskMeterHotKey.exe");
-            assert(globalHotKey != null);
-        } catch (IOException e) {
-            displayError(getResourceString("error.global.hotkey"));
-            LOGGER.warning("Global Hotkey Not Loaded");
-        }
-
         // create each components
         createMenuBar();
         createSmartBar();
@@ -1498,10 +1488,6 @@ public class TaskMeter extends Shell {
         trayItem.dispose();
         tray.dispose();
 
-        if (globalHotKey != null) {
-            globalHotKey.destroy();
-        }
-    
         return true;
     }
 

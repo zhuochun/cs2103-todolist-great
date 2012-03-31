@@ -543,6 +543,17 @@ public class TaskMeter extends Shell {
         mntmSave.setText(getResourceString("save"));
     
         new MenuItem(menuUser, SWT.SEPARATOR);
+        
+        MenuItem mntmhideWindow = new MenuItem(menuUser, SWT.NONE);
+        mntmhideWindow.setAccelerator(SWT.MOD1 + 'W');
+        mntmhideWindow.addSelectionListener(new SelectionAdapter() {
+        	@Override
+        	public void widgetSelected(SelectionEvent e) {
+        		if(e.display.getActiveShell() == null)	return;
+        		e.display.getActiveShell().setMinimized(true);
+        	}
+        });
+        mntmhideWindow.setText("&Hide Window");
     
         MenuItem mntmExit = new MenuItem(menuUser, SWT.NONE);
         mntmExit.addSelectionListener(new SelectionAdapter() {
@@ -553,7 +564,7 @@ public class TaskMeter extends Shell {
                 }
             }
         });
-        mntmExit.setText(getResourceString("exit"));
+        mntmExit.setText(getResourceString("&Exit"));
         
         menuUser.addMenuListener(new MenuAdapter() {
             public void menuShown(MenuEvent e) {
@@ -1436,7 +1447,7 @@ public class TaskMeter extends Shell {
         
         return true;
     }
-
+    
     /**
      * ask whether to save the changes before exit
      * 

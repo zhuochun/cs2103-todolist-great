@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.util.logging.Logger;
 import java.util.logging.Level;
 
+import org.eclipse.swt.SWT;
 import org.eclipse.swt.widgets.Display;
 
 import storage.logging.Log;

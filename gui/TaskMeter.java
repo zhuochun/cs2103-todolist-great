@@ -110,14 +110,23 @@ public class TaskMeter extends Shell {
     private static final int MODE_LIST   = 0;
     private static final int MODE_SEARCH = 1;
     
+    public TaskMeter(final Display display){
+    	super(display,SWT.BORDER | SWT.MAX | SWT.MIN);
+    	constructorSetup(display);
+    }
+    
     /**
      * Create the shell and all respected components
      * 
      * @param display
+     * @param i 
      */
-    public TaskMeter(final Display display) {
-        super(display, SWT.SHELL_TRIM | SWT.BORDER | SWT.APPLICATION_MODAL);
-        
+    public TaskMeter(final Display display, Integer property) {
+        super(display, property.intValue());
+        constructorSetup(display);
+    }
+    
+    private void constructorSetup(final Display display){
         // set grid layout
         GridLayout gridLayout = new GridLayout(11, false);
         gridLayout.horizontalSpacing = 3;
